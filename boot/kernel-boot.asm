@@ -48,7 +48,7 @@ load_kernel:
   ; Should be the size of your bios file
   ; This is corresponding to kernel size so we need to make sure we load enough;
   ; memory for the kernel so all the function are there
-  mov dh, 3 
+  mov dh, 50 
   ; The drive to read the sectors from
   mov dl, [BOOT_DRIVE]
 
