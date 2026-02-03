@@ -80,11 +80,12 @@ void idtSetGate(unsigned char num, unsigned int base, unsigned short selector,
 void keyboardHandlerMain() {
   unsigned char scancode = inb(0x60);
   if (scancode & 0x80) {
+
   } else {
     if (scancode == 0x1C)
       printChar('\n');
     else if (scancode == 0x0E)
-      printChar('\n');
+      printChar('\b');
     else if (scancode < sizeof(scancodeToAscii)) {
       char c = scancodeToAscii[scancode];
       if (c != 0)
