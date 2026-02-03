@@ -1,5 +1,4 @@
-#include "idt.h"
-#include "../kernel/config.h"
+#include "../pch.h"
 
 struct idtEntry idt[IDT_ENTRIES];
 struct idtPtr idtp;

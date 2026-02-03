@@ -1,7 +1,8 @@
-#include "keyboard.h"
-#include "../cpu/idt.h"
-#include "../kernel/config.h"
-#include "screen.h"
+#include "../pch.h"
+
+char keyboardBuffer[256];
+int keyboardBufferIndex = 0;
+bool keyboardPressed = false;
 
 char scancodeToAscii[] = {
     0,   0,   '1', '2', '3', '4', '5', '6', '7', '8', '9',  '0', '-', '=',  0,
@@ -11,17 +12,28 @@ char scancodeToAscii[] = {
 
 void keyboardHandlerMain() {
   unsigned char scancode = inb(KEYBOARD_DATA_PORT);
+  char c = scancodeToAscii[scancode];
 
   if (scancode & SCANCODE_RELEASE_MASK) {
-  } else {
-    if (scancode == SCANCODE_ENTER)
-      printChar('\n');
-    else if (scancode == SCANCODE_BACKSPACE)
-      printChar('\b');
-    else if (scancode < sizeof(scancodeToAscii)) {
-      char c = scancodeToAscii[scancode];
-      if (c != 0)
-        printChar(c);
+    keyboardPressed = false;
+  }
+
+  else {
+    keyboardPressed = true;
+
+    if (scancode == SCANCODE_ENTER) {
+      keyboardBuffer[keyboardBufferIndex] = '\0';
+      keyboardBufferIndex++;
+    }
+
+    else if (scancode == SCANCODE_BACKSPACE) {
+      keyboardBuffer[keyboardBufferIndex] = '\b';
+      keyboardBufferIndex++;
+    }
+
+    else if (scancode < sizeof(scancodeToAscii) && c != 0) {
+      keyboardBuffer[keyboardBufferIndex] = c;
+      keyboardBufferIndex++;
     }
   }
 

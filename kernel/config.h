@@ -57,4 +57,5 @@
 // Keyboard IRQ Mask
 #define KEYBOARD_IRQ_MASK 0xFD
 
+#define TAB_SIZE 2
 #endif

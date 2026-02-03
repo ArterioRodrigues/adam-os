@@ -3,6 +3,7 @@
 global keyboardHandler
 global idtLoad 
 extern keyboardHandlerMain
+extern shellHandlerMain
 
 
 idtLoad:
@@ -19,7 +20,7 @@ keyboardHandler:
 
   ; Call function to handle the keyboard handler
   call keyboardHandlerMain
-
+  call shellHandlerMain
   
   ; Pop all registers onto stack
   popad

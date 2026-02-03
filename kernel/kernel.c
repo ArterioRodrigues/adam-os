@@ -1,6 +1,4 @@
-#include "../cpu/idt.h"
-#include "../drivers/screen.h"
-#include "config.h"
+#include "../pch.h"
 
 extern void keyboardHandler();
 extern void idtLoad();
