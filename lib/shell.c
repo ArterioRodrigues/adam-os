@@ -1,7 +1,12 @@
 #include "../pch.h"
+#include "string.h"
 
 void shellHandlerMain() {
   const char c = keyboardBuffer[keyboardBufferIndex - 1];
+  int x = vgaIndex % VGA_WIDTH;
+  int y = vgaIndex / VGA_WIDTH;
+
+  updateCursor(x, y);
 
   if (c != '\0' || keyboardBufferIndex == 0) {
 
@@ -14,18 +19,30 @@ void shellHandlerMain() {
     return;
   }
 
-  struct string clearCommand = createString("clear");
-  struct string helpCommand = createString("help");
-  struct string echoCommand = createString("echo");
-  struct string aboutCommand = createString("about");
-
-  struct string keyboardBufferString = createString(keyboardBuffer);
-
-  if (cmpString(clearCommand, keyboardBufferString)) {
+  if (strcmp(keyboardBuffer, "clear")) {
     clearScreen();
-  } else if (cmpString(echoCommand, keyboardBufferString)) {
+  }
+
+  else if (strcmp(keyboardBuffer, "about")) {
     printChar('\n');
-    print(keyboard
+    print("\tname - Adam OS");
+    print("\tversion - 0.0.1");
+    printChar('\n');
+  }
+
+  else if (strcmp(keyboardBuffer, "help")) {
+    printChar('\n');
+    print("\tabout - info about OS version\n");
+    print("\tclear - clear terminal screen\n");
+    print("\tehco - print message to screen after echo\n");
+    printChar('\n');
+  }
+
+  else if (strncmp(keyboardBuffer, "echo", 4)) {
+    printChar('\n');
+    printChar('\t');
+    print(keyboardBuffer + 4);
+    printChar('\n');
   }
 
   else {

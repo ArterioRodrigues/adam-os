@@ -8,6 +8,7 @@ void kernelMain() {
   print("Welcome to my OS!\n");
   print("Kernel loaded successfully!\n");
   print("This is written in C!\n");
+  print("> ");
 
   idtp.limit = (sizeof(struct idtEntry) * IDT_ENTRIES) - 1;
   idtp.base = (unsigned int)&idt;
