@@ -1,5 +1,4 @@
 #include "../pch.h"
-#include "string.h"
 
 void shellHandlerMain() {
   const char c = keyboardBuffer[keyboardBufferIndex - 1];

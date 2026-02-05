@@ -8,7 +8,13 @@
 #define VGA_HEIGHT 25
 #define VGA_SIZE (VGA_WIDTH * VGA_HEIGHT)
 #define VGA_COLOR_SHIFT 8
+#define VGA_CTRL_REGISTER 0x3D4
+#define VGA_DATA_REGISTER 0x3D5
+#define VGA_CURSOR_HIGH 0x0E
+#define VGA_CURSOR_LOW 0x0F
 
+// Optional: byte mask
+#define BYTE_MASK 0xFF
 // IDT Configuration
 #define IDT_ENTRIES 256
 
