@@ -1,5 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+// HEAP
+#define HEAP_START 0x10000
+#define HEAP_SIZE 0x80000
+#define HEAP_END (HEAP_START + HEAP_SIZE)
 
 // VGA Configuration
 #define COLOR 0x0F
@@ -13,7 +17,19 @@
 #define VGA_CURSOR_HIGH 0x0E
 #define VGA_CURSOR_LOW 0x0F
 
-// Optional: byte mask
+// TIMER
+// PIT ports
+#define PIT_CHANNEL0 0x40
+#define PIT_COMMAND 0x43
+
+// PIT configuration
+#define PIT_BASE_FREQ 1193182
+#define TIMER_FREQ 100 // Hz
+
+// Command byte breakdown
+#define PIT_MODE2 0x36
+
+//  Optional: byte mask
 #define BYTE_MASK 0xFF
 // IDT Configuration
 #define IDT_ENTRIES 256
@@ -58,10 +74,12 @@
 #define IDT_FLAG_INTERRUPT_GATE 0x8E
 
 // IRQ Numbers
+#define IRQ_TIMER 32
 #define IRQ_KEYBOARD 33
 
 // Keyboard IRQ Mask
 #define KEYBOARD_IRQ_MASK 0xFD
+#define TIMER_KEYBOARD_IRQ_MASK 0xFC
 
 #define TAB_SIZE 2
 #endif

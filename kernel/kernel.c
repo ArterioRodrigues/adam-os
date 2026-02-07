@@ -1,31 +1,22 @@
 #include "../pch.h"
+#include "kmalloc.h"
 
-extern void keyboardHandler();
-extern void idtLoad();
+void kernel_main() {
+  clear_screen();
 
-void kernelMain() {
-  clearScreen();
-  print("Welcome to my OS!\n");
-  print("Kernel loaded successfully!\n");
-  print("This is written in C!\n");
-  print("> ");
+  print("================\n");
+  print("=== ADAM OS! ===\n");
+  print("================\n");
+  print(">> ");
 
-  idtp.limit = (sizeof(struct idtEntry) * IDT_ENTRIES) - 1;
-  idtp.base = (unsigned int)&idt;
+  init_idtp();
 
-  for (int i = 0; i < IDT_ENTRIES; i++) {
-    idtSetGate(i, 0, 0, 0);
-  }
+  remap_pic();
+  init_keyboard();
+  init_timer();
+  load_idtp();
 
-  remapPic();
-  idtSetGate(IRQ_KEYBOARD, (unsigned int)keyboardHandler, KERNEL_CODE_SEGMENT,
-             IDT_FLAG_INTERRUPT_GATE);
-  idtLoad((unsigned int)&idtp);
-
-  __asm__("sti");
-
-  outb(PIC1_DATA, KEYBOARD_IRQ_MASK);
-
+  init_heap();
   while (1)
     ;
 }

@@ -2,26 +2,30 @@
 #define IDT_H
 #include "../kernel/config.h"
 
-struct idtEntry {
-  unsigned short baseLow;
+extern void idt_load();
+
+struct idt_entry {
+  unsigned short base_low;
   unsigned short selector;
   unsigned char zero;
   unsigned char flags;
-  unsigned short baseHigh;
+  unsigned short base_high;
 } __attribute__((packed));
 
-struct idtPtr {
+struct idt_ptr {
   unsigned short limit;
   unsigned int base;
 } __attribute__((packed));
 
-extern struct idtEntry idt[IDT_ENTRIES];
-extern struct idtPtr idtp;
+extern struct idt_entry idt[IDT_ENTRIES];
+extern struct idt_ptr idtp;
 
 unsigned char inb(unsigned short port);
 void outb(unsigned short port, unsigned char data);
-void idtSetGate(unsigned char num, unsigned int base, unsigned short selector,
-                unsigned char flags);
-void remapPic();
+void idt_set_gate(unsigned char num, unsigned int base, unsigned short selector,
+                  unsigned char flags);
+void remap_pic();
+void init_idtp();
+void load_idtp();
 
 #endif

@@ -1,5 +1,9 @@
 #include "../pch.h"
 
+char char_n_10[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+char char_n_16[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                      '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 bool strcmp(const char *str1, const char *str2) {
   int index = 0;
   while (str1[index] != '\0' && str2[index] != '\0') {
@@ -50,14 +54,73 @@ char *strcpy(char *destination, char *source) {
 
 char *strcat(char *destination, char *source) {
   int index = 0;
-  int destLength = strlen(destination);
+  int dest_length = strlen(destination);
+  char *result;
 
   while (source[index] != '\0') {
-    destination[destLength + index] = source[index];
+    destination[dest_length + index] = source[index];
     index++;
   }
 
-  destination[index] = '\0';
-
+  destination[dest_length + index] = '\0';
   return destination;
+}
+
+char *strrev(char *str) {
+  int str_length = strlen(str);
+  for (int i = 0; i < str_length / 2; i++) {
+    char temp = str[i];
+    str[i] = str[str_length - i - 1];
+    str[str_length - i - 1] = temp;
+  }
+
+  return str;
+}
+
+char *int_to_string(char *result, int n) {
+
+  int index = 0;
+  while (n / 10 > 0) {
+    result[index] = char_n_10[n % 10];
+    index++;
+    n = n / 10;
+  }
+  result[index] = char_n_10[n];
+  result[index + 1] = '\0';
+
+  strrev(result);
+  return result;
+}
+
+char *int_to_hex_string(char *result, int n) {
+  int index = 0;
+  char hex[20];
+  while (n / 16 > 0) {
+    hex[index] = char_n_16[n % 16];
+    index++;
+    n = n / 16;
+  }
+  hex[index] = char_n_16[n];
+  hex[index + 1] = '\0';
+
+  strrev(hex);
+  result[0] = '0';
+  result[1] = 'X';
+
+  for (int i = 0; hex[i] != '\0'; i++) {
+    result[2 + i] = hex[i];
+  }
+  return result;
+}
+
+int string_to_int(char *str) {
+  int result = 0;
+  int str_length = strlen(str);
+
+  for (int i = 0; str[i] != '\0'; i++) {
+    if (str[i] >= '0' && str[i] <= '9')
+      result += (str[i] - '0') * pow(10, str_length - i - 1);
+  }
+
+  return result;
 }

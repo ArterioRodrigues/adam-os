@@ -7,4 +7,11 @@ int strlen(const char *str);
 char *strcpy(char *dest, char *source);
 char *strcat(char *dest, char *source);
 
+char *strrev(char *str);
+
+char *int_to_string(char *result, int n);
+char *int_to_hex_string(char *result, int n);
+
+int string_to_int(char *str);
+
 #endif

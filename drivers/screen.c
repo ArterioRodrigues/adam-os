@@ -1,9 +1,9 @@
 #include "../pch.h"
 
-volatile unsigned short *vgaBuffer = (unsigned short *)VGA_ADDRESS;
-int vgaIndex = 0;
+volatile unsigned short *vga_buffer = (unsigned short *)VGA_ADDRESS;
+int vga_index = 0;
 
-void updateCursor(int x, int y) {
+void update_cursor(int x, int y) {
   uint16_t pos = y * VGA_WIDTH + x;
 
   outb(VGA_CTRL_REGISTER, VGA_CURSOR_LOW);
@@ -12,46 +12,46 @@ void updateCursor(int x, int y) {
   outb(VGA_DATA_REGISTER, (uint8_t)((pos >> 8) & BYTE_MASK));
 }
 
-void printChar(char c) {
+void print_char(char c) {
   if (c == '\n') {
-    vgaIndex = (vgaIndex / VGA_WIDTH + 1) * VGA_WIDTH;
+    vga_index = (vga_index / VGA_WIDTH + 1) * VGA_WIDTH;
   }
 
   else if (c == '\b') {
-    if (vgaIndex > 0) {
-      vgaIndex--;
-      vgaBuffer[vgaIndex] = (COLOR << VGA_COLOR_SHIFT) | ' ';
+    if (vga_index > 0) {
+      vga_index--;
+      vga_buffer[vga_index] = (COLOR << VGA_COLOR_SHIFT) | ' ';
     }
   }
 
   else if (c == '\t') {
-    int spacesToAdd = TAB_SIZE - (vgaIndex % TAB_SIZE);
+    int spacesToAdd = TAB_SIZE - (vga_index % TAB_SIZE);
 
     for (int i = 0; i < spacesToAdd; i++) {
-      vgaBuffer[vgaIndex] = (COLOR << VGA_COLOR_SHIFT) | ' ';
-      vgaIndex++;
+      vga_buffer[vga_index] = (COLOR << VGA_COLOR_SHIFT) | ' ';
+      vga_index++;
     }
   }
 
   else {
-    vgaBuffer[vgaIndex] = (COLOR << VGA_COLOR_SHIFT) | c;
-    vgaIndex++;
+    vga_buffer[vga_index] = (COLOR << VGA_COLOR_SHIFT) | c;
+    vga_index++;
   }
 
-  if (vgaIndex >= VGA_SIZE) {
-    vgaIndex = VGA_WIDTH * (VGA_HEIGHT - 1);
+  if (vga_index >= VGA_SIZE) {
+    vga_index = VGA_WIDTH * (VGA_HEIGHT - 1);
   }
 }
 
 void print(const char *str) {
   for (int i = 0; str[i] != '\0'; i++) {
-    printChar(str[i]);
+    print_char(str[i]);
   }
 }
 
-void clearScreen() {
+void clear_screen() {
   for (int i = 0; i < VGA_SIZE; i++) {
-    vgaBuffer[i] = (COLOR << VGA_COLOR_SHIFT) | ' ';
+    vga_buffer[i] = (COLOR << VGA_COLOR_SHIFT) | ' ';
   }
-  vgaIndex = 0;
+  vga_index = 0;
 }

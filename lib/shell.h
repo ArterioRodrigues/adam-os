@@ -1,6 +1,6 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-void shellHandlerMain();
+void shell_handler_main();
 
 #endif

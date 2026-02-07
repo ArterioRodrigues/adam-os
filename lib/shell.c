@@ -1,55 +1,63 @@
 #include "../pch.h"
+#include "string.h"
 
-void shellHandlerMain() {
-  const char c = keyboardBuffer[keyboardBufferIndex - 1];
-  int x = vgaIndex % VGA_WIDTH;
-  int y = vgaIndex / VGA_WIDTH;
+void shell_handler_main() {
+  int x = vga_index % VGA_WIDTH;
+  int y = vga_index / VGA_WIDTH;
+  update_cursor(x, y);
 
-  updateCursor(x, y);
-
-  if (c != '\0' || keyboardBufferIndex == 0) {
-
-    if (keyboardBufferIndex == 0) {
-      print("> ");
-    }
-    if (keyboardPressed == true) {
-      printChar(c);
-    }
+  if (keyboard_buffer_index == 0) {
+    print(">> ");
+    x = vga_index % VGA_WIDTH;
+    y = vga_index / VGA_WIDTH;
+    update_cursor(x, y);
     return;
   }
 
-  if (strcmp(keyboardBuffer, "clear")) {
-    clearScreen();
+  char c = keyboard_buffer[keyboard_buffer_index - 1];
+  if (c != '\0' && keyboard_pressed) {
+    print_char(c);
+    return;
   }
 
-  else if (strcmp(keyboardBuffer, "about")) {
-    printChar('\n');
-    print("\tname - Adam OS");
-    print("\tversion - 0.0.1");
-    printChar('\n');
+  if (c != '\0') {
+    return;
   }
 
-  else if (strcmp(keyboardBuffer, "help")) {
-    printChar('\n');
-    print("\tabout - info about OS version\n");
-    print("\tclear - clear terminal screen\n");
-    print("\tehco - print message to screen after echo\n");
-    printChar('\n');
+  if (strcmp(keyboard_buffer, "clear")) {
+    clear_screen();
+  } else if (strcmp(keyboard_buffer, "about")) {
+    print("\n\tname    - Adam OS");
+    print("\n\tversion - 0.0.1\n");
+  } else if (strcmp(keyboard_buffer, "help")) {
+    print("\n\tabout  - Info about OS version");
+    print("\n\tclear  - Clear terminal screen");
+    print("\n\techo   - Print message to screen");
+    print("\n\tuptime - Show system uptime\n");
+  } else if (strncmp(keyboard_buffer, "echo ", 5)) {
+    print("\n\t");
+    print(keyboard_buffer + 5);
+    print("\n");
+  } else if (strncmp(keyboard_buffer, "sleep ", 6)) {
+    uint32_t seconds = string_to_int(keyboard_buffer + 6);
+    sleep(seconds);
+
+    char result[3];
+    int_to_string(result, seconds);
+    print("\n\twaits ");
+    print(result);
+    print(" seconds\n");
+
+  } else if (strcmp(keyboard_buffer, "uptime")) {
+    char buffer[20];
+    int_to_string(buffer, get_uptime_seconds());
+    print("\nuptime: ");
+    print(buffer);
+    print(" seconds\n");
+  } else {
+    print("\n\tCommand not found!");
+    print("\n\tType 'help' for command list\n");
   }
 
-  else if (strncmp(keyboardBuffer, "echo", 4)) {
-    printChar('\n');
-    printChar('\t');
-    print(keyboardBuffer + 4);
-    printChar('\n');
-  }
-
-  else {
-    printChar('\n');
-    print("\t command not found!");
-    printChar('\n');
-    print("\t type help for command list");
-    printChar('\n');
-  }
-  keyboardBufferIndex = 0;
+  keyboard_buffer_index = 0;
 }
