@@ -14,4 +14,5 @@ char *int_to_hex_string(char *result, int n);
 
 int string_to_int(char *str);
 
+char *strtok(char *str, char delim);
 #endif

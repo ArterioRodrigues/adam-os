@@ -124,3 +124,31 @@ int string_to_int(char *str) {
 
   return result;
 }
+static char *string_token = NULL;
+
+char *strtok(char *str, char delim) {
+  if (str != NULL) {
+    string_token = str;
+  }
+
+  if (string_token == NULL || *string_token == '\0') {
+    return NULL;
+  }
+
+  while (*string_token == delim) {
+    string_token++;
+  }
+
+  char *token_start = string_token;
+
+  while (*string_token && *string_token != delim) {
+    string_token++;
+  }
+
+  if (*string_token) {
+    *string_token = '\0';
+    string_token++;
+  }
+
+  return (*token_start != '\0') ? token_start : NULL;
+}

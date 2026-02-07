@@ -3,18 +3,18 @@
 
 #include "types.h"
 
-struct heap_block_header {
+typedef struct heap_block_header {
   uint32_t size;
   bool is_free;
   struct heap_block_header *next;
-};
+} heap_block_header_t;
 
-static struct heap_block_header *head;
+static heap_block_header_t *head;
 
 void *kmalloc(uint32_t n);
 void kfree(void *header);
 void init_heap();
 
-void dump(struct heap_block_header *ptr);
+void dump(heap_block_header_t *ptr);
 
 #endif

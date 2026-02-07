@@ -9,6 +9,7 @@
 #include "kernel/kmalloc.h"
 #include "kernel/types.h"
 #include "lib/math.h"
+#include "lib/ramfs.h"
 #include "lib/shell.h"
 #include "lib/string.h"
 

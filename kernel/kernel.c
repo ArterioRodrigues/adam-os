@@ -12,11 +12,15 @@ void kernel_main() {
   init_idtp();
 
   remap_pic();
+
   init_keyboard();
   init_timer();
+
   load_idtp();
 
   init_heap();
+  init_ramfs();
+
   while (1)
     ;
 }

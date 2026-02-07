@@ -1,6 +1,8 @@
 #include "../pch.h"
 #include "string.h"
 
+char *path = '/';
+
 void shell_handler_main() {
   int x = vga_index % VGA_WIDTH;
   int y = vga_index / VGA_WIDTH;
@@ -34,6 +36,7 @@ void shell_handler_main() {
     print("\n\tclear  - Clear terminal screen");
     print("\n\techo   - Print message to screen");
     print("\n\tuptime - Show system uptime\n");
+    print("\n\tls - List files in system\n");
   } else if (strncmp(keyboard_buffer, "echo ", 5)) {
     print("\n\t");
     print(keyboard_buffer + 5);
@@ -54,6 +57,9 @@ void shell_handler_main() {
     print("\nuptime: ");
     print(buffer);
     print(" seconds\n");
+  } else if (strcmp(keyboard_buffer, "ls")) {
+    ramfs_ls("/");
+    print("\n");
   } else {
     print("\n\tCommand not found!");
     print("\n\tType 'help' for command list\n");
