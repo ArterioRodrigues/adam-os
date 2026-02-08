@@ -11,14 +11,6 @@ uint32_t get_timer_ticks() { return timer_ticks; }
 
 uint32_t get_uptime_seconds() { return timer_ticks / TIMER_FREQ; }
 
-void sleep(uint32_t seconds) {
-  uint32_t finished = timer_ticks + (seconds * TIMER_FREQ);
-
-  while (timer_ticks < finished) {
-    asm volatile("sti");
-  }
-}
-
 void init_timer() {
   uint16_t divisor = PIT_BASE_FREQ / TIMER_FREQ;
 

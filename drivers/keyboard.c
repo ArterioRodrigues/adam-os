@@ -36,7 +36,7 @@ void keyboard_handler_main() {
       keyboard_buffer_index++;
     }
   }
-
+  keyboard_buffer[keyboard_buffer_index] = '\0';
   outb(PIC1_COMMAND, PIC_EOI);
 }
 

@@ -6,7 +6,12 @@
 #define HEAP_END (HEAP_START + HEAP_SIZE)
 
 // VGA Configuration
-#define COLOR 0x0F
+#define WHITE 0x0F
+#define GREEN 0x02
+#define BLUE 0x01
+#define BRIGHT_GREEN 0x0A
+#define BRIGHT_BLUE 0x0B
+
 #define VGA_ADDRESS 0xB8000
 #define VGA_WIDTH 80
 #define VGA_HEIGHT 25
@@ -81,5 +86,5 @@
 #define KEYBOARD_IRQ_MASK 0xFD
 #define TIMER_KEYBOARD_IRQ_MASK 0xFC
 
-#define TAB_SIZE 2
+#define TAB_SIZE 4
 #endif

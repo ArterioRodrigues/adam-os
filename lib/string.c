@@ -9,6 +9,7 @@ bool strcmp(const char *str1, const char *str2) {
   while (str1[index] != '\0' && str2[index] != '\0') {
     if (str1[index] != str2[index])
       return false;
+
     index++;
   }
 
@@ -77,7 +78,7 @@ char *strrev(char *str) {
   return str;
 }
 
-char *int_to_string(char *result, int n) {
+char *itos(char *result, int n) {
 
   int index = 0;
   while (n / 10 > 0) {
@@ -92,7 +93,7 @@ char *int_to_string(char *result, int n) {
   return result;
 }
 
-char *int_to_hex_string(char *result, int n) {
+char *itohs(char *result, int n) {
   int index = 0;
   char hex[20];
   while (n / 16 > 0) {
@@ -113,7 +114,7 @@ char *int_to_hex_string(char *result, int n) {
   return result;
 }
 
-int string_to_int(char *str) {
+int stoi(char *str) {
   int result = 0;
   int str_length = strlen(str);
 
@@ -126,29 +127,33 @@ int string_to_int(char *str) {
 }
 static char *string_token = NULL;
 
-char *strtok(char *str, char delim) {
+char *strtok(char *destination, char *str, char deliminator) {
   if (str != NULL) {
     string_token = str;
   }
 
   if (string_token == NULL || *string_token == '\0') {
+    *destination = NULL;
     return NULL;
   }
-
-  while (*string_token == delim) {
+  while (*string_token == deliminator) {
     string_token++;
   }
 
-  char *token_start = string_token;
-
-  while (*string_token && *string_token != delim) {
+  int index = 0;
+  while (*string_token && *string_token != deliminator) {
+    destination[index] = *string_token;
+    index++;
     string_token++;
   }
+  
+  destination[index] = '\0';
 
   if (*string_token) {
     *string_token = '\0';
     string_token++;
   }
 
-  return (*token_start != '\0') ? token_start : NULL;
+
+  return (*destination != '\0') ? destination : NULL;
 }

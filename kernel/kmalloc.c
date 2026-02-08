@@ -1,4 +1,3 @@
-#include "kmalloc.h"
 #include "../pch.h"
 
 static heap_block_header_t *head;
@@ -31,7 +30,6 @@ void *kmalloc(uint32_t n) {
   }
 
   if (!heap_ptr) {
-    print("ERROR: Out of heap memory!\n");
     return NULL;
   }
 
@@ -50,16 +48,16 @@ void dump(heap_block_header_t *ptr) {
   char buf[50];
   print(ptr->is_free ? "F=1 " : "F=0 ");
 
-  int_to_string(buf, ptr->size);
+  itos(buf, ptr->size);
   print("S=");
   print(buf);
 
-  int_to_hex_string(buf, (int)ptr);
+  itohs(buf, (int)ptr);
   print(" C=");
   print(buf);
 
   if (ptr->next) {
-    int_to_hex_string(buf, (int)ptr->next);
+    itohs(buf, (int)ptr->next);
     print(" N=");
     print(buf);
   } else {

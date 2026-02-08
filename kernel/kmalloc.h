@@ -11,9 +11,10 @@ typedef struct heap_block_header {
 
 static heap_block_header_t *head;
 
+void init_heap();
+
 void *kmalloc(uint32_t n);
 void kfree(void *header);
-void init_heap();
 
 void dump(heap_block_header_t *ptr);
 

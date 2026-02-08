@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "config.h"
 #include "kmalloc.h"
 
 void kernel_main() {
@@ -7,7 +8,9 @@ void kernel_main() {
   print("================\n");
   print("=== ADAM OS! ===\n");
   print("================\n");
-  print(">> ");
+
+  init_shell();
+  print_color(shell_path, BRIGHT_GREEN);
 
   init_idtp();
 
@@ -24,3 +27,4 @@ void kernel_main() {
   while (1)
     ;
 }
+

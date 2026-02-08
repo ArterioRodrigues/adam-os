@@ -9,10 +9,10 @@ char *strcat(char *dest, char *source);
 
 char *strrev(char *str);
 
-char *int_to_string(char *result, int n);
-char *int_to_hex_string(char *result, int n);
+char *itos(char *result, int n);
+char *itohs(char *result, int n);
 
-int string_to_int(char *str);
+int stoi(char *str);
 
-char *strtok(char *str, char delim);
+char *strtok(char *destination, char *str, char delim);
 #endif
