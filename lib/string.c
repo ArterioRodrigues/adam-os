@@ -157,3 +157,32 @@ char *strtok(char *destination, char *str, char deliminator) {
 
   return (*destination != '\0') ? destination : NULL;
 }
+
+char *strncpy(char* destination, const char* source, int n) {
+  int index = 0;
+
+  while (n && source[index] != '\0') {
+    destination[index] = source[index];
+    index++;
+    n--;
+  }
+
+  destination[index] = '\0';
+  return destination;
+}
+
+char *strncat(char* destination, const char* source, int n) {
+
+  int index = 0;
+  int dest_length = strlen(destination);
+  char *result;
+
+  while (n && source[index] != '\0') {
+    destination[dest_length + index] = source[index];
+    index++;
+    n--;
+  }
+
+  destination[dest_length + index] = '\0';
+  return destination;
+}

@@ -1,6 +1,4 @@
 #include "../pch.h"
-#include "config.h"
-#include "kmalloc.h"
 
 void kernel_main() {
   clear_screen();
@@ -13,18 +11,17 @@ void kernel_main() {
   print_color(shell_path, BRIGHT_GREEN);
 
   init_idtp();
-
   remap_pic();
 
   init_keyboard();
   init_timer();
-
+  init_exception();
   load_idtp();
 
   init_heap();
   init_ramfs();
-
+  
+  int x = 10/0;
   while (1)
     ;
 }
-

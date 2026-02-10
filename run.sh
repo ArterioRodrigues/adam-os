@@ -8,7 +8,8 @@ echo "Creating precompiled header..."
 $CC -ffreestanding -fno-pic -c pch.h -o pch.h.gch
 
 echo "Assembling files..."
-nasm -f elf32 cpu/interrupt.asm -o interrupt.o
+nasm -f elf32 cpu/interrupts.asm -o interrupts.o
+nasm -f elf32 cpu/exceptions.asm -o exceptions.o
 nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
 nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
 
@@ -19,6 +20,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/shell.c -o shell.o
@@ -26,7 +28,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c lib/ramfs.c -o ramfs.o
 
 echo "Linking kernel..."
 $LD -T linker.ld -o kernel.bin kernel-entry.o kernel.o kmalloc.o screen.o \
-    keyboard.o timer.o idt.o interrupt.o ramfs.o math.o string.o shell.o \
+    keyboard.o timer.o idt.o interrupts.o exceptions.o exceptionsc.o ramfs.o math.o string.o shell.o \
     --oformat binary
 
 echo "Creating OS image..."

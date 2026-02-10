@@ -37,7 +37,7 @@ void print_char_color(char c, unsigned char color) {
     vga_buffer[vga_index] = (color << VGA_COLOR_SHIFT) | c;
     vga_index++;
   }
- 
+
   if (vga_index >= VGA_SIZE) {
     vga_index = VGA_WIDTH * (VGA_HEIGHT - 1);
   }
@@ -56,3 +56,16 @@ void clear_screen() {
   vga_index = 0;
 }
 
+void print_many(const char *first, ...) {
+  va_list args;
+  va_start(args, first);
+
+  print(first);
+
+  const char *str;
+  while ((str = va_arg(args, const char *)) != NULL) {
+    print(str);
+  }
+
+  va_end(args);
+}

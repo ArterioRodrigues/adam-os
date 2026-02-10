@@ -13,9 +13,10 @@ static heap_block_header_t *head;
 
 void init_heap();
 
-void *kmalloc(uint32_t n);
+void *kmalloc(uint32_t size);
 void kfree(void *header);
 
 void dump(heap_block_header_t *ptr);
+void dump_heap();
 
 #endif

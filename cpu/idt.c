@@ -53,7 +53,6 @@ void init_idtp() {
 
 void load_idtp() {
   idt_load((unsigned int)&idtp);
-  idt_load((unsigned int)&idtp);
 
   asm volatile("sti");
   outb(PIC1_DATA, TIMER_KEYBOARD_IRQ_MASK);
