@@ -79,7 +79,6 @@ char *strrev(char *str) {
 }
 
 char *itos(char *result, int n) {
-
   int index = 0;
   while (n / 10 > 0) {
     result[index] = char_n_10[n % 10];

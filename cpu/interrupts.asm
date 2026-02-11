@@ -2,11 +2,13 @@
 
 global timer_handler
 global keyboard_handler
+global syscall_handler
 global idt_load 
 
-extern keyboard_handler_main
 extern timer_handler_main 
 extern shell_handler_main
+extern syscall_handler_main
+extern keyboard_handler_main
 
 
 idt_load:
@@ -38,3 +40,28 @@ keyboard_handler:
 
   ; return but all restores the CPU state
   iret
+
+syscall_handler:
+    pusha
+    push ds
+    push es
+    push fs
+    push gs
+    
+    mov ax, 0x10   ; Kernel data segment
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    
+    push esp       ; Pass register struct
+    call syscall_handler_main
+    add esp, 4
+    
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popa
+    
+    iret

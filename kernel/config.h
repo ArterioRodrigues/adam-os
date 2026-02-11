@@ -1,5 +1,15 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+
+// ADDRESS
+#define KERNEL_START 0x00000
+#define KERNEL_END 0x100000
+
+// PAGE TABLE
+#define PAGE_SIZE 4096
+#define MAX_MEMORY (128 * 1024 * 1024)
+#define NUM_FRAMES (MAX_MEMORY / PAGE_SIZE)
+
 // HEAP
 #define HEAP_START 0x10000
 #define HEAP_SIZE 0x80000
