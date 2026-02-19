@@ -1,7 +1,6 @@
+[BITS 32]
 ; For exceptions WITHOUT error code (0, 1, 3, 4, 5, 6, 16, 18, 19)
 ; Need to push dummy 0 to keep stack consistent
-
-; Common stub - saves registers and calls C handler
 extern exception_handler_c
 
 global divide_error_handler
@@ -24,32 +23,37 @@ global simd_fp_handler
 
 
 divide_error_handler:
-  push 0              ; Dummy error code (exception 0 doesn't push one)
-  push 0              ; Exception number (0 for divide error)
+  push 0              
+  push 0              
   jmp exception_common_stub
 
 debug_handler:
+  push 0  
   push 1 
   jmp exception_common_stub
 
 breakpoint_handler:
+  push 0
   push 3 
   jmp exception_common_stub
 
 overflow_handler:
+  push 0
   push 4 
   jmp exception_common_stub
 
 bound_range_handler:
+  push 0
   push 5
   jmp exception_common_stub
 
 invalid_opcode_handler:
-  push 0              ; Dummy error code
-  push 6              ; Exception number (6 for invalid opcode)
+  push 0              
+  push 6              
   jmp exception_common_stub
 
 device_not_available_handler:
+  push 0
   push 7 
   jmp exception_common_stub
 
@@ -70,11 +74,11 @@ stack_fault_handler:
   jmp exception_common_stub
 
 gpf_handler:
-  push 13             ; Exception number (13 for GPF)
+  push 13             
   jmp exception_common_stub
 
 page_fault_handler:
-  push 14             ; Exception number (14 for page fault)
+  push 14             
   jmp exception_common_stub
 
 fpu_error_handler:
@@ -86,44 +90,40 @@ alignment_check_handler:
   jmp exception_common_stub
 
 machine_check_handler:
+  push 0
   push 18 
   jmp exception_common_stub
 
 simd_fp_handler:
+  push 0
   push  19
   jmp exception_common_stub
 
 exception_common_stub:
-    ; Save all registers
-    pusha               ; Pushes: EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI
+    pusha              
     
     push ds
     push es
     push fs
     push gs
     
-    ; Load kernel data segment
-    mov ax, 0x10        ; Kernel data segment
+    mov ax, 0x10      
     mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     
-    ; Call C handler
-    ; Stack now has: int_no, err_code, and all registers
+    push esp
     call exception_handler_c
-    
-    ; Restore segments
+    add esp, 4
+
     pop gs
     pop fs
     pop es
     pop ds
     
-    ; Restore registers
     popa
     
-    ; Clean up exception number and error code
     add esp, 8
     
-    ; Return from interrupt
     iret

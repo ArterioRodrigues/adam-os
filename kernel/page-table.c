@@ -77,11 +77,3 @@ void map_page(page_directory_t *page_directory, uint32_t virtual_address, uint32
     page_table->entries[page_table_index] = physical_address | flags | 1;
 }
 
-void load_page_directory(page_directory_t *page_directory) { asm volatile("mov %0, %%cr3" ::"r"(page_directory)); }
-
-void enable_paging() {
-    uint32_t cr0;
-    asm volatile("mov %%cr0, %0" : "=r"(cr0));
-    cr0 |= 0x80000000;
-    asm volatile("mov %0, %%cr0" ::"r"(cr0));
-}
