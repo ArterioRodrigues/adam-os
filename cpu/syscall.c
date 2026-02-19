@@ -1,7 +1,7 @@
 #include "../pch.h"
-
 extern void syscall_handler();
 
+#define RING3_CALL 0xEE
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -26,5 +26,4 @@ void syscall_handler_main(registers_t *regs) {
         regs->eax = -1;
     }
 }
-
-void init_syscall() { idt_set_gate(0x80, (unsigned int)syscall_handler, KERNEL_CODE_SEGMENT, IDT_FLAG_INTERRUPT_GATE); }
+void init_syscall() { idt_set_gate(0x80, (unsigned int)syscall_handler, KERNEL_CODE_SEGMENT, RING3_CALL); }

@@ -3,6 +3,7 @@
 #include "../kernel/config.h"
 
 extern void idt_load(unsigned int);
+
 struct idt_entry {
   unsigned short base_low;
   unsigned short selector;

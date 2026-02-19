@@ -15,12 +15,13 @@ typedef struct {
 
 
 extern page_directory_t* page_directory;
+extern void load_page_directory(page_directory_t* pd);
+extern void enable_paging();
+extern void disable_paging();
 
 page_directory_t* create_page_directory(); 
 page_table_t* create_page_table();
 
 void map_page(page_directory_t* page_directory, uint32_t virtual_address, uint32_t physical_address, uint32_t flag);
 
-void load_page_directory(page_directory_t* pd);
-void enable_paging();
 #endif

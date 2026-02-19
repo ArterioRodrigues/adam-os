@@ -1,4 +1,3 @@
-#include "frame.h"
 #include "../pch.h"
 
 unsigned int frames_bitmap[NUM_FRAMES / 32];
@@ -14,7 +13,6 @@ void init_frames() {
     for (uint32_t i = 0; i < NUM_FRAMES; i++)
         clear_frame(i);
 
-    mark_frames_used(KERNEL_START, KERNEL_END);
 }
 
 uint32_t allocate_frame() {
@@ -39,7 +37,7 @@ void mark_frames_used(uint32_t start, uint32_t end) {
 void dump_frame() {
     char *result;
 
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < NUM_FRAMES; i++) {
         print(itos(result, test_frame(i)));
     }
 

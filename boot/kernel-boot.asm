@@ -238,6 +238,32 @@ gdt_data:
 ;code segment: Execute + Read but not write
 ;data segment: Read + Write but not execute
 
+; User Code Segment (Ring 3)
+gdt_user_code:
+  dw 0xFFFF
+  dw 0x0
+  db 0x0
+  db 11111010b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 11001111b
+  db 0x0
+
+; User Data Segment (Ring 3)
+gdt_user_data:
+  dw 0xFFFF
+  dw 0x0
+  db 0x0
+  db 11110010b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 11001111b
+  db 0x0
+
+gdt_tss: 
+  dw 0x0067
+  dw 0x0
+  db 0x0
+  db 10001001b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 00000000b
+  db 0x0
+
 ;GDT end marker
 gdt_end:
 

@@ -10,33 +10,38 @@ $CC -ffreestanding -fno-pic -c pch.h -o pch.h.gch
 echo "Assembling files..."
 nasm -f elf32 cpu/interrupts.asm -o interrupts.o
 nasm -f elf32 cpu/exceptions.asm -o exceptions.o
+nasm -f elf32 cpu/gdt.asm -o gdt.o
 nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
+nasm -f elf32 kernel/page-table.asm -o page-table.o
+nasm -f elf32 user/user.asm -o user.o
 nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
 
 echo "Compiling C files..."
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/kernel.c -o kernel.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/kmalloc.c -o kmalloc.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-table.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
+$CC -ffreestanding -fno-pic -include pch.h -c user/user.c -o userc.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/shell.c -o shell.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/ramfs.c -o ramfs.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
-$CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/user.c -o user.o
 
 # Update linker line to include:
 # ... gdt.o gdtc.o syscall.o syscallc.o user.o ...
 
 echo "Linking kernel..."
-$LD -T linker.ld -o kernel.bin kernel-entry.o kernel.o kmalloc.o page-table.o frame.o screen.o syscall.o user.o \
-    mem.o keyboard.o timer.o idt.o interrupts.o exceptions.o exceptionsc.o ramfs.o math.o string.o shell.o \
+$LD -T linker.ld -o kernel.bin kernel-entry.o userc.o  kernel.o kmalloc.o user.o page-tablec.o frame.o screen.o syscall.o  \
+    mem.o keyboard.o timer.o idt.o  interrupts.o gdt.o gdtc.o  exceptions.o  exceptionsc.o ramfs.o math.o string.o shell.o \
+     page-table.o \
     --oformat binary
 
 echo "Creating OS image..."
