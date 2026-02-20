@@ -44,6 +44,7 @@ void init_exception() {
 }
 
 void exception_handler_c(registers_t *regs) {
+    clear_screen();
     print("\n*** EXCEPTION ***\n");
 
     if (regs->int_no < 20) {

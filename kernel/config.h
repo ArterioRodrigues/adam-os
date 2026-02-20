@@ -13,7 +13,7 @@
 //  0x50000000          User stack page (virtual)
 //
 #define KERNEL_START        0x00000     // Physical start of kernel
-#define KERNEL_END          0x100000    // Physical end of kernel (1MB)
+#define KERNEL_END           0x100000    // Physical end of kernel (1MB)
 #define KERNEL_STACK_ADDRESS 0x90000   // Top of kernel stack (grows downward)
 
 #define USER_FUNC_VADDR     0x40000000  // Virtual address user function is mapped to
@@ -209,5 +209,10 @@
 #define BITMASK_LOW         0xFFFF      // Mask for low 16 bits
 #define BITMASK_HIGH        0xFFFF      // Mask for high 16 bits (after shift)
 #define TAB_SIZE            4
+
+// ============================================================
+// SCHEDULER 
+// ============================================================
+#define SCHEDULER_QUANTUM 20 
 
 #endif

@@ -14,7 +14,6 @@ typedef struct {
 } page_directory_t;
 
 
-extern page_directory_t* page_directory;
 extern void load_page_directory(page_directory_t* pd);
 extern void enable_paging();
 extern void disable_paging();

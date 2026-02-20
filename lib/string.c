@@ -106,10 +106,12 @@ char *itohs(char *result, int n) {
   strrev(hex);
   result[0] = '0';
   result[1] = 'X';
-
-  for (int i = 0; hex[i] != '\0'; i++) {
+  
+  int i;
+  for (i = 0; hex[i] != '\0'; i++) {
     result[2 + i] = hex[i];
   }
+  result[2 + i] = '\0';
   return result;
 }
 
