@@ -13,6 +13,7 @@ nasm -f elf32 cpu/exceptions.asm -o exceptions.o
 nasm -f elf32 cpu/gdt.asm -o gdt.o
 nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
 nasm -f elf32 kernel/page-table.asm -o page-table.o
+nasm -f elf32 kernel/process-control-block.asm -o process-control-block.o
 nasm -f elf32 user/user.asm -o user.o
 nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
 
@@ -21,6 +22,8 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/kernel.c -o kernel.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/kmalloc.c -o kmalloc.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
 $CC -ffreestanding -fno-pic -include pch.h -c user/user.c -o userc.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
@@ -39,7 +42,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
 # ... gdt.o gdtc.o syscall.o syscallc.o user.o ...
 
 echo "Linking kernel..."
-$LD -T linker.ld -o kernel.bin kernel-entry.o userc.o  kernel.o kmalloc.o user.o page-tablec.o frame.o screen.o syscall.o  \
+$LD -T linker.ld -o kernel.bin kernel-entry.o userc.o  process-control-blockc.o scheduler.o process-control-block.o kernel.o kmalloc.o user.o page-tablec.o frame.o screen.o syscall.o  \
     mem.o keyboard.o timer.o idt.o  interrupts.o gdt.o gdtc.o  exceptions.o  exceptionsc.o ramfs.o math.o string.o shell.o \
      page-table.o \
     --oformat binary
@@ -57,3 +60,4 @@ mv *.gch build/ 2>/dev/null || true
 
 echo "Build complete!"
 qemu-system-x86_64 -drive format=raw,file=build/os-image.bin
+

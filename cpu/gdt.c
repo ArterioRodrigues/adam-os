@@ -1,8 +1,8 @@
 #include "../pch.h"
 
-struct gdt_entry gdt[6];
+gdt_entry_t gdt[6];
 tss_entry_t tss_entry;
-struct gdt_ptr gdt_ptr_struct;
+gdt_ptr_t gdt_ptr_struct;
 
 void gdt_set_gate(int num, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags) {
     gdt[num].base_low = base & 0xFFFF;

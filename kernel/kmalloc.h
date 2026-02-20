@@ -9,7 +9,7 @@ typedef struct heap_block_header {
     struct heap_block_header *next;
 } heap_block_header_t;
 
-static heap_block_header_t *head;
+static heap_block_header_t *heap_head_ptr;
 
 void init_heap();
 

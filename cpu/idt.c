@@ -1,7 +1,7 @@
 #include "../pch.h"
 
-struct idt_entry idt[IDT_ENTRIES];
-struct idt_ptr idtp;
+idt_entry_t idt[IDT_ENTRIES];
+idt_ptr_t idtp;
 
 unsigned char inb(unsigned short port) {
     unsigned char result;

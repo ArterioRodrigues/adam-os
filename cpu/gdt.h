@@ -40,11 +40,15 @@ struct tss_entry_struct {
     uint16_t trap;
     uint16_t iomap_base;
 } __attribute__((packed));
-typedef struct tss_entry_struct tss_entry_t;
 
-extern struct gdt_entry gdt[6];
+typedef struct tss_entry_struct tss_entry_t;
+typedef struct gdt_ptr gdt_ptr_t;
+typedef struct gdt_entry gdt_entry_t;
+
+extern gdt_entry_t gdt[6];
 extern tss_entry_t tss_entry;
-extern struct gdt_ptr gdt_ptr_struct;
+extern gdt_ptr_t gdt_ptr_struct;
+
 extern void gdt_flush();
 extern void tss_flush();
 

@@ -13,9 +13,11 @@ void update_cursor(int x, int y) {
 }
 
 void print_char_color(char c, unsigned char color) {
-    if (c == '\n') {
+    if (vga_index == VGA_SIZE - 1)
+        vga_index = 0;
+
+    if (c == '\n')
         vga_index = (vga_index / VGA_WIDTH + 1) * VGA_WIDTH;
-    }
 
     else if (c == '\b') {
         if (vga_index > 0) {

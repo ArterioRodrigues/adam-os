@@ -22,12 +22,6 @@ extern void simd_fp_handler();
 
 extern const char* exception_messages[];
 
-typedef struct {
-  uint32_t gs, fs, es, ds;
-  uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
-  uint32_t int_no, err_code;
-  uint32_t eip, cs, eflags, useresp, ss;
-} registers_t;
 
 void init_exception();
 void exception_handler_c(registers_t *regs);
