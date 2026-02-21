@@ -1,6 +1,7 @@
 #ifndef PROCESS_CONTROL_BLOCK_H
 #define PROCESS_CONTROL_BLOCK_H
 
+#include "fdh.h"
 #include "page-table.h"
 #include "types.h"
 
@@ -18,6 +19,7 @@ typedef struct pcb {
     uint32_t parent_pid;
 
     int exit_code;
+    file_descriptor_t fds[MAX_FDS];
 } pcb_t;
 static uint32_t pid_static = 1;
 

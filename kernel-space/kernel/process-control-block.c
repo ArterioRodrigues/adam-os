@@ -15,5 +15,18 @@ pcb_t *create_process_control_block(page_directory_t *page_directory, registers_
     pcb->status = READY;
     pcb->next = next;
 
+    for (int i = 0; i < MAX_FDS; i++) {
+        pcb->fds[i].type = FD_NONE;
+        pcb->fds[i].data = NULL;
+        pcb->fds[i].offset = 0;
+        pcb->fds[i].is_open = false;
+    }
+
+    pcb->fds[0].type = FD_STDIN;
+    pcb->fds[0].is_open = true;
+
+    pcb->fds[1].type = FD_STDOUT;
+    pcb->fds[1].is_open = true;
+
     return pcb;
 }

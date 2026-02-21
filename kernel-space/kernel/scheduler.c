@@ -41,7 +41,7 @@ void start_scheduler() {
 
 void update_scheduler(registers_t *regs) {
     quantum_counter++;
-    if (quantum_counter < SCHEDULER_QUANTUM)
+    if (!scheduler_head_ptr || quantum_counter < SCHEDULER_QUANTUM)
         return;
 
     quantum_counter = 0;
