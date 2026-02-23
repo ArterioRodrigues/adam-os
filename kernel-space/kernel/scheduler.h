@@ -5,7 +5,8 @@
 extern pcb_t *current_process;
 extern pcb_t *scheduler_head_ptr;
 
-static uint32_t quantum_counter;
+extern uint32_t quantum_counter;
+extern uint32_t process_queue_size;
 
 void init_scheduler(pcb_t *pcb);
 void scheduler_enqueue(pcb_t *pcb);

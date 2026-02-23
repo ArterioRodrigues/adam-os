@@ -1,26 +1,43 @@
 #include "../pch.h"
 extern void syscall_handler();
+char syscall_buffer[256];
 
-#define RING3_CALL 0xEE
+void handle_syscall_exit() {
+    print("\nUser program exited\n");
+    while (1)
+        ;
+}
+
+void handle_syscall_read(registers_t *regs) {
+    current_process->status = WAITING;
+    int fd = regs->ebx;
+    char *buf = (char *)regs->ecx;
+    uint32_t len = regs->edx;
+    update_scheduler(regs);
+}
+
+void handle_syscall_write(registers_t *regs) {
+    char *buf = (char *)regs->ecx;
+    uint32_t len = regs->edx;
+    for (uint32_t i = 0; i < len; i++) {
+        print_char(buf[i]);
+    }
+    regs->eax = len;
+}
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
     switch (syscall_num) {
-    case SYSCALL_WRITE: {
-        char *buf = (char *)regs->ecx;
-        uint32_t len = regs->edx;
-        for (uint32_t i = 0; i < len; i++) {
-            print_char(buf[i]);
-        }
-        regs->eax = len;
-    } break;
-
     case SYSCALL_EXIT:
-        print("\nUser program exited\n");
-        while (1)
-            ;
+        handle_syscall_exit();
         break;
-
+    case SYSCALL_WRITE:
+        handle_syscall_write(regs);
+        break;
+    case SYSCALL_READ:
+        handle_syscall_read(regs);
+        break;
     default:
         print("Unknown syscall\n");
         regs->eax = -1;

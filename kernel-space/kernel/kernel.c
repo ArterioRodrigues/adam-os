@@ -1,9 +1,13 @@
-#include "kernel.h"
 #include "../pch.h"
-#include "page-table.h"
+#include "scheduler.h"
 
 extern uint8_t _binary_main_bin_start[];
 extern uint8_t _binary_main_bin_end[];
+
+void idle_fn() {
+    while (1)
+        ;
+}
 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;
@@ -69,12 +73,16 @@ void kernel_main() {
         uint32_t frame = allocate_frame();
     }
 
+    page_directory_t *idle_page_table = create_kernel_page_directory((void *)idle_fn);
+    registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
+
     page_directory_t *process1_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
     registers_t process1_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
     pcb_t *process1 = create_process_control_block(process1_page_directory, process1_reg, 0, NULL);
 
-    init_scheduler(process1);
-
+    init_scheduler(idle);
+    scheduler_enqueue(process1);
     start_scheduler();
 
     while (1)

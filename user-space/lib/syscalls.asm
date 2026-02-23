@@ -1,8 +1,9 @@
 [BITS 32]
 
 global _start
-global sys_write
 global sys_exit
+global sys_read
+global sys_write
 
 extern main
 _start:
@@ -24,3 +25,11 @@ sys_exit:
     mov eax, 1
     int 0x80
 
+
+sys_read:
+    mov eax, 3 
+    mov ebx, [esp + 4]  
+    mov ecx, [esp + 8]  
+    mov edx, [esp + 12]  
+    int 0x80
+    ret
