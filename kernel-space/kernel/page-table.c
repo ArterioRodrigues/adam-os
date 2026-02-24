@@ -1,6 +1,5 @@
 #include "../pch.h"
 
-
 page_directory_t *create_page_directory() {
     uint32_t memory = allocate_frame();
     page_directory_t *page_directory = (page_directory_t *)memory;

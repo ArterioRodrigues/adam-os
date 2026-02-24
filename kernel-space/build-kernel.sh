@@ -1,0 +1,68 @@
+#!/bin/bash
+
+CC=i686-elf-gcc
+LD=i686-elf-ld
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+USER_BUILD="$SCRIPT_DIR/../user-space/build"
+
+cd "$SCRIPT_DIR"
+
+echo "Creating precompiled header..."
+$CC -ffreestanding -fno-pic -c pch.h -o pch.h.gch
+
+echo "Assembling files..."
+nasm -f elf32 cpu/interrupts.asm -o interrupts.o
+nasm -f elf32 cpu/exceptions.asm -o exceptions.o
+nasm -f elf32 cpu/gdt.asm -o gdt.o
+nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
+nasm -f elf32 kernel/page-table.asm -o page-table.o
+nasm -f elf32 kernel/process-control-block.asm -o process-control-block.o
+nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
+
+echo "Compiling C files..."
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/kernel.c -o kernel.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/kmalloc.c -o kmalloc.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
+$CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/shell.c -o shell.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/ramfs.c -o ramfs.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
+
+# collect all embedded user program objects
+USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')
+echo "Including user binaries: $USER_BINS"
+
+echo "Linking kernel..."
+$LD -T linker.ld -o kernel.bin \
+    kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
+    kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
+    mem.o keyboard.o timer.o idt.o interrupts.o gdt.o gdtc.o \
+    exceptions.o exceptionsc.o ramfs.o math.o string.o shell.o \
+    page-table.o \
+    $USER_BINS \
+    --oformat binary
+
+echo "Creating OS image..."
+dd if=/dev/zero of=os-image.bin bs=1M count=10
+dd if=kernel-boot.bin of=os-image.bin conv=notrunc
+dd if=kernel.bin of=os-image.bin seek=1 conv=notrunc
+
+echo "Moving artifacts to build..."
+mkdir -p build
+mv *.o build/ 2>/dev/null || true
+mv *.bin build/ 2>/dev/null || true
+mv *.gch build/ 2>/dev/null || true
+
+echo "Kernel build complete!"

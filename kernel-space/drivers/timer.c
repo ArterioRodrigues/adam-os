@@ -4,8 +4,8 @@ volatile unsigned int timer_ticks = 0;
 
 void timer_handler_main(registers_t *regs) {
     timer_ticks++;
-    outb(PIC1_COMMAND, PIC_EOI);
     update_scheduler(regs);
+    outb(PIC1_COMMAND, PIC_EOI);
 }
 
 uint32_t get_timer_ticks() { return timer_ticks; }

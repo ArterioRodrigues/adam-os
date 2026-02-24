@@ -1,7 +1,7 @@
 #include "../pch.h"
 
 char keyboard_buffer[256];
-int keyboard_buffer_index = 0;
+volatile int keyboard_buffer_index = 0;
 bool keyboard_pressed = false;
 
 char scancode_to_ascii[] = {0,   0,   '1', '2', '3', '4', '5', '6', '7', '8', '9',  '0', '-', '=',  0,

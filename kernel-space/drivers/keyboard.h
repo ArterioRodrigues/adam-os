@@ -2,7 +2,7 @@
 #define KEYBOARD_H
 
 extern char keyboard_buffer[256];
-extern int keyboard_buffer_index;
+extern volatile int keyboard_buffer_index;
 extern unsigned char keyboard_pressed;
 extern void keyboard_handler();
 

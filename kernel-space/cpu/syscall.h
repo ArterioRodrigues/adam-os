@@ -2,7 +2,10 @@
 #define SYSCALL_H
 
 #define SYSCALL_EXIT 1
+#define SYSCALL_READ 3
 #define SYSCALL_WRITE 4
+
+#define RING3_CALL 0xEE
 
 void init_syscall();
 
