@@ -1,21 +1,11 @@
-extern void sys_write(char *buf, int len);
-extern char sys_read(int fd, char *buf, int len);
+#include "../lib/helpers.h"
 
-void wait() {
-    int i = 0;
-    int j = 0;
-    while (i < 10000) {
-        while (j < 10000)
-            j++;
-        i++;
-        j = 0;
-    }
-}
 void main() {
-    char buf[]="12345";
+    char buf[5];
     while (1) {
         wait();
-        sys_read(7, buf, 10);
+        sys_read(0, buf, 5);
         sys_write(buf, 5);
+        sys_write(".." , 2);
     }
 }

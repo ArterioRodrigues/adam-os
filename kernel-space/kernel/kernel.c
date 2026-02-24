@@ -1,13 +1,7 @@
 #include "../pch.h"
-#include "scheduler.h"
 
 extern uint8_t _binary_main_bin_start[];
-extern uint8_t _binary_main_bin_end[];
-
-void idle_fn() {
-    while (1)
-        ;
-}
+extern uint8_t _binary_idle_bin_start[];
 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;
@@ -44,8 +38,6 @@ page_directory_t *create_kernel_page_directory(void *fn) {
     map_page(page_directory, USER_FUNC_VADDR, user_func_frame, PAGE_FLAG_USER);
     map_page(page_directory, USER_STACK_VADDR, user_stack_frame, PAGE_FLAG_USER);
 
-    map_page(page_directory, user_func_frame, user_func_frame, PAGE_FLAG_USER);
-    map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);
     return page_directory;
 }
 
@@ -59,7 +51,7 @@ void kernel_main() {
 
     init_keyboard();
     init_timer();
-    init_shell();
+    // init_shell();
 
     init_exception();
     init_syscall();
@@ -73,16 +65,16 @@ void kernel_main() {
         uint32_t frame = allocate_frame();
     }
 
-    page_directory_t *idle_page_table = create_kernel_page_directory((void *)idle_fn);
+    page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
     registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
     pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
 
-    page_directory_t *process1_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
-    registers_t process1_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    pcb_t *process1 = create_process_control_block(process1_page_directory, process1_reg, 0, NULL);
+    page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
+    registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
 
     init_scheduler(idle);
-    scheduler_enqueue(process1);
+    scheduler_enqueue(main);
     start_scheduler();
 
     while (1)

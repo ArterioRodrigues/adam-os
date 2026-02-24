@@ -9,11 +9,22 @@ void handle_syscall_exit() {
 }
 
 void handle_syscall_read(registers_t *regs) {
-    current_process->status = WAITING;
     int fd = regs->ebx;
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
-    update_scheduler(regs);
+
+    if (fd == 0) {
+        asm volatile("sti"); 
+        while (keyboard_buffer_index < (int)len)  
+
+        asm volatile("cli");
+
+        for (uint32_t i = 0; i < len; i++) {
+            buf[i] = keyboard_buffer[i];
+        }
+        keyboard_buffer_index = 0; 
+        regs->eax = len;
+    }
 }
 
 void handle_syscall_write(registers_t *regs) {

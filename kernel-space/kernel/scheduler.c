@@ -30,6 +30,7 @@ void dump_current_process() {
     print(buf);
     print("\n");
 }
+
 void init_scheduler(pcb_t *pcb) {
     scheduler_head_ptr = pcb;
     current_process = pcb;

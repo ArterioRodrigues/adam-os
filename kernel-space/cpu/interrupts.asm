@@ -48,8 +48,7 @@ keyboard_handler:
   pushad
 
   call keyboard_handler_main
-  call shell_handler_main
-  
+
   popad
 
   iret
