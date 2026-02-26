@@ -50,7 +50,7 @@ void coalesce_blocks() {
     heap_block_header_t *prev = NULL;
 
     while (block) {
-        if (prev->is_free && block->is_free) {
+        if (prev && prev->is_free && block->is_free) {
             prev->size += block->size + sizeof(heap_block_header_t);
             prev->next = block->next;
             block = block->next;

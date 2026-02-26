@@ -27,6 +27,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
@@ -36,7 +37,6 @@ $CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/shell.c -o shell.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/ramfs.c -o ramfs.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
 
@@ -49,7 +49,7 @@ $LD -T linker.ld -o kernel.bin \
     kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
     mem.o keyboard.o timer.o idt.o interrupts.o gdt.o gdtc.o \
-    exceptions.o exceptionsc.o ramfs.o math.o string.o shell.o \
+    exceptions.o exceptionsc.o ramfs.o math.o string.o stdin.o \
     page-table.o \
     $USER_BINS \
     --oformat binary

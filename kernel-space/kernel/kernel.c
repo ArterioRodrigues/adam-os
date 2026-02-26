@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "config.h"
 
 extern uint8_t _binary_main_bin_start[];
 extern uint8_t _binary_idle_bin_start[];
@@ -24,9 +25,6 @@ page_directory_t *create_kernel_page_directory(void *fn) {
     page_directory_t *page_directory = create_page_directory();
 
     for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE)
-        map_page(page_directory, i, i, PAGE_FLAG_KERNEL);
-
-    for (uint32_t i = HEAP_START; i <= HEAP_END; i += PAGE_SIZE)
         map_page(page_directory, i, i, PAGE_FLAG_KERNEL);
 
     map_page(page_directory, VGA_ADDRESS, VGA_ADDRESS, PAGE_FLAG_KERNEL);

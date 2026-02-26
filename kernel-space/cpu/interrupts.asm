@@ -6,7 +6,6 @@ global syscall_handler
 global idt_load 
 
 extern timer_handler_main 
-extern shell_handler_main
 extern syscall_handler_main
 extern keyboard_handler_main
 
@@ -45,16 +44,37 @@ timer_handler:
   iret
 
 keyboard_handler:
-  pushad
 
-  call keyboard_handler_main
-
-  popad
-
-  iret
+    push 0
+    push 0x80
+    pushad
+    push ds
+    push es
+    push fs
+    push gs
+    
+    mov ax, 0x10   
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    
+    push esp
+    call keyboard_handler_main
+    add esp, 4
+    
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popad
+    add esp, 8 
+    iret
 
 syscall_handler:
-    pusha
+    push 0
+    push 0x80
+    pushad
     push ds
     push es
     push fs
@@ -74,7 +94,7 @@ syscall_handler:
     pop fs
     pop es
     pop ds
-    popa
-    
+    popad
+    add esp, 8 
     iret
 

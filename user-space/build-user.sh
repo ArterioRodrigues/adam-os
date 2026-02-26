@@ -10,16 +10,16 @@ mkdir -p "$SCRIPT_DIR/build"
 # assemble syscalls once - shared by all programs
 $NASM -f elf32 "$SCRIPT_DIR/lib/syscalls.asm" -o "$SCRIPT_DIR/build/syscalls.o"
 
-# compile helpers once - linked into each program
+# compile lib once - linked into each program
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
-    -c "$SCRIPT_DIR/programs/helpers.c" -o "$SCRIPT_DIR/build/helpers.o"
+    -c "$SCRIPT_DIR/programs/lib.c" -o "$SCRIPT_DIR/build/lib.o"
 
 # build main binary
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -c "$SCRIPT_DIR/programs/main.c" -o "$SCRIPT_DIR/build/main.o"
 $LD -m elf_i386 -Ttext=0x40000000 \
     "$SCRIPT_DIR/build/syscalls.o" \
-    "$SCRIPT_DIR/build/helpers.o" \
+    "$SCRIPT_DIR/build/lib.o" \
     "$SCRIPT_DIR/build/main.o" \
     -o "$SCRIPT_DIR/build/main.elf"
 $OBJCOPY -O binary "$SCRIPT_DIR/build/main.elf" "$SCRIPT_DIR/build/main.bin"
@@ -29,7 +29,7 @@ $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -c "$SCRIPT_DIR/programs/idle.c" -o "$SCRIPT_DIR/build/idle.o"
 $LD -m elf_i386 -Ttext=0x40000000 \
     "$SCRIPT_DIR/build/syscalls.o" \
-    "$SCRIPT_DIR/build/helpers.o" \
+    "$SCRIPT_DIR/build/lib.o" \
     "$SCRIPT_DIR/build/idle.o" \
     -o "$SCRIPT_DIR/build/idle.elf"
 $OBJCOPY -O binary "$SCRIPT_DIR/build/idle.elf" "$SCRIPT_DIR/build/idle.bin"

@@ -64,13 +64,16 @@ void next_process() {
 
     while (size > 0 && current_process->status == WAITING) {
         current_process = current_process->next;
-        if (!current_process)
+        if (current_process == NULL)
             current_process = scheduler_head_ptr;
         size--;
     }
 
-    if (current_process->status == WAITING)
-        current_process = NULL;
+    if (current_process->status == WAITING || current_process == NULL) {
+        print("ERROR: NULL PROCESS");
+        while (1)
+            ;
+    }
 }
 
 void start_scheduler() {
@@ -81,24 +84,20 @@ void start_scheduler() {
 }
 void update_scheduler(registers_t *regs) {
     quantum_counter++;
-
-    if (!scheduler_head_ptr || !current_process || quantum_counter < SCHEDULER_QUANTUM)
+    if (current_process->status != WAITING &&
+        (!scheduler_head_ptr || !current_process || quantum_counter < SCHEDULER_QUANTUM)) {
         return;
+    }
 
-    quantum_counter = 0;
     memcpy(&current_process->registers, regs, sizeof(registers_t));
 
     next_process();
 
-    if (current_process == NULL) {
-        dump_current_process();
-        print("NULL PROCESS");
-        while (1)
-            ;
-    }
-
     current_process->status = RUNNING;
     memcpy(regs, &current_process->registers, sizeof(registers_t));
+    memcpy(&current_process->registers, regs, sizeof(registers_t));
     set_kernel_stack(current_process->kernel_stack);
     load_page_directory(current_process->page_directory);
+
+    quantum_counter = 0;
 }
