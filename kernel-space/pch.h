@@ -16,9 +16,9 @@
 #include "kernel/page-table.h"
 #include "kernel/process-control-block.h"
 #include "kernel/scheduler.h"
+#include "kernel/stdin.h"
 #include "lib/math.h"
 #include "lib/ramfs.h"
-#include "lib/shell.h"
 #include "lib/mem.h"
 #include "lib/string.h"
 

@@ -25,4 +25,5 @@ extern const char* exception_messages[];
 
 void init_exception();
 void exception_handler_c(registers_t *regs);
+void dump_registers(registers_t *regs);
 #endif

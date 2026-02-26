@@ -1,11 +1,12 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
+#include "../kernel/config.h"
+#include "../kernel/types.h"
 
-extern char keyboard_buffer[256];
-extern volatile int keyboard_buffer_index;
+
 extern unsigned char keyboard_pressed;
 extern void keyboard_handler();
 
-void keyboard_handler_main();
+void keyboard_handler_main(registers_t *regs);
 void init_keyboard();
 #endif

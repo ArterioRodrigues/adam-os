@@ -142,3 +142,23 @@ void exception_handler_c(registers_t *regs) {
     while (1)
         ;
 }
+void dump_registers(registers_t *regs) {
+    char buf[20];
+    print("\n=== REGISTERS ===\n");
+    print("EAX="); print(itohs(buf, regs->eax));
+    print(" EBX="); print(itohs(buf, regs->ebx)); print("\n");
+    print("ECX="); print(itohs(buf, regs->ecx));
+    print(" EDX="); print(itohs(buf, regs->edx)); print("\n");
+    print("ESI="); print(itohs(buf, regs->esi));
+    print(" EDI="); print(itohs(buf, regs->edi)); print("\n");
+    print("EBP="); print(itohs(buf, regs->ebp));
+    print(" ESP="); print(itohs(buf, regs->esp)); print("\n");
+    print("EIP="); print(itohs(buf, regs->eip));
+    print(" EFLAGS="); print(itohs(buf, regs->eflags)); print("\n");
+    print("CS=");  print(itohs(buf, regs->cs));
+    print(" SS=");  print(itohs(buf, regs->ss)); print("\n");
+    print("DS=");  print(itohs(buf, regs->ds));
+    print(" INT="); print(itohs(buf, regs->int_no)); print("\n");
+    print(" USERESP="); print(itohs(buf, regs->useresp)); print("\n");
+    print("=================\n");
+}

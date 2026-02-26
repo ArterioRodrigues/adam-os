@@ -19,7 +19,8 @@ extern void enable_paging();
 extern void disable_paging();
 
 page_directory_t* create_page_directory(); 
-page_table_t* create_page_table();
+page_table_t *create_page_table();
+void copy_page_directory(page_directory_t *dest, page_directory_t *source);
 
 void map_page(page_directory_t* page_directory, uint32_t virtual_address, uint32_t physical_address, uint32_t flag);
 

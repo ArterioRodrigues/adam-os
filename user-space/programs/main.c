@@ -1,11 +1,18 @@
-#include "../lib/helpers.h"
+#include "../lib/lib.h"
 
 void main() {
-    char buf[5];
-    while (1) {
-        wait();
-        sys_read(0, buf, 5);
-        sys_write(buf, 5);
-        sys_write(".." , 2);
+    int pid = sys_fork();
+
+    if (pid == 0) {
+    
+        while (1) {
+            sys_write("child\n", 6);
+            wait();
+        }
+    } else {
+        while (1) {
+            sys_write("parent\n", 7);
+            wait();
+        }
     }
 }

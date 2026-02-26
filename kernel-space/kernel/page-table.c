@@ -1,4 +1,14 @@
+#include "page-table.h"
 #include "../pch.h"
+#include "config.h"
+#include "frame.h"
+
+static void identity_map_in(page_directory_t *pd, uint32_t phys_addr) {
+    uint32_t page_directory_index = phys_addr >> 22;
+    uint32_t page_table_index = (phys_addr >> 12) & 0x3FF;
+    page_table_t *page_table = (page_table_t *)(pd->entries[page_directory_index] & 0xFFFFF000);
+    page_table->entries[page_table_index] = phys_addr | PAGE_FLAG_KERNEL;
+}
 
 page_directory_t *create_page_directory() {
     uint32_t memory = allocate_frame();
@@ -8,6 +18,7 @@ page_directory_t *create_page_directory() {
         page_directory->entries[i] = 0;
     }
 
+    map_page(page_directory, memory, memory, PAGE_FLAG_KERNEL);
     return page_directory;
 }
 
@@ -20,6 +31,44 @@ page_table_t *create_page_table() {
     }
 
     return page_table;
+}
+
+void copy_page_directory(page_directory_t *dest, page_directory_t *source) {
+    for (int i = 0; i < 1024; i++) {
+
+        if (!(source->entries[i] & 1))
+            continue;
+
+        uint32_t vaddr = i << 22;
+
+        if (vaddr < USER_FUNC_VADDR) {
+            dest->entries[i] = source->entries[i];
+            continue;
+        }
+
+        page_table_t *source_pt = (page_table_t *)(source->entries[i] & 0xFFFFF000);
+
+        page_table_t *dest_page_table = (page_table_t *)allocate_frame();
+        identity_map_in(source, (uint32_t)dest_page_table);
+
+        for (int j = 0; j < 1024; j++) {
+            if (source_pt->entries[j] & 1) {
+                uint32_t src_frame = source_pt->entries[j] & 0xFFFFF000;
+
+                uint32_t dest_frame = allocate_frame();
+
+                identity_map_in(source, (uint32_t)dest_frame);
+                identity_map_in(source, (uint32_t)src_frame);
+
+                memcpy((void *)dest_frame, (void *)src_frame, PAGE_SIZE);
+                uint32_t flags = source_pt->entries[j] & 0xFFF;
+
+                dest_page_table->entries[j] = dest_frame | flags;
+            }
+        }
+
+        dest->entries[i] = (uint32_t)dest_page_table | (source->entries[i] & 0xFFF);
+    }
 }
 
 /*
@@ -71,7 +120,7 @@ void map_page(page_directory_t *page_directory, uint32_t virtual_address, uint32
     } else {
         page_table = create_page_table();
         page_directory->entries[page_directory_index] = ((uint32_t)page_table) | flags | 1;
+        identity_map_in(page_directory, (uint32_t)page_table);
     }
     page_table->entries[page_table_index] = physical_address | flags | 1;
 }
-

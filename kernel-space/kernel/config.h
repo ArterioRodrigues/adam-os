@@ -19,6 +19,7 @@
 #define USER_FUNC_VADDR 0x40000000  // Virtual address user function is mapped to
 #define USER_STACK_VADDR 0x50000000 // Virtual address user stack is mapped to
 #define USER_LIB_VADDR 0x60000000   // Virtual address user is mapped to
+#define USER_PAGE_DIRECTORY_VADDR 0x70000000   // Virtual address user is mapped to
 // ============================================================
 // GDT SELECTORS
 // ============================================================
@@ -198,6 +199,7 @@
 // KEYBOARD
 // ============================================================
 #define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_BUFFER_SIZE 256
 #define SCANCODE_ENTER 0x1C
 #define SCANCODE_BACKSPACE 0x0E
 #define SCANCODE_RELEASE_MASK 0x80 // Bit 7 set = key release event
@@ -215,4 +217,8 @@
 // ============================================================
 #define SCHEDULER_QUANTUM 20
 
+// ============================================================
+// BUFFERS
+// ============================================================
+#define STANDARD_IN_BUFFER_SIZE 256
 #endif
