@@ -2,6 +2,8 @@
 #include "../pch.h"
 #include "config.h"
 #include "frame.h"
+#include "kernel.h"
+#include "types.h"
 
 static void identity_map_in(page_directory_t *pd, uint32_t phys_addr) {
     uint32_t page_directory_index = phys_addr >> 22;
@@ -71,7 +73,50 @@ void copy_page_directory(page_directory_t *dest, page_directory_t *source) {
     }
 }
 
+void clear_page_directory(page_directory_t *page_directory) {
+    for (int i = 0; i < 1024; i++) {
+        if (!(page_directory->entries[i] & 1))
+            continue;
+
+        uint32_t vaddr = i << 22;
+        if (vaddr < USER_FUNC_VADDR)
+            continue;
+        page_table_t *page_table = (page_table_t *)(page_directory->entries[i] & 0xFFFFF000);
+        for (int j = 0; j < 1024; j++) {
+            if (page_table->entries[j] & 1) {
+                uint32_t frame = page_table->entries[j] & 0xFFFFF000;
+                free_frame(frame);
+            }
+        }
+        free_frame((uint32_t)page_table);
+    }
+}
+
+void update_page_directory(page_directory_t *page_directory, void *fn, registers_t *regs) {
+    uint32_t user_func_frame = allocate_frame();
+    uint32_t user_stack_frame = allocate_frame();
+
+    map_page(page_directory, user_func_frame, user_func_frame, PAGE_FLAG_USER);
+    map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);
+
+    memcpy((void *)user_func_frame, fn, PAGE_SIZE);
+    map_page(page_directory, USER_FUNC_VADDR, user_func_frame, PAGE_FLAG_USER);
+    map_page(page_directory, USER_STACK_VADDR, user_stack_frame, PAGE_FLAG_USER);
+
+    regs->eip = USER_FUNC_VADDR;
+    regs->esp = USER_STACK_VADDR + 0x1000 - 4;
+
+    uint32_t eflags;
+    asm volatile("pushf; pop %0" : "=r"(eflags));
+
+    regs->cs = (3 * 8) | 3;
+    regs->ss = (4 * 8) | 3;
+    regs->eflags = eflags | 0x200;
+
+    load_page_directory(page_directory);
+}
 /*
+ *
  * map_page - Maps a virtual address to a physical address
  *
  * Virtual Address Breakdown (32-bit):
@@ -109,7 +154,6 @@ void copy_page_directory(page_directory_t *dest, page_directory_t *source) {
  * Now virtual 0x40000000 maps to physical frame with user read-write access
  */
 void map_page(page_directory_t *page_directory, uint32_t virtual_address, uint32_t physical_address, uint32_t flags) {
-
     uint32_t page_directory_index = virtual_address >> 22;
     uint32_t page_table_index = (virtual_address >> 12) & 0x3FF;
 

@@ -14,5 +14,6 @@ static inline void set_frame(uint32_t frame);
 static inline int test_frame(uint32_t frame);
 
 void mark_frames_used(uint32_t start, uint32_t end);
+void free_frame(uint32_t frame);
 
 #endif

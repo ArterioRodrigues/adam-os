@@ -22,7 +22,7 @@ void init_ramfs();
 void ramfs_ls(char *path);
 ramfs_node_t *ramfs_find(char *path);
 
-bool ramfs_write(char *path, char *content);
+bool ramfs_write(char *path, char *content, uint32_t len);
 void ramfs_cat(char *path);
 
 void ramfs_make(ramfs_type_t type, char *path, char *name);

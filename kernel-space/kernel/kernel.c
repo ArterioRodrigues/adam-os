@@ -1,8 +1,6 @@
 #include "../pch.h"
 #include "config.h"
-
-extern uint8_t _binary_main_bin_start[];
-extern uint8_t _binary_idle_bin_start[];
+#include "frame.h"
 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;

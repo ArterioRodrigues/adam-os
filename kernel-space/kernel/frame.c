@@ -12,7 +12,6 @@ static inline int test_frame(uint32_t frame) {
 void init_frames() {
     for (uint32_t i = 0; i < NUM_FRAMES; i++)
         clear_frame(i);
-
 }
 
 uint32_t allocate_frame() {
@@ -37,9 +36,11 @@ void mark_frames_used(uint32_t start, uint32_t end) {
 void dump_frame() {
     char *result;
 
-    for (int i = 0; i < NUM_FRAMES; i++) {
+    for (int i = 0; i < VGA_SIZE - 2; i++) {
         print(itos(result, test_frame(i)));
     }
 
     print("\n");
 }
+
+void free_frame(uint32_t frame) { clear_frame(frame); }
