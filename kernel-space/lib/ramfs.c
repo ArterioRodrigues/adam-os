@@ -23,6 +23,28 @@ ramfs_node_t *ramfs_create(ramfs_type_t type, char *name) {
   return file;
 }
 
+void ramfs_ls(char *path) {
+  ramfs_node_t *current = ramfs_find(path);
+  ramfs_node_t *child = current->children;
+
+  print("\n");
+  while (child != NULL) {
+    if (child->type == RAMFS_FILE) {
+      print("\t");
+      print_color(itos("", child->size), BRIGHT_GREEN );
+      print("\t");
+      print_color(child->name, BRIGHT_GREEN);
+    } else {
+      print("\t");
+      print_color(child->name, BRIGHT_BLUE);
+      print_color("/", BRIGHT_BLUE);
+    }
+
+    print("\n");
+    child = child->next;
+  }
+}
+
 void ramfs_make(ramfs_type_t type, char *path, char *name) {
   ramfs_node_t *current = ramfs_find(path);
   if (current->type != RAMFS_DIR) {
@@ -86,21 +108,21 @@ ramfs_node_t *ramfs_find(char *path) {
   return current;
 }
 
-bool ramfs_write(char *path, char *content) {
+bool ramfs_write(char *path, char *content, uint32_t len) {
   ramfs_node_t *file = ramfs_find(path);
 
   if (!file || file->type != RAMFS_FILE) {
     return false;
   }
 
-  file->size = strlen(content);
+  file->size = len; 
   file->data = kmalloc(file->size + 1);
 
   if (!file->data) {
     return false;
   }
 
-  strcpy((char *)file->data, content);
+  memcpy(file->data, content, len);
   return true;
 }
 

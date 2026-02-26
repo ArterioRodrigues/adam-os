@@ -54,6 +54,26 @@ void handle_syscall_write(registers_t *regs) {
     regs->eax = len;
 }
 
+void handle_syscall_exec(registers_t *regs) {
+    char *buf = (char *)regs->ecx;
+
+    uint32_t count = _binary_shell_bin_end - _binary_shell_bin_start;
+    ramfs_make_file("/", "shell");
+    ramfs_write("/shell", (char *)_binary_shell_bin_start, count);
+    ramfs_ls("/");
+
+    ramfs_node_t *file = ramfs_find(buf);
+
+    if (file == NULL) {
+        return;
+   }
+
+    page_directory_t *current_page_directory = current_process->page_directory;
+
+    clear_page_directory(current_page_directory);
+    update_page_directory(current_page_directory, file->data, regs);
+}
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -69,6 +89,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_READ:
         handle_syscall_read(regs);
+        break;
+    case SYSCALL_EXEC:
+        handle_syscall_exec(regs);
         break;
     default:
         print("Unknown syscall\n");

@@ -34,10 +34,21 @@ $LD -m elf_i386 -Ttext=0x40000000 \
     -o "$SCRIPT_DIR/build/idle.elf"
 $OBJCOPY -O binary "$SCRIPT_DIR/build/idle.elf" "$SCRIPT_DIR/build/idle.bin"
 
+# build shell binary
+$CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+    -c "$SCRIPT_DIR/programs/shell.c" -o "$SCRIPT_DIR/build/shell.o"
+$LD -m elf_i386 -Ttext=0x40000000 \
+    "$SCRIPT_DIR/build/syscalls.o" \
+    "$SCRIPT_DIR/build/lib.o" \
+    "$SCRIPT_DIR/build/shell.o" \
+    -o "$SCRIPT_DIR/build/shell.elf"
+$OBJCOPY -O binary "$SCRIPT_DIR/build/shell.elf" "$SCRIPT_DIR/build/shell.bin"
+
 # embed both as kernel objects
 cd "$SCRIPT_DIR/build"
 $OBJCOPY -I binary -O elf32-i386 -B i386 main.bin main_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 idle.bin idle_bin.o
+$OBJCOPY -I binary -O elf32-i386 -B i386 shell.bin shell_bin.o
 cd "$SCRIPT_DIR"
 
 echo "User space build complete!"
