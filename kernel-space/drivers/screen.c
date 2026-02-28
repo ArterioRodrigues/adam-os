@@ -2,6 +2,7 @@
 
 volatile unsigned short *vga_buffer = (unsigned short *)VGA_ADDRESS;
 int vga_index = 0;
+int vga_cursor_floor = 0;
 
 void update_cursor(int x, int y) {
     uint16_t pos = y * VGA_WIDTH + x;
@@ -13,14 +14,21 @@ void update_cursor(int x, int y) {
 }
 
 void print_char_color(char c, unsigned char color) {
-    if (vga_index == VGA_SIZE - 1)
-        vga_index = 0;
+    if (vga_index >= VGA_SIZE) {
+        for (int i = 0; i < VGA_SIZE; i++) {
+            if (i > VGA_SIZE - VGA_WIDTH)
+                vga_buffer[i] = (WHITE << VGA_COLOR_SHIFT) | ' ';
+            else
+                vga_buffer[i] = vga_buffer[i + VGA_WIDTH];
+        }
+        vga_index = VGA_SIZE - VGA_WIDTH;
+    }
 
     if (c == '\n')
         vga_index = (vga_index / VGA_WIDTH + 1) * VGA_WIDTH;
 
     else if (c == '\b') {
-        if (vga_index > 0) {
+        if (vga_index > 0 && vga_index > vga_cursor_floor) {
             vga_index--;
             vga_buffer[vga_index] = (color << VGA_COLOR_SHIFT) | ' ';
         }
@@ -40,9 +48,6 @@ void print_char_color(char c, unsigned char color) {
         vga_index++;
     }
 
-    if (vga_index >= VGA_SIZE) {
-        vga_index = VGA_WIDTH * (VGA_HEIGHT - 1);
-    }
 }
 
 void print_color(const char *str, unsigned char color) {

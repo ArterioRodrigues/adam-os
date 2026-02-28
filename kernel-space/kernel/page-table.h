@@ -24,6 +24,5 @@ void copy_page_directory(page_directory_t *dest, page_directory_t *source);
 
 void clear_page_directory(page_directory_t *page_directory);
 void map_page(page_directory_t* page_directory, uint32_t virtual_address, uint32_t physical_address, uint32_t flag);
-
-void update_page_directory(page_directory_t *page_directory, void *fn, registers_t *regs);
+void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t size, registers_t *regs);
 #endif

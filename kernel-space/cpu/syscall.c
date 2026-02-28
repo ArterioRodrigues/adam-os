@@ -48,30 +48,33 @@ void handle_syscall_read(registers_t *regs) {
 void handle_syscall_write(registers_t *regs) {
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
+
+    if (strcmp(buf, "\033[2J\033[H")) {
+        clear_screen();
+        return;
+    }
+
     for (uint32_t i = 0; i < len; i++) {
         print_char(buf[i]);
     }
+    vga_cursor_floor = vga_index;
     regs->eax = len;
 }
 
 void handle_syscall_exec(registers_t *regs) {
     char *buf = (char *)regs->ecx;
 
-    uint32_t count = _binary_shell_bin_end - _binary_shell_bin_start;
-    ramfs_make_file("/", "shell");
-    ramfs_write("/shell", (char *)_binary_shell_bin_start, count);
-    ramfs_ls("/");
 
     ramfs_node_t *file = ramfs_find(buf);
 
     if (file == NULL) {
         return;
-   }
+    }
 
     page_directory_t *current_page_directory = current_process->page_directory;
 
     clear_page_directory(current_page_directory);
-    update_page_directory(current_page_directory, file->data, regs);
+    update_page_directory(current_page_directory, file->data, file->size, regs);
 }
 
 void syscall_handler_main(registers_t *regs) {

@@ -3,4 +3,7 @@
 
 int pow(int n, int power);
 int max(int x, int y);
+int min(int x, int y);
+int ceil(int x, int y);
+
 #endif

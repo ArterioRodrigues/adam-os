@@ -5,6 +5,8 @@ global sys_exit
 global sys_fork
 global sys_read
 global sys_write
+global sys_open
+global sys_close
 
 global sys_exec
 
@@ -13,8 +15,6 @@ _start:
     call main       
     call sys_exit
 
-; sys_exit()
-; does not return
 sys_exit:
     mov eax, 1
     int 0x80
@@ -32,18 +32,30 @@ sys_read:
     int 0x80
     ret
 
-; sys_write(char *buf, uint32_t len)
-; returns number of bytes written in eax
 sys_write:
     mov eax, 4          
-    mov ecx, [esp + 4]  
-    mov edx, [esp + 8]  
+    mov ebx, [esp + 4]  
+    mov ecx, [esp + 8]  
+    mov edx, [esp + 12]  
     int 0x80
     ret
+
+sys_open:
+  mov eax, 5
+  mov ebx, [esp + 4]
+  mov ecx, [esp + 8]
+  mov edx, [esp + 12]
+  int 0x80
+  ret
+
+sys_close:
+  mov eax, 6 
+  mov ebx, [esp + 4]
+  int 0x80
+  ret
 
 sys_exec:
     mov eax, 11          
     mov ecx, [esp + 4]  
-    mov edx, [esp + 8]  
     int 0x80
     ret

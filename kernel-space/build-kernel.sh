@@ -28,6 +28,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/ata-disk.c -o ata-disk.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
@@ -48,7 +49,7 @@ echo "Linking kernel..."
 $LD -T linker.ld -o kernel.bin \
     kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
-    mem.o keyboard.o timer.o idt.o interrupts.o gdt.o gdtc.o \
+    mem.o keyboard.o timer.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o ramfs.o math.o string.o stdin.o \
     page-table.o \
     $USER_BINS \

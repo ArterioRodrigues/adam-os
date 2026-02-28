@@ -5,6 +5,7 @@
 #include "cpu/exceptions.h"
 #include "cpu/syscall.h"
 #include "cpu/gdt.h"
+#include "drivers/ata-disk.h"
 #include "drivers/keyboard.h"
 #include "drivers/screen.h"
 #include "drivers/timer.h"

@@ -1,4 +1,5 @@
-#include "../pch.h"
+#ifndef MATH_H
+#define MATH_H
 
 int pow(int n, int power) {
     int result = 1;
@@ -20,8 +21,10 @@ int max(int x, int y) {
 }
 
 int min(int x, int y) {
-    if(x < y) 
-      return x;
+    if (x < y)
+        return x;
     return y;
 }
-int ceil(int x, int y) { return (x + y - 1) / y; }
+int ceil(int x, int y) { return (x / y) + 1; }
+
+#endif
