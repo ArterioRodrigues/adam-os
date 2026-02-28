@@ -9,4 +9,4 @@ echo "=== Building kernel ==="
 bash "$ROOT_DIR/kernel-space/build-kernel.sh"
 
 echo "=== Launching QEMU ==="
-qemu-system-x86_64 -drive format=raw,file="$ROOT_DIR/kernel-space/build/os-image.bin"
+qemu-system-x86_64 -drive format=raw,file="$ROOT_DIR/kernel-space/build/os-image.bin" 

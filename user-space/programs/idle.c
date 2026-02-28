@@ -1,6 +1,7 @@
 #include "../lib/lib.h"
 
-void main() {
+int main() {
+
     while (1)
         ;
 }

@@ -1,10 +1,11 @@
 #include "../lib/lib.h"
+#include "../lib/string.h"
 
 void main() {
-    sys_write("launching shell\n", 16);
+    print("Adam OS\n");
 
     sys_exec("/shell");
 
-    sys_write("\nexec failed", 12);
+    print("\nexec failed");
     sys_exit();
 }

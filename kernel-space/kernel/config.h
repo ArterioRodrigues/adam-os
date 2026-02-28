@@ -16,10 +16,10 @@
 #define KERNEL_END 0x100000          // Physical end of kernel (1MB)
 #define KERNEL_STACK_ADDRESS 0x90000 // Top of kernel stack (grows downward)
 
-#define USER_FUNC_VADDR 0x40000000  // Virtual address user function is mapped to
-#define USER_STACK_VADDR 0x50000000 // Virtual address user stack is mapped to
-#define USER_LIB_VADDR 0x60000000   // Virtual address user is mapped to
-#define USER_PAGE_DIRECTORY_VADDR 0x70000000   // Virtual address user is mapped to
+#define USER_FUNC_VADDR 0x40000000           // Virtual address user function is mapped to
+#define USER_STACK_VADDR 0x50000000          // Virtual address user stack is mapped to
+#define USER_LIB_VADDR 0x60000000            // Virtual address user is mapped to
+#define USER_PAGE_DIRECTORY_VADDR 0x70000000 // Virtual address user is mapped to
 // ============================================================
 // GDT SELECTORS
 // ============================================================
@@ -221,4 +221,30 @@
 // BUFFERS
 // ============================================================
 #define STANDARD_IN_BUFFER_SIZE 256
+
+// ATA PIO Ports
+#define ATA_DATA_PORT 0x1F0
+#define ATA_SECTOR_COUNT 0x1F2
+#define ATA_LBA_LOW 0x1F3
+#define ATA_LBA_MID 0x1F4
+#define ATA_LBA_HIGH 0x1F5
+#define ATA_DRIVE_PORT 0x1F6
+#define ATA_STATUS_PORT 0x1F7
+#define ATA_COMMAND_PORT 0x1F7
+
+// ATA Commands
+#define ATA_CMD_READ 0x20
+#define ATA_CMD_WRITE 0x30
+#define ATA_CMD_FLUSH 0xE7
+
+// ATA Status Bits
+#define ATA_STATUS_BSY 0x80 // bit 7
+#define ATA_STATUS_DRQ 0x08 // bit 3
+
+// ATA Drive Select
+#define ATA_DRIVE_MASTER 0xE0 // LBA mode, master drive
+
+// Filesystem location on disk
+#define ATA_DISK_SIZE_SECTORS 20480  
+#define ATA_FS_START_LBA (ATA_DISK_SIZE_SECTORS - 1)
 #endif

@@ -92,18 +92,27 @@ void clear_page_directory(page_directory_t *page_directory) {
     }
 }
 
-void update_page_directory(page_directory_t *page_directory, void *fn, registers_t *regs) {
-    uint32_t user_func_frame = allocate_frame();
-    uint32_t user_stack_frame = allocate_frame();
+void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t size, registers_t *regs) {
+    uint32_t frame = allocate_frame();
+    uint32_t user_func_frame = frame;
 
     map_page(page_directory, user_func_frame, user_func_frame, PAGE_FLAG_USER);
-    map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);
-
-    memcpy((void *)user_func_frame, fn, PAGE_SIZE);
     map_page(page_directory, USER_FUNC_VADDR, user_func_frame, PAGE_FLAG_USER);
+
+    for (int i = 1; i < ceil(size, PAGE_SIZE); i++) {
+        frame = allocate_frame();
+        map_page(page_directory, frame, frame, PAGE_FLAG_USER);
+        map_page(page_directory, USER_FUNC_VADDR + PAGE_SIZE * i, frame, PAGE_FLAG_USER);
+    }
+
+    memcpy((void *)user_func_frame, fn, size);
+
+    uint32_t user_stack_frame = allocate_frame();
+    map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);
     map_page(page_directory, USER_STACK_VADDR, user_stack_frame, PAGE_FLAG_USER);
 
     regs->eip = USER_FUNC_VADDR;
+    regs->useresp = USER_STACK_VADDR + 0x1000 - 4;
     regs->esp = USER_STACK_VADDR + 0x1000 - 4;
 
     uint32_t eflags;
