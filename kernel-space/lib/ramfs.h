@@ -5,15 +5,15 @@
 typedef enum { RAMFS_FILE, RAMFS_DIR } ramfs_type_t;
 
 typedef struct ramfs_node {
-  char name[64];
-  ramfs_type_t type;
+    char name[64];
+    ramfs_type_t type;
 
-  struct ramfs_node *parent;
-  struct ramfs_node *children;
-  struct ramfs_node *next;
+    struct ramfs_node *parent;
+    struct ramfs_node *children;
+    struct ramfs_node *next;
 
-  uint8_t *data;
-  uint32_t size;
+    uint8_t *data;
+    uint32_t size;
 } ramfs_node_t;
 
 extern ramfs_node_t *ramfs_root;
@@ -28,6 +28,6 @@ void ramfs_cat(char *path);
 void ramfs_make(ramfs_type_t type, char *path, char *name);
 
 #define ramfs_make_folder(path, name) ramfs_make(RAMFS_DIR, path, name);
-#define ramfs_make_file(path, name) ramfs_make(RAMFS_FILE , path, name);
+#define ramfs_make_file(path, name) ramfs_make(RAMFS_FILE, path, name);
 
 #endif

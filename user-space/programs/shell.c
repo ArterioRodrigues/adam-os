@@ -53,6 +53,7 @@ void main() {
         int size = sys_read(0, input_buf, 256);
 
         input_buf[size] = '\0';
-        dispatch(input_buf);
+        if (size > 0)
+            dispatch(input_buf);
     }
 }

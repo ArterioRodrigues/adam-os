@@ -24,9 +24,9 @@ bool ata_read_sector(uint32_t lba, uint8_t *buf) {
         status = inb(ATA_STATUS_PORT);
 
     uint16_t *ptr = (uint16_t *)buf;
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 256; i++) {
         ptr[i] = inw(ATA_DATA_PORT);
-
+    }
     return true;
 }
 
@@ -40,8 +40,9 @@ bool ata_write_sector(uint32_t lba, uint8_t *buf) {
         status = inb(ATA_STATUS_PORT);
 
     uint16_t *ptr = (uint16_t *)buf;
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < 256; i++) {
         outw(ATA_DATA_PORT, ptr[i]);
+    }
 
     outb(ATA_COMMAND_PORT, ATA_CMD_FLUSH);
     ata_await();

@@ -64,7 +64,6 @@ void handle_syscall_write(registers_t *regs) {
 void handle_syscall_exec(registers_t *regs) {
     char *buf = (char *)regs->ecx;
 
-
     ramfs_node_t *file = ramfs_find(buf);
 
     if (file == NULL) {
@@ -72,7 +71,6 @@ void handle_syscall_exec(registers_t *regs) {
     }
 
     page_directory_t *current_page_directory = current_process->page_directory;
-
     clear_page_directory(current_page_directory);
     update_page_directory(current_page_directory, file->data, file->size, regs);
 }

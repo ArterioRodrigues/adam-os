@@ -40,7 +40,6 @@ uint32_t stdin_read(char *buf, int len) {
 }
 
 void stdin_wake_process(registers_t *regs) {
-    dump_stdin_buffer();
     pcb_t *process = stdin.wait_queue.process;
     process->status = RUNNING;
 

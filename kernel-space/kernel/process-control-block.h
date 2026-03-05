@@ -21,7 +21,7 @@ typedef struct pcb {
     int exit_code;
     file_descriptor_t fds[MAX_FDS];
 } pcb_t;
-static uint32_t pid_static = 1;
+static uint32_t pid_static;
 
 extern void switch_to_process(pcb_t *pcb);
 pcb_t *create_process_control_block(page_directory_t *page_directory, registers_t registers, uint32_t parent_pid,

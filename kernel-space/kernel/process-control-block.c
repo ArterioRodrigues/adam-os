@@ -1,5 +1,6 @@
 #include "../pch.h"
 
+static uint32_t pid_static = 1;
 pcb_t *create_process_control_block(page_directory_t *page_directory, registers_t registers, uint32_t parent_pid,
                                     pcb_t *next) {
     pcb_t *pcb = kmalloc(sizeof(pcb_t));
