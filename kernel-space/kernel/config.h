@@ -247,4 +247,6 @@
 // Filesystem location on disk
 #define ATA_DISK_SIZE_SECTORS 20480  
 #define ATA_FS_START_LBA 2048 
+#define FAT16_START_LBA 2048
+#define SECTOR_SIZE 512 
 #endif
