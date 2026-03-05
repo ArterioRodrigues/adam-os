@@ -1,12 +1,5 @@
 #include "../pch.h"
 
-void init_shell() {
-    uint32_t count = _binary_shell_bin_end - _binary_shell_bin_start;
-    ramfs_make_file("/", "shell");
-    ramfs_write("/shell", (char *)_binary_shell_bin_start, count);
-    ramfs_ls("/");
-}
- 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;
     memset(&regs, 0, sizeof(registers_t));
@@ -58,10 +51,8 @@ void kernel_main() {
     load_idtp();
 
     init_heap();
-    init_ramfs();
+    init_fat16();
     init_frames();
-
-    init_shell();
 
     for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
