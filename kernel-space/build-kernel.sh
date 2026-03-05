@@ -38,7 +38,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/ramfs.c -o ramfs.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/fat16.c -o fat16.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
 
 # collect all embedded user program objects
@@ -50,15 +50,21 @@ $LD -T linker.ld -o kernel.bin \
     kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
     mem.o keyboard.o timer.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
-    exceptions.o exceptionsc.o ramfs.o math.o string.o stdin.o \
+    exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o \
     page-table.o \
     $USER_BINS \
     --oformat binary
+
+# build fat storage
+truncate -s 9M fat16.bin
+mkfs.fat -F 16 fat16.bin
+mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10
 dd if=kernel-boot.bin of=os-image.bin conv=notrunc
 dd if=kernel.bin of=os-image.bin seek=1 conv=notrunc
+dd if=fat16.bin of=os-image.bin seek=2048 conv=notrunc
 
 echo "Moving artifacts to build..."
 mkdir -p build

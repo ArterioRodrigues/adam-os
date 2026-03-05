@@ -19,7 +19,7 @@
 #include "kernel/scheduler.h"
 #include "kernel/stdin.h"
 #include "lib/math.h"
-#include "lib/ramfs.h"
+#include "lib/fat16.h"
 #include "lib/mem.h"
 #include "lib/string.h"
 

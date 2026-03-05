@@ -8,7 +8,7 @@ extern void sys_write(int fd, char *buf, int len);
 
 extern int sys_fork();
 extern int sys_close(int fd);
-extern int sys_open(int fd, char *buf, int len);
+extern int sys_open(char *filename);
 extern int sys_read(int fd, char *buf, int len);
 
 static void wait() {

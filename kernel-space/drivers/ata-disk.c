@@ -27,6 +27,7 @@ bool ata_read_sector(uint32_t lba, uint8_t *buf) {
     for (int i = 0; i < 256; i++) {
         ptr[i] = inw(ATA_DATA_PORT);
     }
+
     return true;
 }
 

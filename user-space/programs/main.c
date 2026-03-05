@@ -4,7 +4,7 @@
 void main() {
     print("Adam OS\n");
 
-    sys_exec("/shell");
+    sys_exec("shell");
 
     print("\nexec failed");
     sys_exit();

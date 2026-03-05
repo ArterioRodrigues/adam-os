@@ -12,6 +12,11 @@ global sys_exec
 
 extern main
 _start:
+    jmp start_real
+    db 0xAD, 0xDE, 0x4F, 0x53, 0x41, 0x44, 0x41, 0x4D
+start_real:
+    call main       
+    call sys_exit
     call main       
     call sys_exit
 
@@ -43,8 +48,6 @@ sys_write:
 sys_open:
   mov eax, 5
   mov ebx, [esp + 4]
-  mov ecx, [esp + 8]
-  mov edx, [esp + 12]
   int 0x80
   ret
 
