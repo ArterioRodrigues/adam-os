@@ -1,3 +1,4 @@
+#include "kmalloc.h"
 #include "../pch.h"
 
 static heap_block_header_t *heap_head_ptr;
@@ -13,6 +14,7 @@ void split_block(heap_block_header_t *heap_ptr, uint32_t size) {
     uint32_t remaining_size = heap_ptr->size - size - sizeof(heap_block_header_t);
 
     if (remaining_size < 16) {
+      print("called");
         heap_ptr->size = size;
         heap_ptr->is_free = false;
         return;
@@ -34,7 +36,7 @@ void *kmalloc(uint32_t size) {
 
     heap_block_header_t *heap_ptr = heap_head_ptr;
 
-    while (heap_ptr && !(heap_ptr->is_free && heap_ptr->size >= size))
+    while (heap_ptr && !(heap_ptr->is_free && heap_ptr->size > size))
         heap_ptr = heap_ptr->next;
 
     if (!heap_ptr)

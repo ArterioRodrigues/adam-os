@@ -12,11 +12,6 @@ global sys_exec
 
 extern main
 _start:
-    jmp start_real
-    db 0xAD, 0xDE, 0x4F, 0x53, 0x41, 0x44, 0x41, 0x4D
-start_real:
-    call main       
-    call sys_exit
     call main       
     call sys_exit
 

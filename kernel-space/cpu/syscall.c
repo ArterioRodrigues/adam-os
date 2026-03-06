@@ -49,8 +49,15 @@ void handle_syscall_read(registers_t *regs) {
     case FD_FILE:
         if (!process_fd->is_open)
             print("ERROR: FILE NOT OPEN");
+
+        if (process_fd->data->size - process_fd->offset <= 0) {
+            regs->eax = 0;
+            break;
+        }
+
         fat16_fd_t *fat_fd = (fat16_fd_t *)process_fd->data;
         uint32_t size = min(len, fat_fd->size - process_fd->offset);
+
         memcpy(buf, fat_fd->data + process_fd->offset, size);
         process_fd->offset += size;
         regs->eax = size;
@@ -78,13 +85,21 @@ void handle_syscall_open(registers_t *regs) {
     char *file_name = (char *)regs->ebx;
     fat16_entry_t *entry = fat16_find_file(file_name);
     if (!entry) {
-        print("ERROR: FILE NOT FOUND");
+        regs->eax = -1;
         return;
     }
 
-    fat16_fd_t *fat_fd = kmalloc(sizeof(fat16_fd_t));
-    fat_fd->data = kmalloc(entry->file_size + 512);
-    fat_fd->size = fat16_read_file(entry, fat_fd->data);
+    fat16_fd_t *fat_fd;
+    fat_fd = kmalloc(sizeof(fat16_fd_t));
+    fat_fd->attributes = entry->attributes;
+
+    if (entry->attributes & 0x10) {
+        fat_fd->data = kmalloc(bpb->sectors_per_cluster * SECTOR_SIZE);
+        fat_fd->size = fat16_read_folder(entry, fat_fd->data);
+    } else {
+        fat_fd->data = kmalloc(entry->file_size + SECTOR_SIZE);
+        fat_fd->size = fat16_read_file(entry, fat_fd->data);
+    }
 
     for (int i = 2; i < MAX_FDS; i++) {
         if (!current_process->fds[i].is_open) {
@@ -124,18 +139,21 @@ void handle_syscall_close(registers_t *regs) {
 
 void handle_syscall_exec(registers_t *regs) {
     char *file_name = (char *)regs->ecx;
-
     fat16_entry_t *entry = fat16_find_file(file_name);
 
     if (!entry)
         return;
 
-    uint8_t *data = kmalloc(entry->file_size + 512);
+    uint32_t cluster_size = bpb->sectors_per_cluster * 512;
+    uint32_t num_clusters = ceil(entry->file_size, cluster_size);
+    uint8_t *data = kmalloc(num_clusters * cluster_size + cluster_size);
     fat16_read_file(entry, (uint8_t *)data);
 
     page_directory_t *current_page_directory = current_process->page_directory;
     clear_page_directory(current_page_directory);
     update_page_directory(current_page_directory, data, entry->file_size, regs);
+
+    kfree(data);
 }
 
 void syscall_handler_main(registers_t *regs) {
