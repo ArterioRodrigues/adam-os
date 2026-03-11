@@ -40,6 +40,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/fat16.c -o fat16.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/status-bar.c -o status-bar.o
 
 # collect all embedded user program objects
 USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')
@@ -51,7 +52,7 @@ $LD -T linker.ld -o kernel.bin \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
     mem.o keyboard.o timer.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o \
-    page-table.o \
+    page-table.o status-bar.o\
     $USER_BINS \
     --oformat binary
 

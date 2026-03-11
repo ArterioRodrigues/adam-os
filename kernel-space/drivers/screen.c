@@ -32,6 +32,19 @@ void update_cursor(int x, int y) {
     outb(VGA_DATA_REGISTER, (uint8_t)((pos >> 8) & BYTE_MASK));
 }
 
+void print_at(const char *str, int x, int y, unsigned char color) {
+    int saved = vga_index;
+
+    vga_index = y * VGA_WIDTH + x;
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        vga_buffer[vga_index] = (color << VGA_COLOR_SHIFT) | str[i];
+        vga_index++;
+    }
+
+    vga_index = saved;
+}
+
 void print_char_color(char c, unsigned char color) {
     if (vga_index >= VGA_SIZE) {
         for (int i = 0; i < VGA_SIZE; i++) {

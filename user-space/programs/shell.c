@@ -20,8 +20,10 @@ static void handle_help() {
     print("\tclear  - Clear terminal screen\n");
 }
 
-static void handle_clear() { print("\033[2J\033[H"); }
-
+static void handle_clear() {
+    print("\033[2J\033[H");
+    print("AdamOS\n");
+}
 static void handle_exec(char *arg) {
     if (arg[0] == '\0') {
         print("Usage: exec <path>\n");
@@ -152,9 +154,10 @@ void main() {
     shell_path[0] = '/';
     shell_path[1] = '\0';
 
+    print("AdamOS\n");
     while (1) {
         print(shell_path);
-        print("\033[40m>\033[0m ");
+        print("> ");
 
         int size = sys_read(0, input_buf, 256);
 

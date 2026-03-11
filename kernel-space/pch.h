@@ -22,5 +22,6 @@
 #include "lib/fat16.h"
 #include "lib/mem.h"
 #include "lib/string.h"
+#include "lib/status-bar.h"
 
 #endif
