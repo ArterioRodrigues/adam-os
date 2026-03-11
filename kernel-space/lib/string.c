@@ -116,15 +116,23 @@ char *itohs(char *result, int n) {
 
 int stoi(char *str) {
     int result = 0;
-    int str_length = strlen(str);
+    int i = 0;
 
-    for (int i = 0; str[i] != '\0'; i++) {
-        if (str[i] >= '0' && str[i] <= '9')
-            result += (str[i] - '0') * pow(10, str_length - i - 1);
+    int sign = 1;
+    if (str[0] == '-') {
+        sign = -1;
+        i = 1;
     }
 
-    return result;
+    for (; str[i] != '\0'; i++) {
+        if (str[i] < '0' || str[i] > '9')
+            break;
+        result = result * 10 + (str[i] - '0');
+    }
+
+    return result * sign;
 }
+
 static char *string_token = NULL;
 
 char *strtok(char *destination, char *str, char deliminator) {

@@ -154,7 +154,7 @@ void main() {
 
     while (1) {
         print(shell_path);
-        print("> ");
+        print("\033[40m>\033[0m ");
 
         int size = sys_read(0, input_buf, 256);
 

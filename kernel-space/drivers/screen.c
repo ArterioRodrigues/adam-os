@@ -1,5 +1,24 @@
 #include "../pch.h"
 
+uint8_t ansi_to_vga[20]= {
+    BLACK,                // #30
+    RED,                  // #31
+    GREEN,                // #32
+    BROWN,                // #33
+    BLUE,                 // #34
+    MAGENTA,              // #35
+    CYAN,                 // #36
+    LIGHT_GRAY,           // #37
+    DARK_GRAY,            // #38
+    BRIGHT_RED,           // #39
+    BRIGHT_GREEN,         // #40
+    YELLOW,               // #41
+    BRIGHT_BLUE,          // #42
+    BRIGHT_MAGENTA,       // #43
+    BRIGHT_CYAN,          // #44
+    WHITE                 // #45
+};
+
 volatile unsigned short *vga_buffer = (unsigned short *)VGA_ADDRESS;
 int vga_index = 0;
 int vga_cursor_floor = 0;

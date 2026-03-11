@@ -20,7 +20,7 @@ void stdin_write(char c) {
     stdin.buffer[stdin.write_index] = c;
     stdin.write_index = (stdin.write_index + 1) % STANDARD_IN_BUFFER_SIZE;
     stdin.count = stdin.count + 1;
-    print_char_color(c, BRIGHT_GREEN);
+    print_char_color(c, WHITE);
 }
 uint32_t stdin_read(char *buf, int len) {
     uint32_t index = 0;

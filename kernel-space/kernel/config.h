@@ -110,12 +110,22 @@
 #define VGA_CURSOR_LOW 0x0F  // Low byte of cursor position register index
 
 // VGA colors (foreground)
-#define WHITE 0x0F
-#define GREEN 0x02
-#define BLUE 0x01
-#define BRIGHT_GREEN 0x0A
-#define BRIGHT_BLUE 0x0B
-
+#define BLACK         0x00
+#define BLUE          0x01
+#define GREEN         0x02
+#define CYAN          0x03
+#define RED           0x04
+#define MAGENTA       0x05
+#define BROWN         0x06  // ANSI "Yellow" maps here in standard VGA
+#define LIGHT_GRAY    0x07
+#define DARK_GRAY     0x08
+#define BRIGHT_BLUE   0x09
+#define BRIGHT_GREEN  0x0A
+#define BRIGHT_CYAN   0x0B
+#define BRIGHT_RED    0x0C
+#define BRIGHT_MAGENTA 0x0D
+#define YELLOW        0x0E  // Bright yellow (true yellow in VGA)
+#define WHITE         0x0F
 // ============================================================
 // PIT — PROGRAMMABLE INTERVAL TIMER (Intel 8253/8254)
 // ============================================================

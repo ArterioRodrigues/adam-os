@@ -68,6 +68,7 @@ void handle_syscall_read(registers_t *regs) {
 void handle_syscall_write(registers_t *regs) {
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
+    uint8_t color = WHITE;
 
     if (strcmp(buf, "\033[2J\033[H")) {
         clear_screen();
@@ -75,7 +76,18 @@ void handle_syscall_write(registers_t *regs) {
     }
 
     for (uint32_t i = 0; i < len; i++) {
-        print_char(buf[i]);
+        if (buf[i] == '\033' && buf[i + 1] == '[') {
+            int code = stoi(&buf[i + 2]);
+
+            if (code >= 30 && code <= 50)
+                color = ansi_to_vga[code - 30];
+            else if (code == 0) {
+                color = WHITE;
+            }
+            i += strlen(itos("", code)) + 3;
+        }
+
+        print_char_color(buf[i], color);
     }
     vga_cursor_floor = vga_index;
     regs->eax = len;
