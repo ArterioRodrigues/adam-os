@@ -10,6 +10,7 @@ extern int sys_fork();
 extern int sys_close(int fd);
 extern int sys_open(char *filename);
 extern int sys_read(int fd, char *buf, int len);
+extern int sys_ps(ps_entry_t *buf, int max);
 
 static void wait() {
     int i = 0;

@@ -92,6 +92,43 @@ void handle_cd(char *cmd) {
     sys_close(fd);
 }
 
+void handle_ps() {
+    ps_entry_t buf[10];
+    char num[16];
+    int count = sys_ps(buf, 10);
+
+    print("\nPID  STATUS   PPID");
+    print("\n---  -------  ----\n");
+
+    for (int i = 0; i < count; i++) {
+        print(itos(num, buf[i].pid));
+        print("    ");
+
+        switch (buf[i].status) {
+        case 0:
+            print("RUNNING");
+            break;
+        case 1:
+            print("READY  ");
+            break;
+        case 2:
+            print("WAITING");
+            break;
+        case 3:
+            print("ZOMBIE ");
+            break;
+        default:
+            print("UNKNOWN");
+            break;
+        }
+
+        print("     ");
+        print(itos(num, buf[i].parent_pid));
+        print("\n");
+    }
+    print("\n");
+}
+
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
@@ -105,6 +142,8 @@ static void dispatch(char *line) {
         handle_ls();
     else if (strncmp(line, "cd ", 2))
         handle_cd(line + 3);
+    else if (strncmp(line, "ps ", 2))
+        handle_ps();
     else
         error_handler(line);
 }

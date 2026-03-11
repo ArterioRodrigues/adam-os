@@ -157,6 +157,23 @@ void handle_syscall_exec(registers_t *regs) {
     kfree(data);
 }
 
+void handle_syscall_ps(registers_t *regs) {
+    ps_entry_t *buf = (ps_entry_t *)regs->ebx;
+    int max = (int)regs->ecx;
+    int count = 0;
+
+    pcb_t *p = scheduler_head_ptr;
+    while (p && count < max) {
+        buf[count].pid = p->pid;
+        buf[count].parent_pid = p->parent_pid;
+        buf[count].status = p->status;
+        count++;
+        p = p->next;
+    }
+
+    regs->eax = count;
+}
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -181,6 +198,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_EXEC:
         handle_syscall_exec(regs);
+        break;
+    case SYSCALL_PS:
+        handle_syscall_ps(regs);
         break;
     default:
         print("Unknown syscall\n");

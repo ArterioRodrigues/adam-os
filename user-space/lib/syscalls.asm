@@ -7,6 +7,7 @@ global sys_read
 global sys_write
 global sys_open
 global sys_close
+global sys_ps
 
 global sys_exec
 
@@ -49,6 +50,13 @@ sys_open:
 sys_close:
   mov eax, 6 
   mov ebx, [esp + 4]
+  int 0x80
+  ret
+
+sys_ps:
+  mov eax, 7 
+  mov ebx, [esp + 4]
+  mov ecx, [esp + 8]
   int 0x80
   ret
 

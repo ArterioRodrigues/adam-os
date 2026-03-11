@@ -7,6 +7,7 @@
 #define SYSCALL_WRITE 4
 #define SYSCALL_OPEN 5
 #define SYSCALL_CLOSE 6 
+#define SYSCALL_PS 7 
 #define SYSCALL_EXEC 11
 #define RING3_CALL 0xEE
 

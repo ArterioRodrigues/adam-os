@@ -61,7 +61,7 @@ void kernel_main() {
 
     page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
     registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
+    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL );
 
     page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
     registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
