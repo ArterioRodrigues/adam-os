@@ -54,6 +54,9 @@ void kernel_main() {
     init_fat16();
     init_frames();
 
+    char *buf = "TEST WRTING TO A FILE";
+    fat16_write_file("/test.txt", buf);
+
     for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
     }

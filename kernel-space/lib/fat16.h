@@ -43,6 +43,8 @@ extern fat16_geometry_t *geometry;
 void dump_entry(fat16_entry_t *entry);
 void init_fat16();
 fat16_entry_t *fat16_find_file(char *input);
+fat16_entry_t *fat16_create_file(char *input);
 uint32_t fat16_read_folder(fat16_entry_t *folder_entry, uint8_t *buf); 
 uint32_t fat16_read_file(fat16_entry_t *entry, uint8_t *buf);
+void fat16_write_file(char *path, uint8_t *buf);
 #endif

@@ -193,6 +193,16 @@ uint32_t fat16_read_file(fat16_entry_t *entry, uint8_t *buf) {
     return size;
 }
 
+void fat16_write_file(char *path, uint8_t *buf) {
+    fat16_entry_t *entry = fat16_find_file(path);
+    if (entry == NULL) {
+        fat16_create_file(path);
+       entry = fat16_find_file(path);
+    }
+
+    while(1);
+}
+
 void init_fat16() {
     init_fat16_bpb();
     init_fat16_geometry();
