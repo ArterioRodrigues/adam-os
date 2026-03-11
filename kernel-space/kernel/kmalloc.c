@@ -13,8 +13,7 @@ void init_heap() {
 void split_block(heap_block_header_t *heap_ptr, uint32_t size) {
     uint32_t remaining_size = heap_ptr->size - size - sizeof(heap_block_header_t);
 
-    if (remaining_size < 16) {
-      print("called");
+    if (remaining_size < sizeof(heap_block_header_t) * 3) {
         heap_ptr->size = size;
         heap_ptr->is_free = false;
         return;

@@ -41,23 +41,53 @@ static void error_handler(char *cmd) {
     print("type 'help' for command list\n");
 }
 
-static void handle_ls(char *cmd) {
-    int fd = sys_open(cmd);
+static void handle_ls() {
+    int fd = sys_open(shell_path);
     if (fd == -1) {
-        print("not a folder");
+        print("not a folder\n");
         return;
     }
 
     char buf[512];
     int size = sys_read(fd, buf, 512);
 
-    if ((buf[0] != '.' || buf[32] != '.' ) && !strcmp(cmd, "/"))
-        return;
-
     for (int i = 0; i < size; i += 32) {
         sys_write(0, buf + i, 8);
         print("\n");
     }
+
+    sys_close(fd);
+}
+
+void handle_cd(char *cmd) {
+    if (strcmp(cmd, "..")) {
+        int size = strlen(shell_path);
+        for (int i = size - 2; i > -1; i--) {
+            if (shell_path[i] == '/') {
+                shell_path[i + 1] = '\0';
+                return;
+            }
+        }
+        return;
+    }
+
+    int fd = sys_open(cmd);
+    if (fd == -1) {
+        print("not a folder\n");
+        return;
+    }
+
+    char buf[512];
+    int size = sys_read(fd, buf, 512);
+
+    if (!(buf[0] == '.' && buf[32] == '.')) {
+        print("not a folder\n");
+        sys_close(fd);
+        return;
+    }
+
+    strcat(shell_path, cmd);
+    strcat(shell_path, "/");
 
     sys_close(fd);
 }
@@ -70,7 +100,11 @@ static void dispatch(char *line) {
     else if (strncmp(line, "exec ", 5))
         handle_exec(line + 5);
     else if (strncmp(line, "ls ", 3))
-        handle_ls(line + 3);
+        handle_ls();
+    else if (strncmp(line, "ls", 2))
+        handle_ls();
+    else if (strncmp(line, "cd ", 2))
+        handle_cd(line + 3);
     else
         error_handler(line);
 }

@@ -97,7 +97,8 @@ void handle_syscall_open(registers_t *regs) {
         fat_fd->data = kmalloc(bpb->sectors_per_cluster * SECTOR_SIZE);
         fat_fd->size = fat16_read_folder(entry, fat_fd->data);
     } else {
-        fat_fd->data = kmalloc(entry->file_size + SECTOR_SIZE);
+        uint32_t size = entry->file_size + bpb->sectors_per_cluster * SECTOR_SIZE;
+        fat_fd->data = kmalloc(size);
         fat_fd->size = fat16_read_file(entry, fat_fd->data);
     }
 
