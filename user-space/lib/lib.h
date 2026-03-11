@@ -11,6 +11,7 @@ extern int sys_close(int fd);
 extern int sys_open(char *filename);
 extern int sys_read(int fd, char *buf, int len);
 extern int sys_ps(ps_entry_t *buf, int max);
+extern void sys_kill(int pid);
 
 static void wait() {
     int i = 0;

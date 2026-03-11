@@ -35,6 +35,11 @@ void handle_syscall_fork(registers_t *regs) {
     scheduler_enqueue(child_process);
 }
 
+void handle_syscall_kill(registers_t *regs) {
+  uint32_t pid = regs->ebx;
+  scheduler_remove(pid);
+}
+
 void handle_syscall_read(registers_t *regs) {
     int fd = regs->ebx;
     char *buf = (char *)regs->ecx;
@@ -121,11 +126,14 @@ void handle_syscall_open(registers_t *regs) {
             current_process->fds[i].offset = 0;
             current_process->fds[i].is_open = true;
             regs->eax = i;
+            kfree(entry);
             return;
         }
     }
 
     kfree(fat_fd->data);
+    kfree(fat_fd);
+    kfree(entry);
     print("ERROR: TO MANY FILE OPEN");
     return;
 }
@@ -167,6 +175,7 @@ void handle_syscall_exec(registers_t *regs) {
     update_page_directory(current_page_directory, data, entry->file_size, regs);
 
     kfree(data);
+    kfree(entry);
 }
 
 void handle_syscall_ps(registers_t *regs) {
@@ -213,6 +222,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_PS:
         handle_syscall_ps(regs);
+        break;
+    case SYSCALL_KILL:
+        handle_syscall_kill(regs);
         break;
     default:
         print("Unknown syscall\n");

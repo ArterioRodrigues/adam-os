@@ -131,6 +131,19 @@ void handle_ps() {
     print("\n");
 }
 
+void handle_fork(char *arg) {
+    int child = sys_fork();
+
+    if (child == 0) {
+        handle_exec(arg);
+        sys_kill(child);
+    }
+}
+
+void handle_kill(char *arg) {
+    sys_kill(stoi(arg));
+}
+
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
@@ -146,6 +159,10 @@ static void dispatch(char *line) {
         handle_cd(line + 3);
     else if (strncmp(line, "ps ", 2))
         handle_ps();
+    else if (strncmp(line, "fork ", 5))
+        handle_fork(line + 5);
+    else if (strncmp(line, "kill ", 5))
+        handle_kill(line + 5);
     else
         error_handler(line);
 }

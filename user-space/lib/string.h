@@ -96,4 +96,24 @@ char *itohs(char *result, int n) {
 
 static void print(const char *s) { sys_write(0, (char *)s, strlen(s)); }
 
+
+int stoi(char *str) {
+    int result = 0;
+    int i = 0;
+
+    int sign = 1;
+    if (str[0] == '-') {
+        sign = -1;
+        i = 1;
+    }
+
+    for (; str[i] != '\0'; i++) {
+        if (str[i] < '0' || str[i] > '9')
+            break;
+        result = result * 10 + (str[i] - '0');
+    }
+
+    return result * sign;
+}
 #endif
+

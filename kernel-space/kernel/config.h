@@ -99,7 +99,7 @@
 //
 #define VGA_ADDRESS 0xB8000
 #define VGA_WIDTH 80
-#define VGA_HEIGHT 25
+#define VGA_HEIGHT 25 
 #define VGA_SIZE (VGA_WIDTH * VGA_HEIGHT)
 #define VGA_COLOR_SHIFT 8 // Color byte is the high byte of each cell
 

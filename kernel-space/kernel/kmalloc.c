@@ -1,7 +1,7 @@
 #include "kmalloc.h"
 #include "../pch.h"
 
-static heap_block_header_t *heap_head_ptr;
+heap_block_header_t *heap_head_ptr = NULL;
 
 void init_heap() {
     heap_head_ptr = (void *)HEAP_START;

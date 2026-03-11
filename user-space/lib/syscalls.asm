@@ -10,6 +10,7 @@ global sys_close
 global sys_ps
 
 global sys_exec
+global sys_kill
 
 extern main
 _start:
@@ -63,5 +64,11 @@ sys_ps:
 sys_exec:
     mov eax, 11          
     mov ecx, [esp + 4]  
+    int 0x80
+    ret
+
+sys_kill:
+    mov eax, 12 
+    mov ebx, [esp + 4]  
     int 0x80
     ret

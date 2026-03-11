@@ -101,3 +101,19 @@ void update_scheduler(registers_t *regs) {
 
     quantum_counter = 0;
 }
+
+void scheduler_remove(uint32_t pid) {
+    pcb_t *current = scheduler_head_ptr;
+    pcb_t *prev = NULL;
+    while (current) {
+        if (current->pid == pid) {
+            prev->next = current->next;
+            kfree(current);
+            next_process();
+            return;
+        }
+
+        prev = current;
+        current = current->next;
+    }
+}

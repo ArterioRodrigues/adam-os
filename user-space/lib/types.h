@@ -17,6 +17,5 @@ typedef struct {
     uint32_t pid;
     uint32_t parent_pid;
     process_status_t status;
-    char *name;
 } ps_entry_t;
 #endif

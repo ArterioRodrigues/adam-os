@@ -29,9 +29,11 @@ typedef struct {
     process_status_t status;
 } ps_entry_t;
 
-static uint32_t pid_static;
+extern uint32_t pid_static;
 
 extern void switch_to_process(pcb_t *pcb);
 pcb_t *create_process_control_block(page_directory_t *page_directory, registers_t registers, uint32_t parent_pid,
                                     pcb_t *next);
+
 #endif
+
