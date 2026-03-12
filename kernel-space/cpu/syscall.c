@@ -5,8 +5,9 @@ extern void syscall_handler();
 
 void handle_syscall_exit() {
     print("\nUser program exited\n");
-    while (1)
-        ;
+    int pid = current_process->pid; 
+    scheduler_remove(pid);
+    scheduler_wake(pid);
 }
 
 void handle_syscall_fork(registers_t *regs) {
@@ -32,13 +33,13 @@ void handle_syscall_fork(registers_t *regs) {
     pcb_t *child_process = create_process_control_block(child_page_directory, child_regs, current_process->pid, NULL);
 
     regs->eax = child_process->pid;
-
     scheduler_enqueue(child_process);
+    return;
 }
 
 void handle_syscall_kill(registers_t *regs) {
-  uint32_t pid = regs->ebx;
-  scheduler_remove(pid);
+    uint32_t pid = regs->ebx;
+    scheduler_remove(pid);
 }
 
 void handle_syscall_read(registers_t *regs) {
@@ -195,6 +196,12 @@ void handle_syscall_ps(registers_t *regs) {
     regs->eax = count;
 }
 
+void handle_syscall_wait(registers_t *regs) {
+    int pid = regs->ebx;
+    current_process->status = WAITING;
+    current_process->waiting_pid = pid;
+}
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -225,6 +232,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_KILL:
         handle_syscall_kill(regs);
+        break;
+    case SYSCALL_WAIT:
+        handle_syscall_wait(regs);
         break;
     default:
         print("Unknown syscall\n");

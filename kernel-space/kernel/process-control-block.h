@@ -21,6 +21,7 @@ typedef struct pcb {
     int exit_code;
     file_descriptor_t fds[MAX_FDS];
     char *name;
+    int waiting_pid;
 } pcb_t;
 
 typedef struct {

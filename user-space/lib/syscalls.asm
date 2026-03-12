@@ -11,6 +11,7 @@ global sys_ps
 
 global sys_exec
 global sys_kill
+global sys_waitpid
 
 extern main
 _start:
@@ -69,6 +70,12 @@ sys_exec:
 
 sys_kill:
     mov eax, 12 
+    mov ebx, [esp + 4]  
+    int 0x80
+    ret
+
+sys_waitpid:
+    mov eax, 13 
     mov ebx, [esp + 4]  
     int 0x80
     ret

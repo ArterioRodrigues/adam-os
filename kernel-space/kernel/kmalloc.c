@@ -80,7 +80,7 @@ void dump_heap() {
 
     while (curr) {
         dump(curr);
-        size += curr->size;
+        size += curr->size + sizeof(heap_block_header_t);
         free_size += curr->is_free ? 1 : 0;
         not_free_size += curr->is_free ? 0 : 1;
         curr = curr->next;

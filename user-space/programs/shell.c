@@ -136,13 +136,13 @@ void handle_fork(char *arg) {
 
     if (child == 0) {
         handle_exec(arg);
-        sys_kill(child);
+        sys_exit();
+    } else {
+      sys_waitpid(child);
     }
 }
 
-void handle_kill(char *arg) {
-    sys_kill(stoi(arg));
-}
+void handle_kill(char *arg) { sys_kill(stoi(arg)); }
 
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
