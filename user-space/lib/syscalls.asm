@@ -9,6 +9,7 @@ global sys_open
 global sys_close
 global sys_ps
 
+global sys_create
 global sys_exec
 global sys_kill
 global sys_waitpid
@@ -77,5 +78,14 @@ sys_kill:
 sys_waitpid:
     mov eax, 13 
     mov ebx, [esp + 4]  
+    int 0x80
+    ret
+
+
+sys_create:
+    mov eax, 14
+    mov ebx, [esp + 4]   
+    mov ecx, [esp + 8]  
+    mov edx, [esp + 12]  
     int 0x80
     ret

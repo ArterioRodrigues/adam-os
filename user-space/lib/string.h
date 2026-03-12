@@ -66,7 +66,7 @@ char *itos(char *result, int n) {
     }
     result[index] = char_n_10[n];
     result[index + 1] = '\0';
-    
+
     strrev(result);
     return result;
 }
@@ -96,7 +96,6 @@ char *itohs(char *result, int n) {
 
 static void print(const char *s) { sys_write(0, (char *)s, strlen(s)); }
 
-
 int stoi(char *str) {
     int result = 0;
     int i = 0;
@@ -115,5 +114,12 @@ int stoi(char *str) {
 
     return result * sign;
 }
-#endif
 
+int strfind(char *c, char deliminator) {
+
+  for(int i = 0; i < strlen(c); i++) 
+      if(c[i] == deliminator) return i;
+
+  return -1;
+}
+#endif

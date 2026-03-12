@@ -13,6 +13,7 @@ extern int sys_read(int fd, char *buf, int len);
 extern int sys_ps(ps_entry_t *buf, int max);
 extern void sys_kill(int pid);
 extern void sys_waitpid(int pid);
+extern int sys_create(char *name, char *data, int len);
 
 static void wait() {
     int i = 0;

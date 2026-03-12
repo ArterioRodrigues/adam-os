@@ -134,7 +134,6 @@ int stoi(char *str) {
 }
 
 static char *string_token = NULL;
-
 char *strtok(char *destination, char *str, char deliminator) {
     if (str != NULL) {
         string_token = str;

@@ -1,4 +1,5 @@
 #include "../lib/lib.h"
+#include "../lib/math.h"
 #include "../lib/string.h"
 
 typedef struct fat16_entry {
@@ -53,8 +54,16 @@ static void handle_ls() {
     char buf[512];
     int size = sys_read(fd, buf, 512);
 
-    for (int i = 0; i < size; i += 32) {
-        sys_write(0, buf + i, 8);
+    fat16_entry_t *entry;
+    for (int i = 0; i < size; i += sizeof(fat16_entry_t)) {
+        entry = (fat16_entry_t *)(buf + i);
+
+        sys_write(0, entry->name, strfind(entry->name, ' '));
+
+        if (strfind(entry->extension, ' ')) {
+            print(".");
+            sys_write(0, entry->extension, 3);
+        }
         print("\n");
     }
 
@@ -138,11 +147,54 @@ void handle_fork(char *arg) {
         handle_exec(arg);
         sys_exit();
     } else {
-      sys_waitpid(child);
+        sys_waitpid(child);
     }
 }
 
 void handle_kill(char *arg) { sys_kill(stoi(arg)); }
+
+void handle_create(char *arg) {
+    char name[13];
+    int i = 0;
+    while (arg[i] && arg[i] != ' ') {
+        name[i] = arg[i];
+        i++;
+    }
+    name[i] = '\0';
+    i++;
+
+    char *content = arg + i;
+    int fd = sys_open(name);
+
+    if (fd == -1) {
+        sys_create(name, content, strlen(content));
+    }
+
+    sys_write(fd, content, strlen(content));
+    sys_close(fd);
+}
+
+void handle_cat(char *arg) {
+    int fd = sys_open(arg);
+    char buf[100];
+
+    int size = sys_read(fd, buf, 100);
+    sys_write(0, buf, size);
+
+    sys_close(fd);
+    print("\n");
+}
+
+void handle_bf(char *arg) {
+    int child = sys_fork();
+
+    if (child == 0) {
+        sys_exec("bf");
+        sys_exit();
+    } else {
+        sys_waitpid(child);
+    }
+}
 
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
@@ -163,6 +215,12 @@ static void dispatch(char *line) {
         handle_fork(line + 5);
     else if (strncmp(line, "kill ", 5))
         handle_kill(line + 5);
+    else if (strncmp(line, "touch ", 6))
+        handle_create(line + 6);
+    else if (strncmp(line, "cat ", 4))
+        handle_cat(line + 4);
+    else if (strncmp(line, "bf ", 3))
+        handle_bf(line + 3);
     else
         error_handler(line);
 }

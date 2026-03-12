@@ -1,11 +1,10 @@
 #include "../pch.h"
-#include "exceptions.h"
 
 extern void syscall_handler();
 
 void handle_syscall_exit() {
     print("\nUser program exited\n");
-    int pid = current_process->pid; 
+    int pid = current_process->pid;
     scheduler_remove(pid);
     scheduler_wake(pid);
 }
@@ -73,31 +72,39 @@ void handle_syscall_read(registers_t *regs) {
 }
 
 void handle_syscall_write(registers_t *regs) {
+    char fd = regs->ebx;
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
-    uint8_t color = WHITE;
 
-    if (strcmp(buf, "\033[2J\033[H")) {
-        clear_screen();
-        return;
-    }
+    switch (fd) {
+    case FD_NONE:
+        uint8_t color = WHITE;
 
-    for (uint32_t i = 0; i < len; i++) {
-        if (buf[i] == '\033' && buf[i + 1] == '[') {
-            int code = stoi(&buf[i + 2]);
-
-            if (code >= 30 && code <= 50)
-                color = ansi_to_vga[code - 30];
-            else if (code == 0) {
-                color = WHITE;
-            }
-            i += strlen(itos("", code)) + 3;
+        if (strcmp(buf, "\033[2J\033[H")) {
+            clear_screen();
+            return;
         }
 
-        print_char_color(buf[i], color);
+        for (uint32_t i = 0; i < len; i++) {
+            if (buf[i] == '\033' && buf[i + 1] == '[') {
+                int code = stoi(&buf[i + 2]);
+
+                if (code >= 30 && code <= 50)
+                    color = ansi_to_vga[code - 30];
+                else if (code == 0) {
+                    color = WHITE;
+                }
+                i += strlen(itos("", code)) + 3;
+            }
+
+            print_char_color(buf[i], color);
+        }
+        vga_cursor_floor = vga_index;
+        regs->eax = len;
+        break;
+    case FD_FILE:
+        break;
     }
-    vga_cursor_floor = vga_index;
-    regs->eax = len;
 }
 
 void handle_syscall_open(registers_t *regs) {
@@ -202,6 +209,13 @@ void handle_syscall_wait(registers_t *regs) {
     current_process->waiting_pid = pid;
 }
 
+void handle_syscall_create(registers_t *regs) {
+    char *name = (char *)regs->ebx;
+    uint8_t *data = (uint8_t *)regs->ecx;
+    uint32_t len = regs->edx;
+
+    regs->eax = fat16_write_file(name, data, len) ? 0 : -1;
+}
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -235,6 +249,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_WAIT:
         handle_syscall_wait(regs);
+        break;
+    case SYSCALL_CREATE:
+        handle_syscall_create(regs);
         break;
     default:
         print("Unknown syscall\n");
