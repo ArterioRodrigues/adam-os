@@ -32,6 +32,7 @@ void handle_syscall_fork(registers_t *regs) {
     pcb_t *child_process = create_process_control_block(child_page_directory, child_regs, current_process->pid, NULL);
 
     regs->eax = child_process->pid;
+
     scheduler_enqueue(child_process);
 }
 
@@ -175,7 +176,6 @@ void handle_syscall_exec(registers_t *regs) {
     update_page_directory(current_page_directory, data, entry->file_size, regs);
 
     kfree(data);
-    kfree(entry);
 }
 
 void handle_syscall_ps(registers_t *regs) {

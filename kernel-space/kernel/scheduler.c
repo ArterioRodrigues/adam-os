@@ -1,4 +1,7 @@
 #include "../pch.h"
+#include "config.h"
+#include "kmalloc.h"
+#include "process-control-block.h"
 
 pcb_t *current_process = NULL;
 pcb_t *scheduler_head_ptr = NULL;
@@ -31,6 +34,35 @@ void dump_current_process() {
     print("\n");
 }
 
+void dump_processes() {
+    pcb_t *p = scheduler_head_ptr;
+    char buf[10];
+    while (p) {
+        print(itos(buf, p->pid));
+        print("  ");
+        print(itos(buf, p->parent_pid));
+        print("  ");
+        switch (p->status) {
+        case 0:
+            print("RUNNING");
+            break;
+        case 1:
+            print("READY  ");
+            break;
+        case 2:
+            print("WAITING");
+            break;
+        case 3:
+            print("ZOMBIE ");
+            break;
+        default:
+            print("UNKNOWN");
+            break;
+        }
+        print("\n");
+        p = p->next;
+    }
+}
 void init_scheduler(pcb_t *pcb) {
     scheduler_head_ptr = pcb;
     current_process = pcb;
@@ -82,6 +114,7 @@ void start_scheduler() {
 
     switch_to_process(current_process);
 }
+
 void update_scheduler(registers_t *regs) {
     quantum_counter++;
     if (current_process->status != WAITING &&
@@ -108,8 +141,11 @@ void scheduler_remove(uint32_t pid) {
     while (current) {
         if (current->pid == pid) {
             prev->next = current->next;
+            process_queue_size--;
+            kfree((void *)((uint32_t)(current->kernel_stack - PAGE_SIZE)));
             kfree(current);
-            next_process();
+            dump_heap();
+
             return;
         }
 

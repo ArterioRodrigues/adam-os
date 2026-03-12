@@ -1,5 +1,6 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
+#include "../kernel/types.h"
 
 #define SYSCALL_EXIT 1
 #define SYSCALL_FORK 2
@@ -13,5 +14,6 @@
 #define RING3_CALL 0xEE
 
 void init_syscall();
+void syscall_handler_main(registers_t *regs);
 
 #endif

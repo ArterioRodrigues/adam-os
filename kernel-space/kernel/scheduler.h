@@ -17,5 +17,6 @@ void start_scheduler();
 void update_scheduler(registers_t *regs);
 void set_process_ready(unsigned int pid); 
 
+void dump_processes();
 void debug_scheduler(); 
 #endif

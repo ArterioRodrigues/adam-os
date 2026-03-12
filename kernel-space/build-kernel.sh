@@ -62,6 +62,7 @@ mkfs.fat -F 16 fat16.bin
 
 # add shell to the fat storage
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
+mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
 
 #add documents folder to  fat
 mmd -i fat16.bin ::DOCS
