@@ -1,4 +1,5 @@
 #include "../lib/lib.h"
+#include "../lib/math.h"
 #include "../lib/string.h"
 
 typedef struct fat16_entry {
@@ -20,15 +21,17 @@ static void handle_help() {
     print("\tclear  - Clear terminal screen\n");
 }
 
-static void handle_clear() { print("\033[2J\033[H"); }
-
-static void handle_exec(char *arg) {
-    if (arg[0] == '\0') {
+static void handle_clear() {
+    print("\033[2J\033[H");
+    print("AdamOS\n");
+}
+static void handle_exec(char *filename, char *arg) {
+    if (filename[0] == '\0') {
         print("Usage: exec <path>\n");
         return;
     }
 
-    sys_exec(arg);
+    sys_exec(filename, arg);
     print("exec failed: ");
     print(arg);
     print("\n");
@@ -51,8 +54,16 @@ static void handle_ls() {
     char buf[512];
     int size = sys_read(fd, buf, 512);
 
-    for (int i = 0; i < size; i += 32) {
-        sys_write(0, buf + i, 8);
+    fat16_entry_t *entry;
+    for (int i = 0; i < size; i += sizeof(fat16_entry_t)) {
+        entry = (fat16_entry_t *)(buf + i);
+
+        sys_write(0, entry->name, strfind(entry->name, ' '));
+
+        if (strfind(entry->extension, ' ')) {
+            print(".");
+            sys_write(0, entry->extension, 3);
+        }
         print("\n");
     }
 
@@ -92,19 +103,112 @@ void handle_cd(char *cmd) {
     sys_close(fd);
 }
 
+void handle_ps() {
+    ps_entry_t buf[10];
+    char num[16];
+    int count = sys_ps(buf, 10);
+
+    print("\nPID  STATUS   PPID");
+    print("\n---  -------  ----\n");
+
+    for (int i = 0; i < count; i++) {
+        print(itos(num, buf[i].pid));
+        print("    ");
+
+        switch (buf[i].status) {
+        case 0:
+            print("RUNNING");
+            break;
+        case 1:
+            print("READY  ");
+            break;
+        case 2:
+            print("WAITING");
+            break;
+        case 3:
+            print("ZOMBIE ");
+            break;
+        default:
+            print("UNKNOWN");
+            break;
+        }
+
+        print("     ");
+        print(itos(num, buf[i].parent_pid));
+        print("\n");
+    }
+    print("\n");
+}
+
+void handle_fork(char *filename, char *arg) {
+    int child = sys_fork();
+
+    if (child == 0) {
+        handle_exec(filename, arg);
+    } else {
+        sys_waitpid(child);
+    }
+}
+
+void handle_kill(char *arg) { sys_kill(stoi(arg)); }
+
+void handle_create(char *arg) {
+    char name[13];
+    int i = 0;
+    while (arg[i] && arg[i] != ' ') {
+        name[i] = arg[i];
+        i++;
+    }
+    name[i] = '\0';
+    i++;
+
+    char *content = arg + i;
+    int fd = sys_open(name);
+
+    if (fd == -1) {
+        sys_create(name, content, strlen(content));
+    }
+
+    sys_write(fd, content, strlen(content));
+    sys_close(fd);
+}
+
+void handle_cat(char *arg) {
+    int fd = sys_open(arg);
+    char buf[100];
+
+    int size = sys_read(fd, buf, 100);
+    sys_write(0, buf, size);
+
+    sys_close(fd);
+    print("\n");
+}
+
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
     else if (strcmp(line, "help"))
         handle_help();
     else if (strncmp(line, "exec ", 5))
-        handle_exec(line + 5);
+        handle_exec(line + 5, "");
     else if (strncmp(line, "ls ", 3))
         handle_ls();
     else if (strncmp(line, "ls", 2))
         handle_ls();
     else if (strncmp(line, "cd ", 2))
         handle_cd(line + 3);
+    else if (strncmp(line, "ps ", 2))
+        handle_ps();
+    else if (strncmp(line, "fork ", 5))
+        handle_fork(line + 5, "");
+    else if (strncmp(line, "kill ", 5))
+        handle_kill(line + 5);
+    else if (strncmp(line, "touch ", 6))
+        handle_create(line + 6);
+    else if (strncmp(line, "cat ", 4))
+        handle_cat(line + 4);
+    else if (strncmp(line, "bf ", 3))
+        handle_fork("bf", line + 3);
     else
         error_handler(line);
 }
@@ -113,6 +217,7 @@ void main() {
     shell_path[0] = '/';
     shell_path[1] = '\0';
 
+    print("AdamOS\n");
     while (1) {
         print(shell_path);
         print("> ");

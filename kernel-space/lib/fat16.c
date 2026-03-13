@@ -38,32 +38,37 @@ void dump_entry(fat16_entry_t *entry) {
 }
 
 void fat16_format_name(char *input, char *name_out, char *ext_out) {
-    char name[8];
-    strtok(name, input, '.');
-    char ext[3];
+    char temp[64];
+    strcpy(temp, input);
+
+    char name[9];
+    memset(name, 0, 9);
+    strtok(name, temp, '.');
+
+    char ext[4];
+    memset(ext, 0, 4);
     strtok(ext, NULL, '.');
 
+    bool name_ended = false;
     for (int i = 0; i < 8; i++) {
-        if (name[i])
-            name_out[i] = name[i];
-        else
+        if (!name_ended && name[i])
+            name_out[i] = (name[i] >= 'a' && name[i] <= 'z') ? name[i] - 32 : name[i];
+        else {
+            name_ended = true;
             name_out[i] = ' ';
-
-        if (name[i] >= 'a' && name[i] <= 'z')
-            name_out[i] -= 32;
+        }
     }
 
+    bool ext_ended = false;
     for (int i = 0; i < 3; i++) {
-        if (ext[i])
-            ext_out[i] = ext[i];
-        else
+        if (!ext_ended && ext[i])
+            ext_out[i] = (ext[i] >= 'a' && ext[i] <= 'z') ? ext[i] - 32 : ext[i];
+        else {
+            ext_ended = true;
             ext_out[i] = ' ';
-
-        if (ext[i] >= 'a' && ext[i] <= 'z')
-            ext_out[i] -= 32;
+        }
     }
 }
-
 void init_fat16_bpb() {
     uint8_t *sector = kmalloc(SECTOR_SIZE);
     ata_read_sector(FAT16_START_LBA, sector);
@@ -196,4 +201,86 @@ uint32_t fat16_read_file(fat16_entry_t *entry, uint8_t *buf) {
 void init_fat16() {
     init_fat16_bpb();
     init_fat16_geometry();
+}
+
+uint16_t fat16_alloc_cluster() {
+    uint8_t *sector = kmalloc(SECTOR_SIZE);
+    uint16_t total_clusters = bpb->sectors_per_fat * SECTOR_SIZE / 2;
+
+    for (uint16_t cluster = 2; cluster < total_clusters; cluster++) {
+        uint32_t fat_sector = geometry->fat_start_lba + (cluster / 256);
+        uint32_t fat_offset = (cluster % 256) * 2;
+
+        ata_read_sector(fat_sector, sector);
+        uint16_t value = *(uint16_t *)(sector + fat_offset);
+
+        if (value == 0x0000) {
+            *(uint16_t *)(sector + fat_offset) = 0xFFF8;
+            ata_write_sector(fat_sector, sector);
+            kfree(sector);
+            return cluster;
+        }
+    }
+
+    kfree(sector);
+    return 0;
+}
+
+void fat16_create_dir_entry(char *input, uint16_t cluster, uint32_t size) {
+    char name[8];
+    char ext[3];
+    fat16_format_name(input, name, ext);
+
+    uint8_t *sector = kmalloc(SECTOR_SIZE);
+
+    for (int i = 0; i < geometry->root_dir_sectors; i++) {
+        ata_read_sector(geometry->root_dir_start_lba + i, sector);
+
+        for (int j = 0; j < SECTOR_SIZE; j += sizeof(fat16_entry_t)) {
+            fat16_entry_t *entry = (fat16_entry_t *)(sector + j);
+
+            if (entry->name[0] == 0x00 || entry->name[0] == 0xE5) {
+                memcpy(entry->name, name, 8);
+                memcpy(entry->extension, ext, 3);
+                entry->attributes = 0x20;
+                memset(entry->reserved, 0, 14);
+                entry->start_cluster = cluster;
+                entry->file_size = size;
+
+                ata_write_sector(geometry->root_dir_start_lba + i, sector);
+                kfree(sector);
+                return;
+            }
+        }
+    }
+
+    kfree(sector);
+}
+
+bool fat16_write_file(char *name, uint8_t *data, uint32_t size) {
+    uint16_t cluster = fat16_alloc_cluster();
+    if (cluster == 0)
+        return false;
+
+    uint32_t lba = geometry->data_start_lba + (cluster - 2) * bpb->sectors_per_cluster;
+
+    uint8_t *sector = kmalloc(SECTOR_SIZE);
+
+    for (int i = 0; i < bpb->sectors_per_cluster; i++) {
+        memset(sector, 0, SECTOR_SIZE);
+
+        uint32_t offset = i * SECTOR_SIZE;
+        uint32_t remaining = (size > offset) ? size - offset : 0;
+        uint32_t to_copy = min(remaining, SECTOR_SIZE);
+
+        if (to_copy > 0)
+            memcpy(sector, data + offset, to_copy);
+
+        ata_write_sector(lba + i, sector);
+    }
+
+    kfree(sector);
+
+    fat16_create_dir_entry(name, cluster, size);
+    return true;
 }

@@ -1,6 +1,9 @@
 #ifndef STRING_H
 #define STRING_H
 
+extern char char_n_10[10]; 
+extern char char_n_16[16];
+
 bool strcmp(const char *str1, const char *str2);
 bool strncmp(const char *str1, const char *str2, int n);
 int strlen(const char *str);

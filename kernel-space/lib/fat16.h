@@ -45,4 +45,7 @@ void init_fat16();
 fat16_entry_t *fat16_find_file(char *input);
 uint32_t fat16_read_folder(fat16_entry_t *folder_entry, uint8_t *buf); 
 uint32_t fat16_read_file(fat16_entry_t *entry, uint8_t *buf);
+uint16_t fat16_alloc_cluster();
+void fat16_create_dir_entry(char *input, uint16_t cluster, uint32_t size);
+bool fat16_write_file(char *name, uint8_t *data, uint32_t size);
 #endif

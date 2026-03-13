@@ -1,7 +1,7 @@
 #include "kmalloc.h"
 #include "../pch.h"
 
-static heap_block_header_t *heap_head_ptr;
+heap_block_header_t *heap_head_ptr = NULL;
 
 void init_heap() {
     heap_head_ptr = (void *)HEAP_START;
@@ -80,7 +80,7 @@ void dump_heap() {
 
     while (curr) {
         dump(curr);
-        size += curr->size;
+        size += curr->size + sizeof(heap_block_header_t);
         free_size += curr->is_free ? 1 : 0;
         not_free_size += curr->is_free ? 0 : 1;
         curr = curr->next;

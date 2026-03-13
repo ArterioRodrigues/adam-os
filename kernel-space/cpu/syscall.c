@@ -1,12 +1,10 @@
 #include "../pch.h"
-#include "exceptions.h"
 
 extern void syscall_handler();
 
-void handle_syscall_exit() {
-    print("\nUser program exited\n");
-    while (1)
-        ;
+void handle_syscall_exit(registers_t *regs) {
+    scheduler_remove(current_process->pid);
+    update_scheduler(regs);
 }
 
 void handle_syscall_fork(registers_t *regs) {
@@ -33,6 +31,12 @@ void handle_syscall_fork(registers_t *regs) {
 
     regs->eax = child_process->pid;
     scheduler_enqueue(child_process);
+    return;
+}
+
+void handle_syscall_kill(registers_t *regs) {
+    uint32_t pid = regs->ebx;
+    scheduler_remove(pid);
 }
 
 void handle_syscall_read(registers_t *regs) {
@@ -66,19 +70,39 @@ void handle_syscall_read(registers_t *regs) {
 }
 
 void handle_syscall_write(registers_t *regs) {
+    char fd = regs->ebx;
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
 
-    if (strcmp(buf, "\033[2J\033[H")) {
-        clear_screen();
-        return;
-    }
+    switch (fd) {
+    case FD_NONE:
+        uint8_t color = WHITE;
 
-    for (uint32_t i = 0; i < len; i++) {
-        print_char(buf[i]);
+        if (strcmp(buf, "\033[2J\033[H")) {
+            clear_screen();
+            return;
+        }
+
+        for (uint32_t i = 0; i < len; i++) {
+            if (buf[i] == '\033' && buf[i + 1] == '[') {
+                int code = stoi(&buf[i + 2]);
+
+                if (code >= 30 && code <= 50)
+                    color = ansi_to_vga[code - 30];
+                else if (code == 0) {
+                    color = WHITE;
+                }
+                i += strlen(itos("", code)) + 3;
+            }
+
+            print_char_color(buf[i], color);
+        }
+        vga_cursor_floor = vga_index;
+        regs->eax = len;
+        break;
+    case FD_FILE:
+        break;
     }
-    vga_cursor_floor = vga_index;
-    regs->eax = len;
 }
 
 void handle_syscall_open(registers_t *regs) {
@@ -109,11 +133,14 @@ void handle_syscall_open(registers_t *regs) {
             current_process->fds[i].offset = 0;
             current_process->fds[i].is_open = true;
             regs->eax = i;
+            kfree(entry);
             return;
         }
     }
 
     kfree(fat_fd->data);
+    kfree(fat_fd);
+    kfree(entry);
     print("ERROR: TO MANY FILE OPEN");
     return;
 }
@@ -140,6 +167,8 @@ void handle_syscall_close(registers_t *regs) {
 
 void handle_syscall_exec(registers_t *regs) {
     char *file_name = (char *)regs->ecx;
+    char *arg = (char *)regs->edx;
+
     fat16_entry_t *entry = fat16_find_file(file_name);
 
     if (!entry)
@@ -154,15 +183,60 @@ void handle_syscall_exec(registers_t *regs) {
     clear_page_directory(current_page_directory);
     update_page_directory(current_page_directory, data, entry->file_size, regs);
 
+    if (arg) {
+        uint32_t stack_top = regs->useresp;
+        uint32_t arg_len = strlen(arg) + 1;
+
+        stack_top -= arg_len;
+        uint32_t str_addr = stack_top;
+        memcpy((void *)str_addr, arg, arg_len);
+
+        stack_top -= 4;
+        *(uint32_t *)stack_top = str_addr;
+
+        regs->useresp = stack_top;
+        regs->esp = stack_top;
+    }
     kfree(data);
 }
 
+void handle_syscall_ps(registers_t *regs) {
+    ps_entry_t *buf = (ps_entry_t *)regs->ebx;
+    int max = (int)regs->ecx;
+    int count = 0;
+
+    pcb_t *p = scheduler_head_ptr;
+    while (p && count < max) {
+        buf[count].pid = p->pid;
+        buf[count].parent_pid = p->parent_pid;
+        buf[count].status = p->status;
+        count++;
+        p = p->next;
+    }
+
+    regs->eax = count;
+}
+
+void handle_syscall_wait(registers_t *regs) {
+    int pid = regs->ebx;
+    current_process->status = WAITING;
+    current_process->waiting_pid = pid;
+    update_scheduler(regs);
+}
+
+void handle_syscall_create(registers_t *regs) {
+    char *name = (char *)regs->ebx;
+    uint8_t *data = (uint8_t *)regs->ecx;
+    uint32_t len = regs->edx;
+
+    regs->eax = fat16_write_file(name, data, len) ? 0 : -1;
+}
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
     switch (syscall_num) {
     case SYSCALL_EXIT:
-        handle_syscall_exit();
+        handle_syscall_exit(regs);
         break;
     case SYSCALL_FORK:
         handle_syscall_fork(regs);
@@ -181,6 +255,18 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_EXEC:
         handle_syscall_exec(regs);
+        break;
+    case SYSCALL_PS:
+        handle_syscall_ps(regs);
+        break;
+    case SYSCALL_KILL:
+        handle_syscall_kill(regs);
+        break;
+    case SYSCALL_WAIT:
+        handle_syscall_wait(regs);
+        break;
+    case SYSCALL_CREATE:
+        handle_syscall_create(regs);
         break;
     default:
         print("Unknown syscall\n");

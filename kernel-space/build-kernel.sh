@@ -40,6 +40,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/fat16.c -o fat16.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/status-bar.c -o status-bar.o
 
 # collect all embedded user program objects
 USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')
@@ -51,7 +52,7 @@ $LD -T linker.ld -o kernel.bin \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
     mem.o keyboard.o timer.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o \
-    page-table.o \
+    page-table.o status-bar.o\
     $USER_BINS \
     --oformat binary
 
@@ -61,11 +62,13 @@ mkfs.fat -F 16 fat16.bin
 
 # add shell to the fat storage
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
+mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
+mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 
-#add documents folder to  fat
-mmd -i fat16.bin ::DOCS
-echo "Hello from FAT16" > /tmp/notes.txt
-mcopy -i fat16.bin /tmp/notes.txt ::DOCS/NOTES.TXT
+##add documents folder to  fat
+#mmd -i fat16.bin ::DOCS
+#echo "Hello from FAT16" > /tmp/notes.txt
+#mcopy -i fat16.bin /tmp/notes.txt ::DOCS/NOTES.TXT
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10

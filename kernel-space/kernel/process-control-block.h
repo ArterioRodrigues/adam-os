@@ -20,10 +20,21 @@ typedef struct pcb {
 
     int exit_code;
     file_descriptor_t fds[MAX_FDS];
+    char *name;
+    int waiting_pid;
 } pcb_t;
-static uint32_t pid_static;
+
+typedef struct {
+    uint32_t pid;
+    uint32_t parent_pid;
+    process_status_t status;
+} ps_entry_t;
+
+extern uint32_t pid_static;
 
 extern void switch_to_process(pcb_t *pcb);
 pcb_t *create_process_control_block(page_directory_t *page_directory, registers_t registers, uint32_t parent_pid,
                                     pcb_t *next);
+
 #endif
+

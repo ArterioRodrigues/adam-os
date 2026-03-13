@@ -10,4 +10,12 @@ typedef unsigned char uint8_t;
 #define true 1 
 #define bool uint8_t
 
+
+typedef enum { RUNNING, READY, WAITING, ZOMBIE } process_status_t;
+
+typedef struct {
+    uint32_t pid;
+    uint32_t parent_pid;
+    process_status_t status;
+} ps_entry_t;
 #endif
