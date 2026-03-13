@@ -22,6 +22,7 @@ _start:
 sys_exit:
     mov eax, 1
     int 0x80
+    ret
 
 sys_fork:
     mov eax, 2 
@@ -66,6 +67,7 @@ sys_ps:
 sys_exec:
     mov eax, 11          
     mov ecx, [esp + 4]  
+    mov edx, [esp + 8]  
     int 0x80
     ret
 

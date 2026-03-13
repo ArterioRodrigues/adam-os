@@ -25,13 +25,13 @@ static void handle_clear() {
     print("\033[2J\033[H");
     print("AdamOS\n");
 }
-static void handle_exec(char *arg) {
-    if (arg[0] == '\0') {
+static void handle_exec(char *filename, char *arg) {
+    if (filename[0] == '\0') {
         print("Usage: exec <path>\n");
         return;
     }
 
-    sys_exec(arg);
+    sys_exec(filename, arg);
     print("exec failed: ");
     print(arg);
     print("\n");
@@ -140,12 +140,11 @@ void handle_ps() {
     print("\n");
 }
 
-void handle_fork(char *arg) {
+void handle_fork(char *filename, char *arg) {
     int child = sys_fork();
 
     if (child == 0) {
-        handle_exec(arg);
-        sys_exit();
+        handle_exec(filename, arg);
     } else {
         sys_waitpid(child);
     }
@@ -185,24 +184,13 @@ void handle_cat(char *arg) {
     print("\n");
 }
 
-void handle_bf(char *arg) {
-    int child = sys_fork();
-
-    if (child == 0) {
-        sys_exec("bf");
-        sys_exit();
-    } else {
-        sys_waitpid(child);
-    }
-}
-
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
     else if (strcmp(line, "help"))
         handle_help();
     else if (strncmp(line, "exec ", 5))
-        handle_exec(line + 5);
+        handle_exec(line + 5, "");
     else if (strncmp(line, "ls ", 3))
         handle_ls();
     else if (strncmp(line, "ls", 2))
@@ -212,7 +200,7 @@ static void dispatch(char *line) {
     else if (strncmp(line, "ps ", 2))
         handle_ps();
     else if (strncmp(line, "fork ", 5))
-        handle_fork(line + 5);
+        handle_fork(line + 5, "");
     else if (strncmp(line, "kill ", 5))
         handle_kill(line + 5);
     else if (strncmp(line, "touch ", 6))
@@ -220,7 +208,7 @@ static void dispatch(char *line) {
     else if (strncmp(line, "cat ", 4))
         handle_cat(line + 4);
     else if (strncmp(line, "bf ", 3))
-        handle_bf(line + 3);
+        handle_fork("bf", line + 3);
     else
         error_handler(line);
 }

@@ -3,7 +3,7 @@
 
 
 void main() {
-    sys_exec("shell");
+    sys_exec("shell", "");
     print("Error: exec failed");
 
     int fd = sys_open("/");

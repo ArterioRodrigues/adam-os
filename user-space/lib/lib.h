@@ -3,7 +3,7 @@
 #include "types.h"
 
 extern void sys_exit();
-extern void sys_exec(char *buf);
+extern void sys_exec(char*filname, char *buf);
 extern void sys_write(int fd, char *buf, int len);
 
 extern int sys_fork();

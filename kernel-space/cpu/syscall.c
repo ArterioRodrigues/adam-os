@@ -2,11 +2,9 @@
 
 extern void syscall_handler();
 
-void handle_syscall_exit() {
-    print("\nUser program exited\n");
-    int pid = current_process->pid;
-    scheduler_remove(pid);
-    scheduler_wake(pid);
+void handle_syscall_exit(registers_t *regs) {
+    scheduler_remove(current_process->pid);
+    update_scheduler(regs);
 }
 
 void handle_syscall_fork(registers_t *regs) {
@@ -169,6 +167,8 @@ void handle_syscall_close(registers_t *regs) {
 
 void handle_syscall_exec(registers_t *regs) {
     char *file_name = (char *)regs->ecx;
+    char *arg = (char *)regs->edx;
+
     fat16_entry_t *entry = fat16_find_file(file_name);
 
     if (!entry)
@@ -183,6 +183,20 @@ void handle_syscall_exec(registers_t *regs) {
     clear_page_directory(current_page_directory);
     update_page_directory(current_page_directory, data, entry->file_size, regs);
 
+    if (arg) {
+        uint32_t stack_top = regs->useresp;
+        uint32_t arg_len = strlen(arg) + 1;
+
+        stack_top -= arg_len;
+        uint32_t str_addr = stack_top;
+        memcpy((void *)str_addr, arg, arg_len);
+
+        stack_top -= 4;
+        *(uint32_t *)stack_top = str_addr;
+
+        regs->useresp = stack_top;
+        regs->esp = stack_top;
+    }
     kfree(data);
 }
 
@@ -207,6 +221,7 @@ void handle_syscall_wait(registers_t *regs) {
     int pid = regs->ebx;
     current_process->status = WAITING;
     current_process->waiting_pid = pid;
+    update_scheduler(regs);
 }
 
 void handle_syscall_create(registers_t *regs) {
@@ -221,7 +236,7 @@ void syscall_handler_main(registers_t *regs) {
 
     switch (syscall_num) {
     case SYSCALL_EXIT:
-        handle_syscall_exit();
+        handle_syscall_exit(regs);
         break;
     case SYSCALL_FORK:
         handle_syscall_fork(regs);
