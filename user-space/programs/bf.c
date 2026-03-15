@@ -38,9 +38,9 @@ void main(char *arg) {
         }
 
         else if (c == ',') {
-            char ch;
-            sys_read(0, &ch, 1);
-            tape[ptr] = ch;
+            char *ch;
+            sys_read(0, ch, 1);
+            tape[ptr] = *ch;
         }
 
         else if (c == '[') {

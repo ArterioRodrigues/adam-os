@@ -64,11 +64,8 @@ mkfs.fat -F 16 fat16.bin
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
 mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
-
-##add documents folder to  fat
-#mmd -i fat16.bin ::DOCS
-#echo "Hello from FAT16" > /tmp/notes.txt
-#mcopy -i fat16.bin /tmp/notes.txt ::DOCS/NOTES.TXT
+mcopy -i fat16.bin $USER_BUILD/vim.bin ::VIM
+mcopy -i fat16.bin $USER_BUILD/main.bf ::BOUNCE.BF
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10

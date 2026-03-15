@@ -43,7 +43,6 @@ $LD -m elf_i386 -Ttext=0x40000000 \
     -o "$SCRIPT_DIR/build/shell.elf"
 $OBJCOPY -O binary "$SCRIPT_DIR/build/shell.elf" "$SCRIPT_DIR/build/shell.bin"
 
-
 # build bf binary
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -c "$SCRIPT_DIR/programs/bf.c" -o "$SCRIPT_DIR/build/bf.o"
@@ -54,12 +53,24 @@ $LD -m elf_i386 -Ttext=0x40000000 \
     -o "$SCRIPT_DIR/build/bf.elf"
 $OBJCOPY -O binary "$SCRIPT_DIR/build/bf.elf" "$SCRIPT_DIR/build/bf.bin"
 
+# build vim binary
+$CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+    -c "$SCRIPT_DIR/programs/vim.c" -o "$SCRIPT_DIR/build/vim.o"
+$LD -m elf_i386 -Ttext=0x40000000 \
+    "$SCRIPT_DIR/build/syscalls.o" \
+    "$SCRIPT_DIR/build/lib.o" \
+    "$SCRIPT_DIR/build/vim.o" \
+    -o "$SCRIPT_DIR/build/vim.elf"
+$OBJCOPY -O binary "$SCRIPT_DIR/build/vim.elf" "$SCRIPT_DIR/build/vim.bin"
+
 # embed both as kernel objects
 cd "$SCRIPT_DIR/build"
-$OBJCOPY -I binary -O elf32-i386 -B i386 idle.bin main.o
+$OBJCOPY -I binary -O elf32-i386 -B i386 main.bin main.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 idle.bin idle_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 shell.bin shell_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 bf.bin bf.o
+$OBJCOPY -I binary -O elf32-i386 -B i386 vim.bin vim.o
 cd "$SCRIPT_DIR"
 
 echo "User space build complete!"
+

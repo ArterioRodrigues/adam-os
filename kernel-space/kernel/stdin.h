@@ -22,4 +22,5 @@ uint32_t stdin_read(char *buf, int len);
 void stdin_wake_process(registers_t *regs);
 void stdin_block_process(registers_t *regs, int len);
 
+void dump_stdin_buffer();
 #endif

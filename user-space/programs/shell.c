@@ -25,6 +25,7 @@ static void handle_clear() {
     print("\033[2J\033[H");
     print("AdamOS\n");
 }
+
 static void handle_exec(char *filename, char *arg) {
     if (filename[0] == '\0') {
         print("Usage: exec <path>\n");
@@ -58,11 +59,11 @@ static void handle_ls() {
     for (int i = 0; i < size; i += sizeof(fat16_entry_t)) {
         entry = (fat16_entry_t *)(buf + i);
 
-        sys_write(0, entry->name, strfind(entry->name, ' '));
+        sys_write(1, entry->name, strfind(entry->name, ' '));
 
         if (strfind(entry->extension, ' ')) {
             print(".");
-            sys_write(0, entry->extension, 3);
+            sys_write(1, entry->extension, 3);
         }
         print("\n");
     }
@@ -178,7 +179,7 @@ void handle_cat(char *arg) {
     char buf[100];
 
     int size = sys_read(fd, buf, 100);
-    sys_write(0, buf, size);
+    sys_write(1, buf, size);
 
     sys_close(fd);
     print("\n");
@@ -209,6 +210,8 @@ static void dispatch(char *line) {
         handle_cat(line + 4);
     else if (strncmp(line, "bf ", 3))
         handle_fork("bf", line + 3);
+    else if (strncmp(line, "vim ", 4))
+        handle_fork("vim", line + 4);
     else
         error_handler(line);
 }
@@ -223,7 +226,6 @@ void main() {
         print("> ");
 
         int size = sys_read(0, input_buf, 256);
-
         input_buf[size] = '\0';
         if (size > 0)
             dispatch(input_buf);

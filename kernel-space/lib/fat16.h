@@ -35,6 +35,7 @@ typedef struct {
     uint8_t *data;
     uint32_t size;
     uint8_t attributes;
+    uint16_t start_cluster;
 } fat16_fd_t;
 
 extern fat16_bpb_t *bpb;

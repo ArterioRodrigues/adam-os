@@ -4,7 +4,7 @@
 #include "../kernel/types.h"
 
 
-extern unsigned char keyboard_pressed;
+extern bool keyboard_pressed;
 extern void keyboard_handler();
 
 void keyboard_handler_main(registers_t *regs);

@@ -73,3 +73,4 @@ void stdin_block_process(registers_t *regs, int len) {
     stdin.wait_queue.requested_len = len;
     update_scheduler(regs);
 }
+

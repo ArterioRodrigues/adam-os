@@ -70,12 +70,17 @@ void handle_syscall_read(registers_t *regs) {
 }
 
 void handle_syscall_write(registers_t *regs) {
-    char fd = regs->ebx;
+    int fd = regs->ebx;
     char *buf = (char *)regs->ecx;
     uint32_t len = regs->edx;
+    file_descriptor_t *process_fd = &current_process->fds[fd];
 
-    switch (fd) {
-    case FD_NONE:
+    switch (process_fd->type) {
+    case FD_STDIN:
+        for (int i = 0; i < len; i++)
+            stdin_write(buf[i]);
+        break;
+    case FD_STDOUT:
         uint8_t color = WHITE;
 
         if (strcmp(buf, "\033[2J\033[H")) {
@@ -101,12 +106,40 @@ void handle_syscall_write(registers_t *regs) {
         regs->eax = len;
         break;
     case FD_FILE:
+        if (!process_fd->is_open) {
+            regs->eax = (uint32_t)-1;
+            return;
+        }
+
+        fat16_fd_t *fat_fd = (fat16_fd_t *)process_fd->data;
+
+        uint32_t to_write = min(len, fat_fd->size);
+        memcpy(fat_fd->data, buf, to_write);
+
+        uint32_t cluster_lba = geometry->data_start_lba + (fat_fd->start_cluster - 2) * bpb->sectors_per_cluster;
+        uint8_t *sector = kmalloc(SECTOR_SIZE);
+
+        for (uint32_t i = 0; i < bpb->sectors_per_cluster; i++) {
+            uint32_t offset = i * SECTOR_SIZE;
+            memset(sector, 0, SECTOR_SIZE);
+            uint32_t remaining = (to_write > offset) ? to_write - offset : 0;
+            if (remaining > 0)
+                memcpy(sector, buf + offset, min(remaining, SECTOR_SIZE));
+            ata_write_sector(cluster_lba + i, sector);
+        }
+        kfree(sector);
+
+        regs->eax = to_write;
         break;
     }
 }
 
 void handle_syscall_open(registers_t *regs) {
     char *file_name = (char *)regs->ebx;
+
+    if (!file_name)
+        return;
+
     fat16_entry_t *entry = fat16_find_file(file_name);
     if (!entry) {
         regs->eax = -1;
@@ -120,10 +153,12 @@ void handle_syscall_open(registers_t *regs) {
     if (entry->attributes & 0x10) {
         fat_fd->data = kmalloc(bpb->sectors_per_cluster * SECTOR_SIZE);
         fat_fd->size = fat16_read_folder(entry, fat_fd->data);
+        fat_fd->start_cluster = entry->start_cluster;
     } else {
         uint32_t size = entry->file_size + bpb->sectors_per_cluster * SECTOR_SIZE;
         fat_fd->data = kmalloc(size);
         fat_fd->size = fat16_read_file(entry, fat_fd->data);
+        fat_fd->start_cluster = entry->start_cluster;
     }
 
     for (int i = 2; i < MAX_FDS; i++) {
@@ -171,8 +206,10 @@ void handle_syscall_exec(registers_t *regs) {
 
     fat16_entry_t *entry = fat16_find_file(file_name);
 
-    if (!entry)
+    if (!entry) {
+        regs->eax = (uint32_t)-1;
         return;
+    }
 
     uint32_t cluster_size = bpb->sectors_per_cluster * 512;
     uint32_t num_clusters = ceil(entry->file_size, cluster_size);

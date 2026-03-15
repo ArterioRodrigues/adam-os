@@ -1,19 +1,20 @@
 #ifndef IDT_H
 #define IDT_H
 #include "../kernel/config.h"
+#include "../kernel/types.h"
 
 extern void idt_load(unsigned int);
 
 struct idt_entry {
-    unsigned short base_low;
-    unsigned short selector;
-    unsigned char zero;
-    unsigned char flags;
-    unsigned short base_high;
+    uint16_t base_low;
+    uint16_t selector;
+    uint8_t zero;
+    uint8_t flags;
+    uint16_t base_high;
 } __attribute__((packed));
 
 struct idt_ptr {
-    unsigned short limit;
+    uint16_t limit;
     unsigned int base;
 } __attribute__((packed));
 
@@ -23,12 +24,12 @@ typedef struct idt_entry idt_entry_t;
 extern idt_entry_t idt[IDT_ENTRIES];
 extern idt_ptr_t idtp;
 
-unsigned short inw(unsigned short port);
-void outw(unsigned short port, unsigned short data);
+uint16_t inw(uint16_t port);
+void outw(uint16_t port, uint16_t data);
 
-unsigned char inb(unsigned short port);
-void outb(unsigned short port, unsigned char data);
-void idt_set_gate(unsigned char num, unsigned int base, unsigned short selector, unsigned char flags);
+uint8_t inb(uint16_t port);
+void outb(uint16_t port, uint8_t data);
+void idt_set_gate(uint8_t num, unsigned int base, uint16_t selector, uint8_t flags);
 void remap_pic();
 void init_idtp();
 void load_idtp();

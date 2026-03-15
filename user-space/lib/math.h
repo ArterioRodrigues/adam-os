@@ -25,6 +25,6 @@ int min(int x, int y) {
         return x;
     return y;
 }
-int ceil(int x, int y) { return (x / y) + 1; }
+int ceil(int x, int y) { return (x + y - 1) / y; }
 
 #endif

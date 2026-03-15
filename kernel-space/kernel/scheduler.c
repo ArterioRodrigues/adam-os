@@ -120,6 +120,7 @@ void start_scheduler() {
 
 void update_scheduler(registers_t *regs) {
     quantum_counter++;
+    //TODO : CHECK WHY RUNNING IS CAUSE A 
     if ((current_process->status == READY || current_process == RUNNING) &&
         (!scheduler_head_ptr || !current_process || quantum_counter < SCHEDULER_QUANTUM)) {
         return;

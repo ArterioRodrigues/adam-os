@@ -62,9 +62,8 @@ void keyboard_handler_main(registers_t *regs) {
                 stdin_write(c);
         }
     }
-
-    if (stdin.wait_queue.process != NULL && stdin.wait_queue.requested_len <= stdin.count ||
-        scancode == SCANCODE_ENTER) {
+    if (stdin.wait_queue.process != NULL &&
+        (stdin.wait_queue.requested_len <= stdin.count || scancode == SCANCODE_ENTER)) {
         stdin_wake_process(regs);
     }
 

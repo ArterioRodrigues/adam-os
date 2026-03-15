@@ -7,7 +7,7 @@ pcb_t *create_process_control_block(page_directory_t *page_directory, registers_
     memcpy(&pcb->registers, &registers, sizeof(registers_t));
     pcb->page_directory = page_directory;
 
-    uint32_t *stack_mem = kmalloc(PAGE_SIZE);
+    uint8_t *stack_mem = (uint8_t *)kmalloc(PAGE_SIZE);
     pcb->kernel_stack = (uint32_t)(stack_mem + PAGE_SIZE);
 
     pcb->pid = pid_static++;
