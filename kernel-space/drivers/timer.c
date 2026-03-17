@@ -3,7 +3,17 @@
 volatile unsigned int timer_ticks = 0;
 
 void timer_handler_main(registers_t *regs) {
+
     timer_ticks++;
+    pcb_t *p = scheduler_head_ptr;
+    while (p) {
+        if (p->sleep_ticks > 0) {
+            p->sleep_ticks--;
+            if (p->sleep_ticks == 0 && p->status == WAITING)
+                p->status = READY;
+        }
+        p = p->next;
+    }
     update_scheduler(regs);
     update_status_bar();
     outb(PIC1_COMMAND, PIC_EOI);

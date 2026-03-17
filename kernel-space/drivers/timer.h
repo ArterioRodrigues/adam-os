@@ -5,9 +5,9 @@
 extern void timer_handler();
 extern volatile unsigned int timer_ticks;
 
+uint32_t get_timer_ticks();
 void init_timer();
 
 void timer_handler_main(registers_t *regs);
-unsigned int get_timer_ticks();
 unsigned int get_uptime_seconds();
 #endif

@@ -14,6 +14,9 @@ global sys_exec
 global sys_kill
 global sys_waitpid
 
+global sys_poll
+global sys_sleep
+global sys_uptime
 extern main
 _start:
     call main       
@@ -89,5 +92,22 @@ sys_create:
     mov ebx, [esp + 4]   
     mov ecx, [esp + 8]  
     mov edx, [esp + 12]  
+    int 0x80
+    ret
+
+sys_poll:
+    mov eax, 15
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_sleep:
+    mov eax, 16
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_uptime:
+    mov eax, 17
     int 0x80
     ret

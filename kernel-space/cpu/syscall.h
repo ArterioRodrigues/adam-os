@@ -13,7 +13,9 @@
 #define SYSCALL_KILL 12
 #define SYSCALL_WAIT 13
 #define SYSCALL_CREATE 14
-
+#define SYSCALL_POLL   15
+#define SYSCALL_SLEEP  16
+#define SYSCALL_UPTIME 17
 #define RING3_CALL 0xEE
 
 void init_syscall();
