@@ -8,7 +8,9 @@
 #include "drivers/ata-disk.h"
 #include "drivers/keyboard.h"
 #include "drivers/screen.h"
+#include "drivers/mouse.h"
 #include "drivers/timer.h"
+#include "drivers/vga-graphics.h"
 #include "kernel/kernel.h"
 #include "kernel/config.h"
 #include "kernel/frame.h"
@@ -23,5 +25,6 @@
 #include "lib/mem.h"
 #include "lib/string.h"
 #include "lib/status-bar.h"
+#include "lib/font.h"
 
 #endif

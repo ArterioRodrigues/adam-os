@@ -61,5 +61,6 @@ void load_idtp() {
 
     asm volatile("sti");
 
-    outb(PIC1_DATA, TIMER_KEYBOARD_IRQ_MASK);
+    outb(PIC1_DATA, MASTER_MOUSE_TIMER_KB_MASK);
+    outb(PIC2_DATA, SLAVE_MOUSE_MASK);
 }

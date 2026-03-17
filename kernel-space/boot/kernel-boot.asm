@@ -28,32 +28,44 @@ start:
   ; after this we will have to make our own function
   ; to print to video memory
   mov si, msg_loading
+
   ; call the print function
   call print_rm
   
   ; call load kernel
   call load_kernel
 
+  call load_vga
+
   ; call swith to protected mode
   call switch_to_pm
 
   jmp $
 
-load_kernel:
-  ; loads KERNEL_OFFSET into bx
-  ; specifies where in memory the kernel is 
-  mov bx, KERNEL_OFFSET
-  ; how many sectors to read
-  ; 3 sectors of 512 bytes 
-  ; Should be the size of your bios file
-  ; This is corresponding to kernel size so we need to make sure we load enough;
-  ; memory for the kernel so all the function are there
-  mov dh, 50 
-  ; The drive to read the sectors from
-  mov dl, [BOOT_DRIVE]
+load_vga:
+  mov ah, 0x00
+  mov al, 0x13
+  int 0x10
 
-  call disk_load
   ret
+
+load_kernel:
+  mov si, dap         ; DS:SI → Disk Address Packet
+  mov ah, 0x42        ; Extended Read
+  mov dl, [BOOT_DRIVE]
+  int 0x13
+  jc disk_error
+  ret
+
+; Disk Address Packet — must be in memory, not on stack
+dap:
+  db 0x10       ; DAP size (16 bytes)
+  db 0x00       ; reserved
+  dw 100        ; number of sectors to read
+  dw KERNEL_OFFSET  ; destination offset
+  dw 0x0000     ; destination segment
+  dd 1          ; LBA start (sector 1 = right after bootloader)
+  dd 0          ; upper 32 bits of LBA (zero)
 
 disk_load:
   ; stores the dx registers to te stack

@@ -91,6 +91,13 @@
 #define HEAP_END (HEAP_START + HEAP_SIZE)
 
 // ============================================================
+// VGA GRAPHICS MODE
+// ============================================================
+#define VGA_GRAPHICS_ADDRESS 0xA0000
+#define VGA_GRAPHICS_WIDTH 320
+#define VGA_GRAPHICS_HEIGHT 200
+#define VGA_GRAPHICS_SIZE (VGA_GRAPHICS_WIDTH * VGA_GRAPHICS_HEIGHT)
+// ============================================================
 // VGA TEXT MODE
 // ============================================================
 // VGA text mode buffer lives at 0xB8000.
@@ -99,7 +106,7 @@
 //
 #define VGA_ADDRESS 0xB8000
 #define VGA_WIDTH 80
-#define VGA_HEIGHT 25 
+#define VGA_HEIGHT 25
 #define VGA_SIZE (VGA_WIDTH * VGA_HEIGHT)
 #define VGA_COLOR_SHIFT 8 // Color byte is the high byte of each cell
 
@@ -110,22 +117,22 @@
 #define VGA_CURSOR_LOW 0x0F  // Low byte of cursor position register index
 
 // VGA colors (foreground)
-#define BLACK         0x00
-#define BLUE          0x01
-#define GREEN         0x02
-#define CYAN          0x03
-#define RED           0x04
-#define MAGENTA       0x05
-#define BROWN         0x06  // ANSI "Yellow" maps here in standard VGA
-#define LIGHT_GRAY    0x07
-#define DARK_GRAY     0x08
-#define BRIGHT_BLUE   0x09
-#define BRIGHT_GREEN  0x0A
-#define BRIGHT_CYAN   0x0B
-#define BRIGHT_RED    0x0C
+#define BLACK 0x00
+#define BLUE 0x01
+#define GREEN 0x02
+#define CYAN 0x03
+#define RED 0x04
+#define MAGENTA 0x05
+#define BROWN 0x06 // ANSI "Yellow" maps here in standard VGA
+#define LIGHT_GRAY 0x07
+#define DARK_GRAY 0x08
+#define BRIGHT_BLUE 0x09
+#define BRIGHT_GREEN 0x0A
+#define BRIGHT_CYAN 0x0B
+#define BRIGHT_RED 0x0C
 #define BRIGHT_MAGENTA 0x0D
-#define YELLOW        0x0E  // Bright yellow (true yellow in VGA)
-#define WHITE         0x0F
+#define YELLOW 0x0E // Bright yellow (true yellow in VGA)
+#define WHITE 0x0F
 // ============================================================
 // PIT — PROGRAMMABLE INTERVAL TIMER (Intel 8253/8254)
 // ============================================================
@@ -160,7 +167,11 @@
 #define PIC1_COMMAND 0x20 // Master PIC command port
 #define PIC1_DATA 0x21    // Master PIC data/mask port
 #define PIC2_COMMAND 0xA0 // Slave PIC command port
-#define PIC2_DATA 0xA1    // Slave PIC data/mask port
+                          
+#define PS2_DATA 0x60
+#define PS2_STATUS 0x64
+#define PS2_COMMAND 0x64
+#define PIC2_DATA 0xA1 // Slave PIC data/mask port
 
 #define PIC_ICW1_INIT 0x11 // Begin init sequence, cascade mode, ICW4 needed
 #define PIC_ICW4_8086 0x01 // 8086 mode (not MCS-80)
@@ -175,7 +186,9 @@
 // IRQ mask register: each bit masks one IRQ line (0=enabled, 1=masked)
 // 0xFC = 11111100 — only IRQ0 (timer, bit 0) and IRQ1 (keyboard, bit 1) enabled
 #define TIMER_KEYBOARD_IRQ_MASK 0xFC
-#define KEYBOARD_IRQ_MASK 0xFD // 11111101 — only keyboard enabled
+#define KEYBOARD_IRQ_MASK 0xFD          // 11111101 — only keyboard enabled
+#define MASTER_MOUSE_TIMER_KB_MASK 0xF8 // IRQ0 + IRQ1 + IRQ2 (cascade)
+#define SLAVE_MOUSE_MASK 0xEF           // IRQ12 (bit 4 on slave)
 
 // ============================================================
 // IDT — INTERRUPT DESCRIPTOR TABLE
@@ -255,8 +268,8 @@
 #define ATA_DRIVE_MASTER 0xE0 // LBA mode, master drive
 
 // Filesystem location on disk
-#define ATA_DISK_SIZE_SECTORS 20480  
-#define ATA_FS_START_LBA 2048 
+#define ATA_DISK_SIZE_SECTORS 20480
+#define ATA_FS_START_LBA 2048
 #define FAT16_START_LBA 2048
-#define SECTOR_SIZE 512 
+#define SECTOR_SIZE 512
 #endif

@@ -31,7 +31,9 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/ata-disk.c -o ata-disk.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/mouse.c -o mouse.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/vga-graphics.c -o vga-graphics.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
@@ -41,6 +43,7 @@ $CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/fat16.c -o fat16.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
 $CC -ffreestanding -fno-pic -include pch.h -c lib/status-bar.c -o status-bar.o
+$CC -ffreestanding -fno-pic -include pch.h -c lib/font.c -o font.o
 
 # collect all embedded user program objects
 USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')
@@ -50,9 +53,9 @@ echo "Linking kernel..."
 $LD -T linker.ld -o kernel.bin \
     kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
-    mem.o keyboard.o timer.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
+    mem.o keyboard.o mouse.o timer.o vga-graphics.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o \
-    page-table.o status-bar.o\
+    page-table.o status-bar.o font.o\
     $USER_BINS \
     --oformat binary
 

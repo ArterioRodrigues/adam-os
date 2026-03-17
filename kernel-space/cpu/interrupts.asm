@@ -2,12 +2,14 @@
 
 global timer_handler
 global keyboard_handler
+global mouse_handler
 global syscall_handler
 global idt_load 
 
 extern timer_handler_main 
 extern syscall_handler_main
 extern keyboard_handler_main
+extern mouse_handler_main 
 
 
 idt_load:
@@ -44,7 +46,6 @@ timer_handler:
   iret
 
 keyboard_handler:
-
     push 0
     push 0x80
     pushad
@@ -61,6 +62,33 @@ keyboard_handler:
     
     push esp
     call keyboard_handler_main
+    add esp, 4
+    
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popad
+    add esp, 8 
+    iret
+
+mouse_handler:
+    push 0
+    push 0x80
+    pushad
+    push ds
+    push es
+    push fs
+    push gs
+    
+    mov ax, 0x10   
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    
+    push esp
+    call mouse_handler_main
     add esp, 4
     
     pop gs
