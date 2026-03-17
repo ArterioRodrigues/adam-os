@@ -40,7 +40,6 @@ void dump_entry(fat16_entry_t *entry) {
 void fat16_format_name(char *input, char *name_out, char *ext_out) {
     char temp[64];
     strcpy(temp, input);
-
     char name[9];
     memset(name, 0, 9);
     strtok(name, temp, '.');
@@ -50,6 +49,7 @@ void fat16_format_name(char *input, char *name_out, char *ext_out) {
     strtok(ext, NULL, '.');
 
     bool name_ended = false;
+
     for (int i = 0; i < 8; i++) {
         if (!name_ended && name[i])
             name_out[i] = (name[i] >= 'a' && name[i] <= 'z') ? name[i] - 32 : name[i];

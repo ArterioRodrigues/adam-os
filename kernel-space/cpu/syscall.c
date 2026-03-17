@@ -9,6 +9,7 @@ void handle_syscall_exit(registers_t *regs) {
 
 void handle_syscall_fork(registers_t *regs) {
     uint32_t page_directory_address = allocate_frame();
+
     {
         uint32_t page_directory_index = page_directory_address >> 22;
         uint32_t page_table_index = (page_directory_address >> 12) & 0x3FF;
@@ -28,9 +29,9 @@ void handle_syscall_fork(registers_t *regs) {
     child_regs.eax = 0;
 
     pcb_t *child_process = create_process_control_block(child_page_directory, child_regs, current_process->pid, NULL);
-
     regs->eax = child_process->pid;
     scheduler_enqueue(child_process);
+
     return;
 }
 
@@ -52,7 +53,7 @@ void handle_syscall_read(registers_t *regs) {
         break;
     case FD_FILE:
         if (!process_fd->is_open)
-            print("ERROR: FILE NOT OPEN");
+            print("error: file is not open");
 
         if (process_fd->data->size - process_fd->offset <= 0) {
             regs->eax = 0;
@@ -61,7 +62,6 @@ void handle_syscall_read(registers_t *regs) {
 
         fat16_fd_t *fat_fd = (fat16_fd_t *)process_fd->data;
         uint32_t size = min(len, fat_fd->size - process_fd->offset);
-
         memcpy(buf, fat_fd->data + process_fd->offset, size);
         process_fd->offset += size;
         regs->eax = size;

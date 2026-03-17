@@ -1,14 +1,10 @@
 #include "../pch.h"
-#include "config.h"
-#include "fdh.h"
-#include "kmalloc.h"
-#include "page-table.h"
-#include "process-control-block.h"
 
 pcb_t *current_process = NULL;
 pcb_t *scheduler_head_ptr = NULL;
 uint32_t quantum_counter = 0;
 uint32_t process_queue_size = 0;
+bool enable_scheduler = false;
 
 void dump_current_process() {
     char buf[20];
@@ -70,10 +66,6 @@ void init_scheduler(pcb_t *pcb) {
     scheduler_head_ptr = pcb;
     current_process = pcb;
     process_queue_size++;
-
-    set_kernel_stack(current_process->kernel_stack);
-    load_page_directory(current_process->page_directory);
-    enable_paging();
 }
 
 void scheduler_enqueue(pcb_t *pcb) {
@@ -93,7 +85,6 @@ void scheduler_enqueue(pcb_t *pcb) {
 void next_process() {
     current_process = current_process->next;
     uint32_t size = process_queue_size;
-
     if (!current_process)
         current_process = scheduler_head_ptr;
 
@@ -115,32 +106,39 @@ void start_scheduler() {
     if (!scheduler_head_ptr)
         return;
 
-    switch_to_process(current_process);
+    enable_scheduler = true;
+    scheduler_head_ptr->status = RUNNING;
+
+    set_kernel_stack(scheduler_head_ptr->kernel_stack);
+    load_page_directory(scheduler_head_ptr->page_directory);
+
+    enable_paging();
+
+    switch_to_process(scheduler_head_ptr);
 }
 
 void update_scheduler(registers_t *regs) {
+    if (!enable_scheduler)
+        return;
+
     quantum_counter++;
-    //TODO : CHECK WHY RUNNING IS CAUSE A 
-    if ((current_process->status == READY || current_process == RUNNING) &&
-        (!scheduler_head_ptr || !current_process || quantum_counter < SCHEDULER_QUANTUM)) {
+    if (current_process && quantum_counter < SCHEDULER_QUANTUM &&
+        (current_process->status == READY || current_process == RUNNING)) {
         return;
     }
 
-    if (current_process->status == ZOMBIE) {
+    if (current_process && current_process->status == ZOMBIE) {
         int pid = current_process->pid;
         scheduler_wake(current_process->pid);
         next_process();
         scheduler_remove(pid);
-    }
-
-    else {
+    } else {
         memcpy(&current_process->registers, regs, sizeof(registers_t));
         next_process();
     }
 
     current_process->status = RUNNING;
     memcpy(regs, &current_process->registers, sizeof(registers_t));
-    memcpy(&current_process->registers, regs, sizeof(registers_t));
     set_kernel_stack(current_process->kernel_stack);
     load_page_directory(current_process->page_directory);
     quantum_counter = 0;

@@ -65,7 +65,7 @@ $OBJCOPY -O binary "$SCRIPT_DIR/build/vim.elf" "$SCRIPT_DIR/build/vim.bin"
 
 # embed both as kernel objects
 cd "$SCRIPT_DIR/build"
-$OBJCOPY -I binary -O elf32-i386 -B i386 main.bin main.o
+$OBJCOPY -I binary -O elf32-i386 -B i386 main.bin main_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 idle.bin idle_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 shell.bin shell_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 bf.bin bf.o

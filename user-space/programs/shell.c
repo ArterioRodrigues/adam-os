@@ -23,16 +23,16 @@ static void handle_help() {
 
 static void handle_clear() {
     print("\033[2J\033[H");
-    print("AdamOS\n");
+    print("SHELL\n");
 }
 
-static void handle_exec(char *filename, char *arg) {
-    if (filename[0] == '\0') {
+static void handle_exec(char *file_name, char *arg) {
+    if (file_name[0] == '\0') {
         print("Usage: exec <path>\n");
         return;
     }
 
-    sys_exec(filename, arg);
+    sys_exec(file_name, arg);
     print("exec failed: ");
     print(arg);
     print("\n");
@@ -141,11 +141,11 @@ void handle_ps() {
     print("\n");
 }
 
-void handle_fork(char *filename, char *arg) {
+void handle_fork(char *file_name, char *arg) {
     int child = sys_fork();
 
     if (child == 0) {
-        handle_exec(filename, arg);
+        handle_exec(file_name, arg);
     } else {
         sys_waitpid(child);
     }
@@ -220,13 +220,14 @@ void main() {
     shell_path[0] = '/';
     shell_path[1] = '\0';
 
-    print("AdamOS\n");
+    print("SHELL\n");
     while (1) {
         print(shell_path);
         print("> ");
 
         int size = sys_read(0, input_buf, 256);
         input_buf[size] = '\0';
+
         if (size > 0)
             dispatch(input_buf);
     }
