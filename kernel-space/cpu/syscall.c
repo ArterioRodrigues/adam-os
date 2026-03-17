@@ -50,6 +50,8 @@ void handle_syscall_read(registers_t *regs) {
     case FD_STDIN:
         if (stdin.count < len)
             stdin_block_process(regs, len);
+        else
+            regs->eax = stdin_read(buf, len);
         break;
     case FD_FILE:
         if (!process_fd->is_open)
@@ -270,6 +272,25 @@ void handle_syscall_create(registers_t *regs) {
 
     regs->eax = fat16_write_file(name, data, len) ? 0 : -1;
 }
+void handle_syscall_poll(registers_t *regs) {
+    int fd = regs->ebx;
+    if (fd == 0)
+        regs->eax = (stdin.count > 0) ? 1 : 0;
+    else
+        regs->eax = 0;
+}
+
+void handle_syscall_sleep(registers_t *regs) {
+    uint32_t ticks = regs->ebx;
+    if (ticks == 0)
+        return;
+    current_process->sleep_ticks = ticks;
+    current_process->status = WAITING;
+    update_scheduler(regs);
+}
+
+void handle_syscall_uptime(registers_t *regs) { regs->eax = get_timer_ticks(); }
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -306,6 +327,15 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_CREATE:
         handle_syscall_create(regs);
+        break;
+    case SYSCALL_POLL:
+        handle_syscall_poll(regs);
+        break;
+    case SYSCALL_SLEEP:
+        handle_syscall_sleep(regs);
+        break;
+    case SYSCALL_UPTIME:
+        handle_syscall_uptime(regs);
         break;
     default:
         print("Unknown syscall\n");

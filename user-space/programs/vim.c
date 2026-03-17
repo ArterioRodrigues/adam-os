@@ -26,8 +26,9 @@ void main(char *arg) {
     }
 
     int size = 0;
-    while (size < 2000) {
-        size += sys_read(0, vim_buffer + size, 2000 - size);
+    int file_size = 0;
+    while (file_size < 2000) {
+        size = sys_read(0, vim_buffer + size, 2000 - size);
 
         if (size >= 5 && strcmp(vim_buffer + size - 5, "/quit"))
             break;

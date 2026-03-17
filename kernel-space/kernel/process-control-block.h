@@ -22,6 +22,7 @@ typedef struct pcb {
     file_descriptor_t fds[MAX_FDS];
     char *name;
     int waiting_pid;
+    uint32_t sleep_ticks;
 } pcb_t;
 
 typedef struct {
@@ -37,4 +38,3 @@ pcb_t *create_process_control_block(page_directory_t *page_directory, registers_
                                     pcb_t *next);
 
 #endif
-

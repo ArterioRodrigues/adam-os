@@ -117,9 +117,23 @@ void start_scheduler() {
     switch_to_process(scheduler_head_ptr);
 }
 
+void decrement_wait_process() {
+    pcb_t *process = scheduler_head_ptr;
+    while (process) {
+        if (process->sleep_ticks > 0) {
+            process->sleep_ticks--;
+            if (process->sleep_ticks == 0 && process->status == WAITING)
+                process->status = READY;
+        }
+        process = process->next;
+    }
+}
+
 void update_scheduler(registers_t *regs) {
     if (!enable_scheduler)
         return;
+
+    decrement_wait_process();
 
     quantum_counter++;
     if (current_process && quantum_counter < SCHEDULER_QUANTUM &&

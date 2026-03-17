@@ -3,6 +3,7 @@
 volatile unsigned int timer_ticks = 0;
 
 void timer_handler_main(registers_t *regs) {
+
     timer_ticks++;
     update_scheduler(regs);
     update_status_bar();

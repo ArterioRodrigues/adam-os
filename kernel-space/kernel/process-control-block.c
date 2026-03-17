@@ -29,5 +29,6 @@ pcb_t *create_process_control_block(page_directory_t *page_directory, registers_
     pcb->fds[1].is_open = true;
 
     pcb->waiting_pid = 0;
+    pcb->sleep_ticks = 0;
     return pcb;
 }
