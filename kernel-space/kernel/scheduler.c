@@ -111,7 +111,9 @@ void start_scheduler() {
 
     set_kernel_stack(scheduler_head_ptr->kernel_stack);
     load_page_directory(scheduler_head_ptr->page_directory);
+
     enable_paging();
+
     switch_to_process(scheduler_head_ptr);
 }
 

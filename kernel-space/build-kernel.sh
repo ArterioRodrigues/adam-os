@@ -65,7 +65,7 @@ mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
 mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/vim.bin ::VIM
-mcopy -i fat16.bin $USER_BUILD/main.bf ::BOUNCE.BF
+mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10
