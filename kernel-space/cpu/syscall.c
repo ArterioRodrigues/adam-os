@@ -97,7 +97,8 @@ void handle_syscall_write(registers_t *regs) {
                 else if (code == 0) {
                     color = WHITE;
                 }
-                i += strlen(itos("", code)) + 3;
+                char tmp[12];
+                i += strlen(itos(tmp, code)) + 3;
             }
 
             print_char_color(buf[i], color);
@@ -234,6 +235,7 @@ void handle_syscall_exec(registers_t *regs) {
         regs->useresp = stack_top;
         regs->esp = stack_top;
     }
+    kfree(entry);
     kfree(data);
 }
 

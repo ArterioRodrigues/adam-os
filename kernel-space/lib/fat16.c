@@ -179,7 +179,7 @@ uint32_t fat16_read_file(fat16_entry_t *entry, uint8_t *buf) {
         size += SECTOR_SIZE;
     }
 
-    uint8_t fat_buffer[532];
+    uint8_t fat_buffer[512];
     ata_read_sector(fat_sector, fat_buffer);
     uint16_t next_cluster = *(uint16_t *)(fat_buffer + fat_offset);
     while (next_cluster < 0xFFF8) {

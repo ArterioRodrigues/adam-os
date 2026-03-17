@@ -47,8 +47,8 @@ void stdin_wake_process(registers_t *regs) {
     process->status = RUNNING;
 
     memcpy(&current_process->registers, regs, sizeof(registers_t));
-
     memcpy(regs, &process->registers, sizeof(registers_t));
+
     set_kernel_stack(process->kernel_stack);
     load_page_directory(process->page_directory);
 

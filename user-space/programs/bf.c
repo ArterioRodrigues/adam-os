@@ -38,7 +38,7 @@ void main(char *arg) {
         }
 
         else if (c == ',') {
-            char *ch;
+            char ch[1];
             sys_read(0, ch, 1);
             tape[ptr] = *ch;
         }

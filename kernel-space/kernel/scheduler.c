@@ -159,7 +159,6 @@ void scheduler_remove(uint32_t pid) {
 
     while (current) {
         if (current->pid == pid) {
-
             if (prev == NULL)
                 scheduler_head_ptr = current->next;
             else
@@ -168,7 +167,6 @@ void scheduler_remove(uint32_t pid) {
             process_queue_size--;
 
             clear_page_directory(current->page_directory);
-
             for (int i = 0; i < MAX_FDS; i++) {
                 file_descriptor_t *process_fd = &current->fds[i];
                 if (!process_fd->is_open || process_fd->type != FD_FILE)

@@ -79,10 +79,19 @@ char *strrev(char *str) {
 
 char *itos(char *result, int n) {
     int index = 0;
+    bool is_negative = false;
+
+    if (n < 0) {
+        is_negative = true;
+        n = -n;
+    }
     while (n / 10 > 0) {
         result[index] = char_n_10[n % 10];
         index++;
         n = n / 10;
+    }
+    if (is_negative) {
+        result[index++] = '-';
     }
     result[index] = char_n_10[n];
     result[index + 1] = '\0';

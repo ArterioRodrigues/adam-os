@@ -1,6 +1,6 @@
 #include "../pch.h"
 
-void memcpy(void *dest, void *src, uint32_t n) {
+void memcpy(void *dest, const void *src, uint32_t n) {
     unsigned char *d = dest;
     unsigned char *s = (char *)src;
 

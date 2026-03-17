@@ -192,13 +192,11 @@ static void dispatch(char *line) {
         handle_help();
     else if (strncmp(line, "exec ", 5))
         handle_exec(line + 5, "");
-    else if (strncmp(line, "ls ", 3))
-        handle_ls();
     else if (strncmp(line, "ls", 2))
         handle_ls();
-    else if (strncmp(line, "cd ", 2))
+    else if (strncmp(line, "cd ", 3))
         handle_cd(line + 3);
-    else if (strncmp(line, "ps ", 2))
+    else if (strncmp(line, "ps", 2))
         handle_ps();
     else if (strncmp(line, "fork ", 5))
         handle_fork(line + 5, "");
