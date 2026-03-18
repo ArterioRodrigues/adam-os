@@ -44,7 +44,7 @@ void kernel_main() {
     remap_pic();
 
     init_keyboard();
-    init_mouse(); 
+    init_mouse();
     init_timer();
 
     init_exception();
@@ -55,23 +55,25 @@ void kernel_main() {
     init_fat16();
     init_frames();
 
+    for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
+        uint32_t frame = allocate_frame();
+    }
 
-    // for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
-    //     uint32_t frame = allocate_frame();
-    // }
+    page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
+    registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
 
-    //    page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
-    //    registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    //    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
-    //
-    //    page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
-    //    registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    //    pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
-    //
-    //    init_scheduler(idle);
-    //    scheduler_enqueue(main);
-    //    start_scheduler();
-    //
-    while (1)
-        ;
+    page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
+    registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
+
+    init_scheduler(idle);
+    scheduler_enqueue(main);
+    start_scheduler();
+
+    while (1) {
+        vga_clear_screen(0x0);
+        vga_draw_cursor(mouse_x, mouse_y);
+        vga_flip();
+    }
 }

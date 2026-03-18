@@ -11,4 +11,5 @@ void vga_draw_line(int x0, int y0, int x1, int y1, uint8_t color);
 void vga_draw_char(int x, int y, char c, uint8_t color);
 void vga_draw_string(int x, int y, char *c, uint8_t color);
 void vga_flip();
+void vga_draw_cursor(int x, int y);
 #endif

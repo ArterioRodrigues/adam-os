@@ -7,6 +7,7 @@
 
 ; The sets a consant KERNEL_OFFSET = 0x1000
 KERNEL_OFFSET equ 0x1000
+KERNEL_SECTORS equ 82
 
 start:
   ; When BIOS jumps to 0x7C00 it sets the dl register to be the booted drive
@@ -35,9 +36,11 @@ start:
   ; call load kernel
   call load_kernel
 
+  ; switch to VGA Mode 13h (320x200, 256 colors)
+  ; Must be done in real mode before protected mode switch
   call load_vga
 
-  ; call swith to protected mode
+  ; call switch to protected mode
   call switch_to_pm
 
   jmp $
@@ -46,58 +49,29 @@ load_vga:
   mov ah, 0x00
   mov al, 0x13
   int 0x10
-
   ret
 
+; Load kernel using LBA extended read (int 0x13 AH=0x42)
+; Loads to temporary address 0x10000 (segment 0x1000:offset 0x0000)
+; to avoid overwriting bootloader at 0x7C00.
+; Kernel will be relocated to 0x1000 in protected mode.
 load_kernel:
-  mov si, dap         ; DS:SI → Disk Address Packet
-  mov ah, 0x42        ; Extended Read
+  mov si, dap
+  mov ah, 0x42
   mov dl, [BOOT_DRIVE]
   int 0x13
   jc disk_error
   ret
 
-; Disk Address Packet — must be in memory, not on stack
+; Disk Address Packet for LBA extended read
 dap:
-  db 0x10       ; DAP size (16 bytes)
-  db 0x00       ; reserved
-  dw 100        ; number of sectors to read
-  dw KERNEL_OFFSET  ; destination offset
-  dw 0x0000     ; destination segment
-  dd 1          ; LBA start (sector 1 = right after bootloader)
-  dd 0          ; upper 32 bits of LBA (zero)
-
-disk_load:
-  ; stores the dx registers to te stack
-  push dx
-  
-  ; The function number for the BIOS interrupt 0x13
-  ; you put the function number in ah and the paramters in al
-  mov ah, 0x02
-  ; the paramter is the number of sectors being 3
-  mov al, dh
-  ; Cylinder: Stack of platters in the hard drive. Which platter to start at
-  mov ch, 0x00
-  ; Head: Read or write head
-  mov dh, 0x00
-  ; Sector: A slice of the track (Usually 512btyes).
-  ; The bootloader is in the first slice so we call the second to start 
-  mov cl, 0x02
-
-  ; Software interrupt, NOT Hardware interrupt
-  int 0x13
-
-  ; If carry flag is set something went wrong go to the disk error mode
-  jc disk_error
-  
-  ; Pop from stack into dx
-  pop dx
-  ; compate al and dh double check that al and dh are the same we requested
-  ; 3 if they aren't the same jump to error again 
-  cmp al, dh
-  jne disk_error
-
-  ret
+  db 0x10                ; DAP size (16 bytes)
+  db 0x00                ; reserved
+  dw KERNEL_SECTORS      ; number of sectors to read
+  dw 0x0000              ; destination offset
+  dw 0x1000              ; destination segment (0x1000 << 4 = physical 0x10000)
+  dd 1                   ; LBA start (sector 1, right after bootloader)
+  dd 0                   ; upper 32 bits of LBA
 
 disk_error:
   ; move the message into si print message
@@ -112,12 +86,6 @@ print_rm:
   mov ah, 0x0E
 
   .loop:
-    ; load the string byte from SI to AL and increment SI by 1
-    ; Move SI along the string until you reach the 0 at the end
-    ; Compare al to 0 to see if end of string was reached
-    ; if you reach the end of the string jump to done
-    ; call print character interrupt 
-    ; else keep loop 
     lodsb
     cmp al, 0
     je .done
@@ -128,37 +96,23 @@ print_rm:
     ret
 
 switch_to_pm:
-  ; Switching into proteced mode 
-  ; (CLI) Clear interrupt flag - disable maskable interrupts
-  ; If enable during switch it will cause total system failure if interrupt was called
-  ; Because in protected mode interrupts use IDT and we haven't set up IDT
-  ; System would find garabge and crash due to this.
+  ; Disable interrupts — IDT not set up yet
   cli
-  ; Load Global Description Table
-  ; GDT is a table taht defines memory segments to know where GDT is before we switch to
-  ; protected mode.after switch CPU will use GDT to interpret segment registers.
+
+  ; Load Global Descriptor Table
   lgdt [gdt_descriptor]
 
-  ; CRO - Control Register 0: A special CPU register that controls operation mode
-  ; BIT 0 of CRO = Protected Mode BIT 1 of CRO = Real Mode
+  ; Set protected mode bit in CR0
   mov eax, cr0 
-  ; Preserves all other bits in CRO
-  ; Could do mov cr0, 1 which would zero all other bis
   or eax, 1
-  ; after mov cr0, eax we are in proteced mode
   mov cr0, eax
   
-  ; Before transistion we do FAR JUMP
-  ; This is a special jump that loads both CS (code segment) and IP (Instruction Pointer)
-  ; We are technically in protected mode
-  ; But CS still has the old mode value 
-  ; This far jump flused the CPU and loads the new code segment
+  ; Far jump to flush pipeline and load new code segment
   jmp CODE_SEG:init_pm
 
 [BITS 32]
 init_pm:
-  ; We reload all the registers with valid protected mode values
-  ; Register cs doesn't need to be updated since it was already in the far jump
+  ; Reload all segment registers with protected mode selectors
   mov ax, DATA_SEG
   mov ds, ax
   mov es, ax
@@ -166,96 +120,103 @@ init_pm:
   mov gs, ax
   mov ss, ax
 
-  ; We set the new base pointer to 0x90000
+  ; Set up protected mode stack
   mov ebp, 0x90000
-  ; We set the new stack pointer to 0x90000
-  ; This give ourselves more room  (old stack was tiny)
-  ; Move it away from where we load our kernel
-  ; 0x90000 is conventional for bootloader
   mov esp, ebp
 
-  ; Call kernel offset at 0x1000
-  ; Jump to kernel we loaded our kernel at 0x1000, so now we call it
-  ; Kernel takes over and the bootloader is done
-  call KERNEL_OFFSET
-  
-  ; if for some reason kernel returns we loop for evers
-  jmp $
+  ; === Step 1: Relocate GDT to 0x80000 ===
+  ; The kernel copy will overwrite 0x7C00 where the GDT lives.
+  ; The CPU references the GDT continuously, so we must move it first.
+  mov esi, gdt_start
+  mov edi, 0x80000
+  mov ecx, (gdt_end - gdt_start + 3) / 4
+  cld
+  rep movsd
 
-; GDT - Memory Segment
+  ; Point GDTR to the new GDT location
+  lgdt [new_gdt_ptr]
+
+  ; Far jump to flush pipeline with new GDT
+  jmp CODE_SEG:.gdt_ok
+.gdt_ok:
+
+  ; === Step 2: Copy trampoline to 0x600 ===
+  ; The trampoline is a small piece of code that copies the kernel
+  ; from 0x10000 → 0x1000, then calls the kernel entry point.
+  ; We put it at 0x600 (safely below 0x1000) so it won't be
+  ; overwritten when the kernel is copied into place.
+  mov esi, .trampoline
+  mov edi, 0x600
+  mov ecx, (.trampoline_end - .trampoline + 3) / 4
+  cld
+  rep movsd
+
+  ; === Step 3: Jump to trampoline ===
+  ; After this jump, everything at 0x7C00 can safely be overwritten
+  jmp 0x600
+
+; --- Trampoline code (will be copied to 0x600) ---
+; Uses only absolute addresses so it runs correctly at any location.
+.trampoline:
+  ; Copy kernel from temp 0x10000 → linked address 0x1000
+  mov esi, 0x10000
+  mov edi, KERNEL_OFFSET
+  mov ecx, (KERNEL_SECTORS * 512) / 4
+  cld
+  rep movsd
+
+  ; Call kernel entry point
+  mov eax, KERNEL_OFFSET
+  call eax
+
+  ; If kernel returns, halt forever
+  jmp $
+.trampoline_end:
+
+; --- New GDT pointer (used after relocation to 0x80000) ---
+new_gdt_ptr:
+  dw gdt_end - gdt_start - 1
+  dd 0x80000
+
+; ============================================================
+; GDT - GLOBAL DESCRIPTOR TABLE
+; ============================================================
 ; In protected mode the CPU enforces memory protection. The GDT defines:
 ; - Which memory regions exist
-; - what you can do with them (read, write, execute)
+; - What you can do with them (read, write, execute)
 ; - What privilege level is required
 ; - How large they are 
 gdt_start:
-  ; First entry must be null on the GDT as of x86 architecture
-  ; Why - If a segment register is accidentally zero, the CPU 
-  ; will catch it and fault instead of accessing random memory it's safer
-  ; dq - define quadword: 8bytes of zeros
+  ; First entry must be null (x86 requirement)
   dq 0x0
 
-; This is weird to allow for bakward compatiblity
-; The limit is the size of the segment in this case 0xFFFF and 11001111b = 0xFFFFF * 4KB  = 4GB
-; The base is the starting address of the segment. Base = Segment starts at memory address 0
-; Combined with the limit of 4GB this segment covers memory from 0 to 4gb,  
-; Access Byte = 10011010b
-; Let's break down each bit:
-; Bit 7: P (Present)              = 1 (segment is present in memory)
-; Bit 6-5: DPL (Privilege Level)  = 00 (ring 0 = kernel)
-; Bit 4: S (Descriptor Type)      = 1 (code or data segment)
-; Bit 3: E (Executable)           = 1 (this is a code segment)
-; Bit 2: DC (Direction/Conforming)= 0 (code grows up)
-; Bit 1: RW (Readable/Writable)   = 1 (code can be read)
-; Bit 0: A (Accessed)             = 0 (CPU will set this)
-
-; Present bit = 1:If 0, accessing this segment causes a fault. Used for virtual memory (swapping segments to disk).
-
-; DPL = 00 (Ring 0): Privilege levels:
-; - Ring 0: Kernel (highest privilege)
-; - Ring 1-2: Rarely used
-; - Ring 3: User applications (lowest privilege)
-; 
-; Your kernel runs in Ring 0. Later, user programs will run in Ring 3.
-; **Executable = 1:** This is a code segment. The CPU can fetch instructions from here.
-; **Readable = 1:** Code can be read as data. Some systems forbid this (execute-only code) for security.
-; **Why readable code?** Sometimes you need to read your own code (debugging, self-modifying code, reading constants embedded in code).
-; #### **Flags + Limit = 11001111b**
-; Bit 7: G (Granularity)          = 1 (limit is in 4KB units)
-; Bit 6: DB (Default operation)   = 1 (32-bit segment)
-; Bit 5: L (Long mode)            = 0 (not 64-bit)
-; Bit 4: AVL (Available)          = 0 (for OS use)
-; Bits 3-0: Limit bits 16-19      = 1111
-; Granularity = 1: Each unit of limit represents 4KB, not 1 byte.
+; Kernel Code Segment (Ring 0)
+; Base = 0x00000000, Limit = 4GB
+; Access: Present, DPL=0, Code, Readable
 gdt_code: 
-  dw 0xFFFF ; Limit (bits 0-15)
-  dw 0x0    ; Base (bits 0-15)
-  db 0x0    ; Base (bits 16-23)
-  db 10011010b ; Access byte
-  db 11001111b ; Flags + limit (bits 16 -19)
-  db 0x0 ; base (bits 24 - 31)
+  dw 0xFFFF       ; Limit (bits 0-15)
+  dw 0x0          ; Base (bits 0-15)
+  db 0x0          ; Base (bits 16-23)
+  db 10011010b    ; Access byte: P=1, DPL=00, S=1, E=1, DC=0, RW=1, A=0
+  db 11001111b    ; Flags: G=1, DB=1, L=0, AVL=0 + Limit bits 16-19
+  db 0x0          ; Base (bits 24-31)
 
-; **Almost identical to code segment!** Only one bit different:
-; **Access byte = 10010010b:**
-; Bit 3: E (Executable) = 0 (this is a data segment, not code)
-; This means the data segment isn't allowed to execute
+; Kernel Data Segment (Ring 0)
+; Same as code but not executable
 gdt_data:
   dw 0xFFFF
   dw 0x0
   db 0x0
-  db 10010010b
+  db 10010010b    ; Access byte: E=0 (data segment)
   db 11001111b
   db 0x0
-
-;code segment: Execute + Read but not write
-;data segment: Read + Write but not execute
 
 ; User Code Segment (Ring 3)
 gdt_user_code:
   dw 0xFFFF
   dw 0x0
   db 0x0
-  db 11111010b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 11111010b    ; Access byte: DPL=11 (ring 3), code
   db 11001111b
   db 0x0
 
@@ -264,37 +225,35 @@ gdt_user_data:
   dw 0xFFFF
   dw 0x0
   db 0x0
-  db 11110010b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 11110010b    ; Access byte: DPL=11 (ring 3), data
   db 11001111b
   db 0x0
 
+; TSS Descriptor (filled in by kernel at runtime)
 gdt_tss: 
   dw 0x0067
   dw 0x0
   db 0x0
-  db 10001001b    ; Only difference: DPL=11 (ring 3) instead of 00
+  db 10001001b    ; Access byte: Present, DPL=0, TSS type
   db 00000000b
   db 0x0
 
-;GDT end marker
 gdt_end:
 
+; GDT descriptor (pointer structure for lgdt)
 gdt_descriptor:
-  ; Size of GDT
-  dw gdt_end - gdt_start - 1
-  ; Address of GDT
-  dd gdt_start 
+  dw gdt_end - gdt_start - 1   ; Size of GDT
+  dd gdt_start                  ; Address of GDT
 
-; GDT LAYOUT - 8 bytes wide each
-; gdt_start: 0x00
-; gdt_code: 0x80
-; gdt_descriptor 0x10
-CODE_SEG equ gdt_code - gdt_start ; = 0x08
-DATA_SEG equ gdt_data - gdt_start ; = 0x10
+; Segment selector offsets
+CODE_SEG equ gdt_code - gdt_start      ; = 0x08
+DATA_SEG equ gdt_data - gdt_start      ; = 0x10
 
+; Data
 BOOT_DRIVE db 0
 msg_loading db "Loading kernel....", 13, 10, 0
 msg_disk_error db "Disk read error!", 0
 
+; Pad to 510 bytes + boot signature
 times 510-($-$$) db 0
 dw 0xAA55

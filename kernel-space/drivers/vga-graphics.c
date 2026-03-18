@@ -50,19 +50,16 @@ void vga_draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
 }
 
 void vga_draw_char(int x, int y, char c, uint8_t color) {
-    uint8_t *glyph = font8x8[c - 32];
-    for (int row = 0; row < 8; row++) {
+    uint8_t *glyph = font8x8_bold[c - 32];
+    for (int row = 0; row < font_row; row++) {
         uint8_t bits = glyph[row];
-        for (int col = 0; col < 8; col++) {
-            if (bits & (0x00 >> col))
+        for (int col = 0; col < font_col; col++) {
+            if (bits & (0x80 >> col))
                 vga_put_pixel(x + col, y + row, color);
         }
     }
-    while(1) {
-      vga_draw_rect(10, 10, 100, 100, 0x56);
-      vga_flip();
-    }
 }
+
 void vga_draw_string(int x, int y, char *c, uint8_t color) {
     int size = strlen(c);
     for (int i = 0; i < size; i++) {
@@ -71,3 +68,11 @@ void vga_draw_string(int x, int y, char *c, uint8_t color) {
 }
 
 void vga_flip() { memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)back_buffer, VGA_GRAPHICS_SIZE); }
+
+void vga_draw_cursor(int x, int y) {
+    for (int row = 0; row < font_row; row++) {
+        for (int col = 0; col < font_col; col++)
+            if (mouse_cursor[row] & (0x80 >> col)) 
+                vga_put_pixel(x + col, y + row, WHITE);
+    }
+}
