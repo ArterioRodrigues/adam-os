@@ -18,7 +18,7 @@ nasm -f elf32 cpu/gdt.asm -o gdt.o
 nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
 nasm -f elf32 kernel/page-table.asm -o page-table.o
 nasm -f elf32 kernel/process-control-block.asm -o process-control-block.o
-nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
+nasm -f bin boot/kernel-boot-vga-visual.asm -o kernel-boot.bin
 
 echo "Compiling C files..."
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/kernel.c -o kernel.o
@@ -27,7 +27,9 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/window.c -o window.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
+$CC -ffreestanding -fno-pic -include pch.h -c kernel/event.c -o event.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/ata-disk.c -o ata-disk.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
@@ -51,10 +53,10 @@ echo "Including user binaries: $USER_BINS"
 
 echo "Linking kernel..."
 $LD -T linker.ld -o kernel.bin \
-    kernel-entry.o process-control-blockc.o scheduler.o process-control-block.o \
+    kernel-entry.o process-control-blockc.o scheduler.o window.o process-control-block.o \
     kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
     mem.o keyboard.o mouse.o timer.o vga-graphics.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
-    exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o \
+    exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o event.o\
     page-table.o status-bar.o font.o\
     $USER_BINS \
     --oformat binary

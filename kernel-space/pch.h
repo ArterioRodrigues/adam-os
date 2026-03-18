@@ -20,6 +20,8 @@
 #include "kernel/process-control-block.h"
 #include "kernel/scheduler.h"
 #include "kernel/stdin.h"
+#include "kernel/event.h"
+#include "kernel/window.h"
 #include "lib/math.h"
 #include "lib/fat16.h"
 #include "lib/mem.h"

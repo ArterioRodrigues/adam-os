@@ -1,9 +1,9 @@
 #include "../pch.h"
 
 volatile uint8_t *vga_graphics_buffer = (uint8_t *)VGA_GRAPHICS_ADDRESS;
-uint8_t back_buffer[VGA_GRAPHICS_SIZE];
-uint32_t font_row = 8;
-uint32_t font_col = 8;
+uint8_t *back_buffer = NULL;
+uint32_t font_row = 4;
+uint32_t font_col = 4;
 
 void vga_put_pixel(int x, int y, uint8_t color) {
     if (x >= VGA_GRAPHICS_WIDTH || x < 0 || y >= VGA_GRAPHICS_HEIGHT || y < 0)
@@ -50,7 +50,7 @@ void vga_draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
 }
 
 void vga_draw_char(int x, int y, char c, uint8_t color) {
-    uint8_t *glyph = font8x8_bold[c - 32];
+    uint8_t *glyph = font4x4[c - 32];
     for (int row = 0; row < font_row; row++) {
         uint8_t bits = glyph[row];
         for (int col = 0; col < font_col; col++) {
@@ -63,16 +63,29 @@ void vga_draw_char(int x, int y, char c, uint8_t color) {
 void vga_draw_string(int x, int y, char *c, uint8_t color) {
     int size = strlen(c);
     for (int i = 0; i < size; i++) {
-        vga_draw_char(x + (i * font_col), y, c[i], color);
+        vga_draw_char(x + (i * font_row), y, c[i], color);
     }
 }
 
 void vga_flip() { memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)back_buffer, VGA_GRAPHICS_SIZE); }
 
-void vga_draw_cursor(int x, int y) {
-    for (int row = 0; row < font_row; row++) {
-        for (int col = 0; col < font_col; col++)
-            if (mouse_cursor[row] & (0x80 >> col)) 
-                vga_put_pixel(x + col, y + row, WHITE);
+void vga_draw_cursor(int x, int y, uint8_t color) {
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++)
+            if (mouse_cursor[row] & (0x80 >> col))
+                vga_put_pixel(x + col, y + row, color);
+    }
+}
+
+void init_vga() {
+    back_buffer = kmalloc(VGA_GRAPHICS_SIZE);
+    memset(back_buffer, 0, VGA_GRAPHICS_SIZE);
+}
+
+void vga_blit(int x, int y, uint32_t width, uint32_t height, uint8_t *buffer) {
+    uint32_t size = width * height;
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++)
+            vga_put_pixel(x + i, y + j, buffer[(j * width) + i]);
     }
 }

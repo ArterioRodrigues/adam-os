@@ -1,10 +1,18 @@
 #include "../pch.h"
+#include "vga-graphics.h"
 
 uint8_t mouse_cycle = 0;
 uint8_t mouse_bytes[3];
 uint8_t mouse_buttons = 0;
+uint8_t prev_mouse_buttons = 0;
 int mouse_x = 160;
 int mouse_y = 100;
+int prev_mouse_x = 160;
+int prev_mouse_y = 100;
+int drag_offset_x = 0;
+int drag_offset_y = 0;
+int dx = 0;
+int dy = 0;
 bool is_x_negative = false;
 bool is_y_negative = false;
 
@@ -89,9 +97,11 @@ void mouse_handler_main(registers_t *regs) {
         is_x_negative = mouse_bytes[0] & (1 << 4) ? true : false;
         is_y_negative = mouse_bytes[0] & (1 << 5) ? true : false;
 
-        int dx = is_x_negative ? mouse_bytes[1] | 0xFFFFFF00 : mouse_bytes[1];
-        int dy = is_y_negative ? mouse_bytes[2] | 0xFFFFFF00 : mouse_bytes[2];
+        dx = is_x_negative ? mouse_bytes[1] | 0xFFFFFF00 : mouse_bytes[1];
+        dy = is_y_negative ? mouse_bytes[2] | 0xFFFFFF00 : mouse_bytes[2];
 
+        prev_mouse_x = mouse_x;
+        prev_mouse_y = mouse_y;
         mouse_x += dx;
         mouse_y -= dy;
 
@@ -104,8 +114,13 @@ void mouse_handler_main(registers_t *regs) {
         if (mouse_y > 199)
             mouse_y = 199;
 
+        prev_mouse_buttons = mouse_buttons;
         mouse_buttons = mouse_bytes[0] & 0x07;
+
+        update_window();
+        wm_composite();
     }
+
     outb(PIC2_COMMAND, PIC_EOI);
     outb(PIC1_COMMAND, PIC_EOI);
 
