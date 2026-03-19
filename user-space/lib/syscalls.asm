@@ -17,6 +17,12 @@ global sys_waitpid
 global sys_poll
 global sys_sleep
 global sys_uptime
+global sys_create_window
+global sys_create_rect
+global sys_create_text
+global sys_get_event
+global sys_destory_window
+
 extern main
 _start:
     call main       
@@ -109,5 +115,36 @@ sys_sleep:
 
 sys_uptime:
     mov eax, 17
+    int 0x80
+    ret
+
+sys_create_window:
+    mov eax, 18
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_create_rect:
+    mov eax, 19
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_create_text:
+    mov eax, 20
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_get_event:
+    mov eax, 21 
+    mov ebx, [esp + 4]
+    mov ecx, [esp + 8]
+    int 0x80
+    ret
+
+sys_destory_window:
+    mov eax, 22 
+    mov ebx, [esp + 4]
     int 0x80
     ret

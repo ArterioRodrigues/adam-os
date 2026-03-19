@@ -57,32 +57,22 @@ void kernel_main() {
     init_frames();
     init_vga();
 
-    window_t *window1 = wm_create_window(10, 10, 145, 180, "PROGRAM 1", 0);
-    window_t *window2 = wm_create_window(165, 10, 145, 180, "PROGRAM 2", 0);
-    window_t *window3 = wm_create_window(105, 10, 145, 180, "PROGRAM 3", 0);
-    wm_composite();
+    wm_composite(); 
+    for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
+        uint32_t frame = allocate_frame();
+    }
 
-    while (1);
-    
-    // for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
-    //     uint32_t frame = allocate_frame();
-    // }
+    page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
+    registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
 
-    // page_directory_t *idle_page_table = create_kernel_page_directory((void *)_binary_idle_bin_start);
-    // registers_t idle_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    // pcb_t *idle = create_process_control_block(idle_page_table, idle_reg, 0, NULL);
+    page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
+    registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
+    pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
 
-    // page_directory_t *main_page_directory = create_kernel_page_directory((void *)_binary_main_bin_start);
-    // registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
-    // pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
-
-    // init_scheduler(idle);
-    // scheduler_enqueue(main);
-    // start_scheduler();
-
-    // while (1) {
-    //     vga_clear_screen(0x0);
-    //     vga_draw_cursor(mouse_x, mouse_y);
-    //     vga_flip();
-    // }
+    init_scheduler(idle);
+    scheduler_enqueue(main);
+    start_scheduler();
+    while (1)
+        ;
 }

@@ -2,6 +2,15 @@
 #define VGA_H
 #include "../kernel/types.h"
 
+typedef struct {
+  uint32_t window_id;
+    int x;
+    int y;
+    uint32_t width;
+    uint32_t height;
+    uint8_t color;
+} create_rect_t;
+
 extern volatile uint8_t *vga_graphics_buffer; 
 void vga_put_pixel(int x, int y, uint8_t color);
 void vga_clear_screen(uint8_t color);

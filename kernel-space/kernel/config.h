@@ -273,3 +273,4 @@
 #define FAT16_START_LBA 2048
 #define SECTOR_SIZE 512
 #endif
+#define RING3_CALL 0xEE

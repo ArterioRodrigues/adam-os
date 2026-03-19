@@ -291,6 +291,52 @@ void handle_syscall_sleep(registers_t *regs) {
 
 void handle_syscall_uptime(registers_t *regs) { regs->eax = get_timer_ticks(); }
 
+void handle_syscall_create_window(registers_t *regs) {
+    create_window_t *window = (create_window_t *)regs->ebx;
+    window_t *temp =
+        wm_create_window(window->x, window->y, window->width, window->height, window->title, current_process->pid);
+    wm_composite();
+
+    regs->eax = temp->window_id;
+}
+
+void handle_syscall_draw_rect(registers_t *regs) {
+    create_rect_t *rect = (create_rect_t *)regs->ebx;
+    window_t *window = get_window(rect->window_id);
+    uint32_t index = 0;
+
+    window_draw_rect(window, rect->x, rect->y, rect->width, rect->height, rect->color);
+    wm_composite();
+}
+
+void handle_syscall_draw_text(registers_t *regs) {
+
+    create_text_t *text = (create_text_t *)regs->ebx;
+    window_t *window = get_window(text->window_id);
+
+    window_draw_string(window, text);
+    wm_composite();
+
+}
+void handle_syscall_get_event(registers_t *regs) {
+    uint32_t id = regs->ebx;
+    event_t *event = (event_t *)regs->ecx;
+
+    window_t *window = get_window(id);
+    if (!window || event_queue_is_empty(&window->event_queue)) {
+        regs->eax = 0;
+        return;
+    }
+    event_t *popped = event_queue_pop(&window->event_queue);
+    memcpy(event, popped, sizeof(event_t));
+    regs->eax = 1;
+}
+void handle_syscall_destory_window(registers_t *regs) {
+    uint32_t id = regs->ebx;
+    remove_window(id);
+    wm_composite();
+}
+
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 
@@ -336,6 +382,21 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_UPTIME:
         handle_syscall_uptime(regs);
+        break;
+    case SYSCALL_CREATE_WINDOW:
+        handle_syscall_create_window(regs);
+        break;
+    case SYSCALL_DRAW_RECT:
+        handle_syscall_draw_rect(regs);
+        break;
+    case SYSCALL_DRAW_TEXT:
+        handle_syscall_draw_text(regs);
+        break;
+    case SYSCALL_DRAW_EVENT:
+        handle_syscall_get_event(regs);
+        break;
+    case SYSCALL_DESTROY_WINDOW:
+        handle_syscall_destory_window(regs);
         break;
     default:
         print("Unknown syscall\n");
