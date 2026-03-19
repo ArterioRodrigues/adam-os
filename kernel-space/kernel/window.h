@@ -46,6 +46,7 @@ typedef struct {
 extern window_t *window_head_ptr;
 extern uint32_t window_z_index;
 extern uint32_t window_id;
+extern bool wm_dirty;
 
 window_t *wm_create_window(int x, int y, uint32_t width, uint32_t height, char *title, int pid);
 void wm_composite();

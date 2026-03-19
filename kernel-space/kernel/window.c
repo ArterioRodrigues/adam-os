@@ -4,6 +4,7 @@
 
 #define PADDING 4
 window_t *window_head_ptr = NULL;
+bool wm_dirty = false;
 uint32_t window_z_index = 1;
 uint32_t window_id = 1;
 
@@ -86,12 +87,11 @@ void wm_composite() {
     if (focus_window) {
         draw_window(focus_window);
     }
-    vga_draw_cursor(mouse_x, mouse_y, 0xF);
+    vga_draw_cursor(mouse_x, mouse_y, 0x56);
     vga_flip();
 }
 
 void update_window() {
-
     window_t *window = window_head_ptr;
     while (window) {
         if (window->is_dragging) {
@@ -105,8 +105,9 @@ void update_window() {
         window = window->next;
     }
 
-    if (mouse_x != prev_mouse_x || mouse_y != prev_mouse_y)
+    if (mouse_x != prev_mouse_x || mouse_y != prev_mouse_y) {
         update_focused_window(EVENT_MOUSE_MOVE, 0, 0, mouse_buttons, mouse_x, mouse_y);
+    }
 
     if (!((mouse_buttons & 1) && !(prev_mouse_buttons & 1)))
         return;

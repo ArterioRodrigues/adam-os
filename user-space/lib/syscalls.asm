@@ -22,6 +22,7 @@ global sys_create_rect
 global sys_create_text
 global sys_get_event
 global sys_destory_window
+global sys_flush
 
 extern main
 _start:
@@ -146,5 +147,10 @@ sys_get_event:
 sys_destory_window:
     mov eax, 22 
     mov ebx, [esp + 4]
+    int 0x80
+    ret
+
+sys_flush:
+    mov eax, 23 
     int 0x80
     ret

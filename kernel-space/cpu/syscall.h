@@ -21,6 +21,7 @@
 #define SYSCALL_DRAW_TEXT 20
 #define SYSCALL_DRAW_EVENT 21
 #define SYSCALL_DESTROY_WINDOW 22
+#define SYSCALL_FLUSH 23
 
 void init_syscall();
 void syscall_handler_main(registers_t *regs);
