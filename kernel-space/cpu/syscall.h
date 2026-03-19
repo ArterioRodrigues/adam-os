@@ -13,10 +13,15 @@
 #define SYSCALL_KILL 12
 #define SYSCALL_WAIT 13
 #define SYSCALL_CREATE 14
-#define SYSCALL_POLL   15
-#define SYSCALL_SLEEP  16
+#define SYSCALL_POLL 15
+#define SYSCALL_SLEEP 16
 #define SYSCALL_UPTIME 17
-#define RING3_CALL 0xEE
+#define SYSCALL_CREATE_WINDOW 18
+#define SYSCALL_DRAW_RECT 19
+#define SYSCALL_DRAW_TEXT 20
+#define SYSCALL_DRAW_EVENT 21
+#define SYSCALL_DESTROY_WINDOW 22
+#define SYSCALL_FLUSH 23
 
 void init_syscall();
 void syscall_handler_main(registers_t *regs);

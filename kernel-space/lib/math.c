@@ -25,3 +25,10 @@ int min(int x, int y) {
     return y;
 }
 int ceil(int x, int y) { return (x + y - 1) / y; }
+
+float abs(int x) {
+    if (x < 0)
+        return x * -1;
+
+    return x;
+}

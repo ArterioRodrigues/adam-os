@@ -36,6 +36,7 @@ void keyboard_handler_main(registers_t *regs) {
 
     if (shift_held && scancode == SCANCODE_ENTER) {
         stdin_write(' ');
+        update_focused_window(EVENT_KEYPRESS, scancode, ' ', NULL, NULL, NULL);
         print("\n");
         outb(PIC1_COMMAND, PIC_EOI);
         return;
@@ -50,16 +51,22 @@ void keyboard_handler_main(registers_t *regs) {
     } else {
         keyboard_pressed = true;
 
-        if (scancode == SCANCODE_ENTER)
+        if (scancode == SCANCODE_ENTER) {
+            update_focused_window(EVENT_KEYPRESS, scancode, '\n', NULL, NULL, NULL);
             stdin_write('\n');
+        }
 
-        else if (scancode == SCANCODE_BACKSPACE)
+        else if (scancode == SCANCODE_BACKSPACE) {
+            update_focused_window(EVENT_KEYPRESS, scancode, '\b', NULL, NULL, NULL);
             stdin_write('\b');
+        }
 
         else if (scancode < sizeof(scancode_to_ascii)) {
             char c = shift_held ? scancode_to_ascii_shift[scancode] : scancode_to_ascii[scancode];
-            if (c != 0)
+            if (c != 0) {
+                update_focused_window(EVENT_KEYPRESS, scancode, c, NULL, NULL, NULL);
                 stdin_write(c);
+            }
         }
     }
     if (stdin.wait_queue.process != NULL &&

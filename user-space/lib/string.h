@@ -2,7 +2,6 @@
 #define STRING_H
 #include "lib.h"
 
-char char_n_10[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char char_n_16[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 static int strlen(const char *s) {
@@ -58,13 +57,23 @@ char *strrev(char *str) {
 
 char *itos(char *result, int n) {
     int index = 0;
+    bool is_negative = false;
+
+    if (n < 0) {
+        is_negative = true;
+        n = -n;
+    }
 
     while (n / 10 > 0) {
-        result[index] = char_n_10[n % 10];
+
+        result[index] = '0' + (n % 10);
         index++;
         n = n / 10;
     }
-    result[index] = char_n_10[n];
+
+    result[index] = '0' + n;
+    if (is_negative)
+        result[index++] = '-';
     result[index + 1] = '\0';
 
     strrev(result);
@@ -117,16 +126,16 @@ int stoi(char *str) {
 
 int strfind(char *c, char deliminator) {
 
-  for(int i = 0; i < strlen(c); i++) 
-      if(c[i] == deliminator) return i;
+    for (int i = 0; i < strlen(c); i++)
+        if (c[i] == deliminator)
+            return i;
 
-  return -1;
+    return -1;
 }
 
-
 void memcpy(void *dest, void *src, uint32_t n) {
-    unsigned char *d = dest;
-    unsigned char *s = (char *)src;
+    unsigned char *d = (unsigned char *)dest;
+    unsigned char *s = (unsigned char *)src;
 
     while (n--) {
         *d++ = *s++;

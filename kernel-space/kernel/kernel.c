@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "window.h"
 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;
@@ -44,6 +45,7 @@ void kernel_main() {
     remap_pic();
 
     init_keyboard();
+    init_mouse();
     init_timer();
 
     init_exception();
@@ -53,8 +55,9 @@ void kernel_main() {
     init_heap();
     init_fat16();
     init_frames();
+    init_vga();
 
-
+    wm_composite(); 
     for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
     }
@@ -70,7 +73,6 @@ void kernel_main() {
     init_scheduler(idle);
     scheduler_enqueue(main);
     start_scheduler();
-
     while (1)
         ;
 }

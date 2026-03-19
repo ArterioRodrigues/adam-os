@@ -3,7 +3,7 @@
 #include "types.h"
 
 extern void sys_exit();
-extern void sys_exec(char*filname, char *buf);
+extern void sys_exec(char *filname, char *buf);
 extern void sys_write(int fd, char *buf, int len);
 
 extern int sys_fork();
@@ -17,6 +17,13 @@ extern int sys_create(char *name, char *data, int len);
 extern int sys_poll(int fd);
 extern void sys_sleep(int ticks);
 extern int sys_uptime();
+extern int sys_create_window(create_window_t *window);
+extern void sys_create_rect(create_rect_t *rect);
+extern void sys_create_text(create_text_t *text);
+extern int sys_get_event(uint32_t id, event_t *event);
+extern void sys_destory_window(uint32_t id);
+extern void sys_flush();
+
 
 static void wait() {
     int i = 0;
