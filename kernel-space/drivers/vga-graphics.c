@@ -1,18 +1,24 @@
 #include "../pch.h"
 
-volatile uint8_t *vga_graphics_buffer = (uint8_t *)VGA_GRAPHICS_ADDRESS;
+volatile uint8_t *vga_graphics_buffer;
 uint8_t *back_buffer = NULL;
+
 uint32_t font_row = 4;
 uint32_t font_col = 4;
 
+uint32_t screen_width;
+uint32_t screen_height;
+uint32_t screen_pitch;
+uint32_t screen_size;
+
 void vga_put_pixel(int x, int y, uint8_t color) {
-    if (x >= VGA_GRAPHICS_WIDTH || x < 0 || y >= VGA_GRAPHICS_HEIGHT || y < 0)
+    if (x >= screen_width || x < 0 || y >= screen_height || y < 0)
         return;
-    uint32_t index = (y * VGA_GRAPHICS_WIDTH) + x;
-    back_buffer[index] = color;
+    uint32_t index = (y * screen_pitch) + x;
+    vga_graphics_buffer[index] = color;
 }
 
-void vga_clear_screen(uint8_t color) { memset((void *)back_buffer, color, VGA_GRAPHICS_SIZE); }
+void vga_clear_screen(uint8_t color) { memset((void *)vga_graphics_buffer, color, screen_size); }
 
 void vga_draw_rect(int x, int y, int w, int h, uint8_t color) {
     for (int i = x; i < x + w; i++) {
@@ -67,7 +73,7 @@ void vga_draw_string(int x, int y, char *c, uint8_t color) {
     }
 }
 
-void vga_flip() { memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)back_buffer, VGA_GRAPHICS_SIZE); }
+void vga_flip() { rep_memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)vga_graphics_buffer, screen_size); }
 
 void vga_draw_cursor(int x, int y, uint8_t color) {
     for (int row = 0; row < 8; row++) {
@@ -78,8 +84,13 @@ void vga_draw_cursor(int x, int y, uint8_t color) {
 }
 
 void init_vga() {
-    back_buffer = kmalloc(VGA_GRAPHICS_SIZE);
-    memset(back_buffer, 0, VGA_GRAPHICS_SIZE);
+    screen_width = *(uint16_t *)(VBE_MODE_INFO_ADDR + 0x12);
+    screen_height = *(uint16_t *)(VBE_MODE_INFO_ADDR + 0x14);
+    screen_pitch = *(uint16_t *)(VBE_MODE_INFO_ADDR + 0x10);
+    vga_graphics_buffer = (volatile uint8_t *)(*(uint32_t *)(VBE_MODE_INFO_ADDR + 0x28));
+    screen_size = screen_pitch * screen_height;
+    back_buffer = kmalloc(screen_size);
+    memset(back_buffer, 0, screen_size);
 }
 
 void vga_blit(int x, int y, uint32_t width, uint32_t height, uint8_t *buffer) {

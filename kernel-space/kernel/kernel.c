@@ -21,10 +21,13 @@ registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
 page_directory_t *create_kernel_page_directory(void *fn) {
     page_directory_t *page_directory = create_page_directory();
 
-    for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE)
+    for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE)
         map_page(page_directory, i, i, PAGE_FLAG_KERNEL);
 
-    map_page(page_directory, VGA_ADDRESS, VGA_ADDRESS, PAGE_FLAG_KERNEL);
+    uint32_t fb_start = (uint32_t)vga_graphics_buffer & ~0xFFF;
+    uint32_t fb_end = (uint32_t)vga_graphics_buffer + screen_size;
+    for (uint32_t addr = fb_start; addr < fb_end; addr += PAGE_SIZE)
+        map_page(page_directory, addr, addr, PAGE_FLAG_KERNEL);
 
     uint32_t user_func_frame = allocate_frame();
     uint32_t user_stack_frame = allocate_frame();
@@ -37,8 +40,6 @@ page_directory_t *create_kernel_page_directory(void *fn) {
 }
 
 void kernel_main() {
-    clear_screen();
-
     init_gdt();
     set_kernel_stack(KERNEL_STACK_ADDRESS);
     init_idtp();
@@ -57,8 +58,8 @@ void kernel_main() {
     init_frames();
     init_vga();
 
-    wm_composite(); 
-    for (uint32_t i = KERNEL_START; i <= KERNEL_END; i += PAGE_SIZE) {
+    wm_composite();
+    for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
     }
 

@@ -3,7 +3,7 @@
 #include "../kernel/types.h"
 
 typedef struct {
-  uint32_t window_id;
+    uint32_t window_id;
     int x;
     int y;
     uint32_t width;
@@ -11,7 +11,15 @@ typedef struct {
     uint8_t color;
 } create_rect_t;
 
-extern volatile uint8_t *vga_graphics_buffer; 
+extern volatile uint8_t *vga_graphics_buffer;
+extern uint8_t *back_buffer;
+extern uint32_t font_row;
+extern uint32_t font_col;
+extern uint32_t screen_width;
+extern uint32_t screen_height;
+extern uint32_t screen_pitch;
+extern uint32_t screen_size;
+
 void vga_put_pixel(int x, int y, uint8_t color);
 void vga_clear_screen(uint8_t color);
 void vga_draw_rect(int x, int y, int w, int h, uint8_t color);
