@@ -46,11 +46,29 @@ start:
   jmp $
 
 load_vga:
-  mov ah, 0x00
-  mov al, 0x13
+  xor ax, ax
+  mov es, ax
+  mov di, 0x500 
+  mov ah, 0x4F
+  mov al, 0x01 
+  mov cx, 0x103
   int 0x10
+
+  cmp ax, 0x004F
+  jne .vga_error
+
+  mov ah, 0x4F
+  mov al, 0x02
+  mov bh, 0x41
+  mov bl, 0x03
+  int 0x10
+
+  cmp ax, 0x004F
+  jne .vga_error
   ret
 
+.vga_error:
+  jmp $
 ; Load kernel using LBA extended read (int 0x13 AH=0x42)
 ; Loads to temporary address 0x10000 (segment 0x1000:offset 0x0000)
 ; to avoid overwriting bootloader at 0x7C00.

@@ -12,9 +12,9 @@
 //  0x40000000          User function page (virtual)
 //  0x50000000          User stack page (virtual)
 //
-#define KERNEL_START 0x00000         // Physical start of kernel
-#define KERNEL_END 0x100000          // Physical end of kernel (1MB)
-#define KERNEL_STACK_ADDRESS 0x90000 // Top of kernel stack (grows downward)
+#define KERNEL_START 0x00000           // Physical start of kernel
+#define KERNEL_END   0x100000 // Physical end of kernel (1MB)
+#define KERNEL_STACK_ADDRESS 0x90000   // Top of kernel stack (grows downward)
 
 #define USER_FUNC_VADDR 0x40000000           // Virtual address user function is mapped to
 #define USER_STACK_VADDR 0x50000000          // Virtual address user stack is mapped to
@@ -86,17 +86,14 @@
 // ============================================================
 // HEAP
 // ============================================================
-#define HEAP_START 0x10000
-#define HEAP_SIZE 0x80000
+#define HEAP_START 0x100000
+#define HEAP_SIZE 0x300000
 #define HEAP_END (HEAP_START + HEAP_SIZE)
 
 // ============================================================
 // VGA GRAPHICS MODE
 // ============================================================
-#define VGA_GRAPHICS_ADDRESS 0xA0000
-#define VGA_GRAPHICS_WIDTH 320
-#define VGA_GRAPHICS_HEIGHT 200
-#define VGA_GRAPHICS_SIZE (VGA_GRAPHICS_WIDTH * VGA_GRAPHICS_HEIGHT)
+#define VBE_MODE_INFO_ADDR 0x500
 // ============================================================
 // VGA TEXT MODE
 // ============================================================
@@ -167,7 +164,7 @@
 #define PIC1_COMMAND 0x20 // Master PIC command port
 #define PIC1_DATA 0x21    // Master PIC data/mask port
 #define PIC2_COMMAND 0xA0 // Slave PIC command port
-                          
+
 #define PS2_DATA 0x60
 #define PS2_STATUS 0x64
 #define PS2_COMMAND 0x64

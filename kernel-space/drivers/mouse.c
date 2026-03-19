@@ -5,10 +5,10 @@ uint8_t mouse_cycle = 0;
 uint8_t mouse_bytes[3];
 uint8_t mouse_buttons = 0;
 uint8_t prev_mouse_buttons = 0;
-int mouse_x = 160;
-int mouse_y = 100;
-int prev_mouse_x = 160;
-int prev_mouse_y = 100;
+int mouse_x = 400;
+int mouse_y = 300;
+int prev_mouse_x = 400;
+int prev_mouse_y = 300;
 int drag_offset_x = 0;
 int drag_offset_y = 0;
 int dx = 0;
@@ -107,12 +107,12 @@ void mouse_handler_main(registers_t *regs) {
 
         if (mouse_x < 0)
             mouse_x = 0;
-        if (mouse_x > 319)
-            mouse_x = 319;
+        if (mouse_x > screen_width - 1)
+            mouse_x = screen_width - 1;
         if (mouse_y < 0)
             mouse_y = 0;
-        if (mouse_y > 199)
-            mouse_y = 199;
+        if (mouse_y > screen_height - 1)
+            mouse_y = screen_height - 1;
 
         prev_mouse_buttons = mouse_buttons;
         mouse_buttons = mouse_bytes[0] & 0x07;
