@@ -48,7 +48,6 @@ static void handle_fork(char *file_name, char *arg) {
     int child = sys_fork();
     if (child == 0) {
         handle_exec(file_name, arg);
-        sys_exit();
     } else {
         sys_waitpid(child);
     }

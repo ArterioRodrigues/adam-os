@@ -1,59 +1,73 @@
 #include "../lib/lib.h"
 
-#define BW 10
-#define BH 20
-#define COLS 80
-#define WRITE_ROWS 24
-#define FBSIZE (COLS * WRITE_ROWS)
+/* ── Board constants ─────────────────────────────────────────────────── */
 
-char fb[FBSIZE];
-uint8_t board[BH][BW];
-uint16_t pieces[7][4] = {
-    {0x0F00, 0x2222, 0x00F0, 0x4444}, // I
-    {0x6600, 0x6600, 0x6600, 0x6600}, // O
-    {0x0E40, 0x4C40, 0x4E00, 0x4640}, // T
-    {0x06C0, 0x8C40, 0x6C00, 0x4620}, // S
-    {0x0C60, 0x4C80, 0xC600, 0x2640}, // Z
-    {0x0E80, 0xC440, 0x2E00, 0x44C0}, // J
-    {0x0E20, 0x4460, 0x8E00, 0xC880}, // L
+#define BW         10
+#define BH         20
+#define CELL       10
+#define BOARD_X    5
+#define BOARD_Y    5
+#define SIDEBAR_X  115
+#define WIN_W      200
+#define WIN_H      215
+
+/* ── VGA colors for each piece (index 1-7) ───────────────────────────── */
+
+#define COL_BG       0x08  /* dark gray — board background */
+#define COL_GRID     0x00  /* black — grid lines */
+#define COL_GHOST    0x07  /* light gray */
+#define COL_SIDEBAR  0x00  /* black — sidebar bg */
+#define COL_TEXT     0x0F  /* white */
+#define COL_LABEL    0x07  /* light gray — dim labels */
+
+static const uint8_t piece_colors[8] = {
+    0x00,  /* 0: empty */
+    0x0B,  /* 1: I  — bright cyan */
+    0x0E,  /* 2: O  — yellow */
+    0x0D,  /* 3: T  — bright magenta */
+    0x0A,  /* 4: S  — bright green */
+    0x0C,  /* 5: Z  — bright red */
+    0x09,  /* 6: J  — bright blue */
+    0x06,  /* 7: L  — brown (orange) */
 };
 
-char pchar[] = " #@$%&*+";
+/* ── Piece data (4x4 bitmaps, 4 rotations each) ─────────────────────── */
 
-int cp, cr, cx, cy;
-int np;
-int score, lines, level;
-int game_over;
-int drop_interval;
-uint32_t rng;
+static const uint16_t pieces[7][4] = {
+    {0x0F00, 0x2222, 0x00F0, 0x4444}, /* I */
+    {0x6600, 0x6600, 0x6600, 0x6600}, /* O */
+    {0x0E40, 0x4C40, 0x4E00, 0x4640}, /* T */
+    {0x06C0, 0x8C40, 0x6C00, 0x4620}, /* S */
+    {0x0C60, 0x4C80, 0xC600, 0x2640}, /* Z */
+    {0x0E80, 0xC440, 0x2E00, 0x44C0}, /* J */
+    {0x0E20, 0x4460, 0x8E00, 0xC880}, /* L */
+};
 
-// ── Framebuffer ──────────────────────────────────────────────────────────────
-//
-// NO newlines. VGA is 80x25 = 2000 cells laid out linearly.
-//
-// We only write rows 0-23 (1920 bytes). Row 24 is never touched,
-// so vga_index stops at 1920, well below VGA_SIZE (2000).
-// This prevents the scroll code from ever firing.
-//
-// Row 0:     empty (kernel status bar lives here)
-// Row 1:     title + score
-// Row 2:     top border + lines
-// Row 3-22:  board (20 rows) + level/next/controls on right
-// Row 23:    bottom border + game over
-// Row 24:    empty (not written — prevents VGA scroll)
+/* ── Game state ──────────────────────────────────────────────────────── */
 
-int rand7(void) {
+static uint8_t board[BH][BW];
+static int cp, cr, cx, cy;       /* current piece, rotation, position */
+static int np;                    /* next piece */
+static int score, total_lines, level;
+static int game_over;
+static int drop_interval;
+static uint32_t rng;
+static uint32_t win_id;
+
+/* ── RNG / piece logic ───────────────────────────────────────────────── */
+
+static int rand7(void) {
     rng = rng * 1103515245 + 12345;
     return ((rng >> 16) & 0x7FFF) % 7;
 }
 
-int pcell(int p, int r, int gx, int gy) { return (pieces[p][r] >> (15 - gy * 4 - gx)) & 1; }
+static int pcell(int p, int r, int gx, int gy) {
+    return (pieces[p][r] >> (15 - gy * 4 - gx)) & 1;
+}
 
-int collides(int p, int r, int px, int py) {
-    int gy;
-    int gx;
-    for (gy = 0; gy < 4; gy++)
-        for (gx = 0; gx < 4; gx++)
+static int collides(int p, int r, int px, int py) {
+    for (int gy = 0; gy < 4; gy++)
+        for (int gx = 0; gx < 4; gx++)
             if (pcell(p, r, gx, gy)) {
                 int bx = px + gx;
                 int by = py + gy;
@@ -65,11 +79,9 @@ int collides(int p, int r, int px, int py) {
     return 0;
 }
 
-void lock_piece(void) {
-    int gy;
-    int gx;
-    for (gy = 0; gy < 4; gy++)
-        for (gx = 0; gx < 4; gx++)
+static void lock_piece(void) {
+    for (int gy = 0; gy < 4; gy++)
+        for (int gx = 0; gx < 4; gx++)
             if (pcell(cp, cr, gx, gy)) {
                 int bx = cx + gx;
                 int by = cy + gy;
@@ -78,35 +90,27 @@ void lock_piece(void) {
             }
 }
 
-int clear_rows(void) {
+static int clear_rows(void) {
     int cleared = 0;
-    int y;
-    for (y = BH - 1; y >= 0; y--) {
+    for (int y = BH - 1; y >= 0; y--) {
         int full = 1;
-        int x;
-        for (x = 0; x < BW; x++)
-            if (!board[y][x]) {
-                full = 0;
-                break;
-            }
+        for (int x = 0; x < BW; x++)
+            if (!board[y][x]) { full = 0; break; }
+
         if (full) {
             cleared++;
-            int yy;
-            for (yy = y; yy > 0; yy--) {
-                int xx;
-                for (xx = 0; xx < BW; xx++)
+            for (int yy = y; yy > 0; yy--)
+                for (int xx = 0; xx < BW; xx++)
                     board[yy][xx] = board[yy - 1][xx];
-            }
-            int xx;
-            for (xx = 0; xx < BW; xx++)
+            for (int xx = 0; xx < BW; xx++)
                 board[0][xx] = 0;
-            y++;
+            y++; /* re-check this row */
         }
     }
     return cleared;
 }
 
-void spawn(void) {
+static void spawn(void) {
     cp = np;
     np = rand7();
     cr = 0;
@@ -116,149 +120,160 @@ void spawn(void) {
         game_over = 1;
 }
 
-void award_lines(int n) {
-    int pts[5];
-    pts[0] = 0;
-    pts[1] = 100;
-    pts[2] = 300;
-    pts[3] = 500;
-    pts[4] = 800;
+static void award_lines(int n) {
+    static const int pts[] = {0, 100, 300, 500, 800};
     score += pts[n] * (level + 1);
-    lines += n;
-    level = lines / 10;
+    total_lines += n;
+    level = total_lines / 10;
     drop_interval = 20 - level * 2;
     if (drop_interval < 2)
         drop_interval = 2;
 }
 
-// ── Framebuffer helpers ──────────────────────────────────────────────────────
+/* ── Drawing helpers ─────────────────────────────────────────────────── */
 
-void fb_put(int row, int col, char c) {
-    if (row >= 0 && row < WRITE_ROWS && col >= 0 && col < COLS)
-        fb[row * COLS + col] = c;
+static void draw_rect(int x, int y, int w, int h, uint8_t color) {
+    create_rect_t r;
+    r.window_id = win_id;
+    r.x = x;
+    r.y = y;
+    r.width = w;
+    r.height = h;
+    r.color = color;
+    sys_create_rect(&r);
 }
 
-void fb_str(int row, int col, char *s) {
-    int i;
-    for (i = 0; s[i] && col + i < COLS; i++)
-        fb[row * COLS + col + i] = s[i];
+static void draw_text(int x, int y, char *str, uint8_t color) {
+    create_text_t t;
+    t.window_id = win_id;
+    t.x = x;
+    t.y = y;
+    t.str = str;
+    t.color = color;
+    sys_create_text(&t);
 }
 
-void fb_num(int row, int col, int n) {
-    char tmp[12];
-    itos(tmp, n);
-    fb_str(row, col, tmp);
+static void draw_num(int x, int y, int n, uint8_t color) {
+    char buf[12];
+    itos(buf, n);
+    draw_text(x, y, buf, color);
 }
 
-// ── Rendering ────────────────────────────────────────────────────────────────
+static void draw_cell(int bx, int by, uint8_t color) {
+    int px = BOARD_X + bx * CELL;
+    int py = BOARD_Y + by * CELL;
+    draw_rect(px + 1, py + 1, CELL - 1, CELL - 1, color);
+}
 
-void render(void) {
-    // Fill rows 0-23 with spaces
-    memset(fb, ' ', FBSIZE);
+/* ── Rendering ───────────────────────────────────────────────────────── */
 
-    // Row 1: title + score
-    fb_str(1, 4, "T E T R I S");
-    fb_str(1, 30, "Score:");
-    fb_num(1, 37, score);
+static void render(void) {
+    /* Clear entire window */
+    draw_rect(0, 0, WIN_W, WIN_H, COL_SIDEBAR);
 
-    // Row 2: top border + lines
-    fb_str(2, 3, "+----------+");
-    fb_str(2, 30, "Lines:");
-    fb_num(2, 37, lines);
+    /* Board background */
+    draw_rect(BOARD_X, BOARD_Y, BW * CELL, BH * CELL, COL_BG);
 
-    // Row 3: level (right side)
-    fb_str(3, 30, "Level:");
-    fb_num(3, 37, level + 1);
+    /* Grid lines */
+    for (int x = 0; x <= BW; x++)
+        draw_rect(BOARD_X + x * CELL, BOARD_Y, 1, BH * CELL, COL_GRID);
+    for (int y = 0; y <= BH; y++)
+        draw_rect(BOARD_X, BOARD_Y + y * CELL, BW * CELL, 1, COL_GRID);
 
-    // Rows 3-22: board (20 rows)
-    {
-        int y;
-        for (y = 0; y < BH; y++) {
-            int sr = y + 3;
-            fb_put(sr, 3, '|');
-            fb_put(sr, 14, '|');
+    /* Locked pieces on board */
+    for (int y = 0; y < BH; y++)
+        for (int x = 0; x < BW; x++)
+            if (board[y][x])
+                draw_cell(x, y, piece_colors[board[y][x]]);
 
-            int x;
-            for (x = 0; x < BW; x++) {
-                char c = ' ';
-
-                int px = x - cx;
-                int py = y - cy;
-                if (px >= 0 && px < 4 && py >= 0 && py < 4 && pcell(cp, cr, px, py))
-                    c = pchar[cp + 1];
-
-                if (c == ' ' && board[y][x])
-                    c = pchar[board[y][x]];
-
-                fb_put(sr, 4 + x, c);
-            }
-        }
-    }
-
-    // Ghost piece
-    {
-        int gy = cy;
-        while (!collides(cp, cr, cx, gy + 1))
-            gy++;
-        if (gy != cy) {
-            int py;
-            for (py = 0; py < 4; py++) {
-                int px;
-                for (px = 0; px < 4; px++) {
-                    if (pcell(cp, cr, px, py)) {
-                        int bx = cx + px;
-                        int by = gy + py;
-                        if (by >= 0 && by < BH) {
-                            int sr = by + 3;
-                            int idx = sr * COLS + 4 + bx;
-                            if (idx < FBSIZE && fb[idx] == ' ')
-                                fb[idx] = ':';
-                        }
-                    }
+    /* Ghost piece */
+    int ghost_y = cy;
+    while (!collides(cp, cr, cx, ghost_y + 1))
+        ghost_y++;
+    if (ghost_y != cy) {
+        for (int gy = 0; gy < 4; gy++)
+            for (int gx = 0; gx < 4; gx++)
+                if (pcell(cp, cr, gx, gy)) {
+                    int bx = cx + gx;
+                    int by = ghost_y + gy;
+                    if (by >= 0 && by < BH && !board[by][bx])
+                        draw_cell(bx, by, COL_GHOST);
                 }
-            }
-        }
     }
 
-    // Next piece preview
-    fb_str(5, 30, "Next:");
-    {
-        int py;
-        for (py = 0; py < 4; py++) {
-            int px;
-            for (px = 0; px < 4; px++) {
-                char c = pcell(np, 0, px, py) ? pchar[np + 1] : ' ';
-                fb_put(6 + py, 30 + px, c);
+    /* Current piece */
+    for (int gy = 0; gy < 4; gy++)
+        for (int gx = 0; gx < 4; gx++)
+            if (pcell(cp, cr, gx, gy)) {
+                int bx = cx + gx;
+                int by = cy + gy;
+                if (by >= 0 && by < BH)
+                    draw_cell(bx, by, piece_colors[cp + 1]);
             }
-        }
+
+    /* ── Sidebar ─────────────────────────────────────────────────── */
+
+    int sy = 8;
+
+    draw_text(SIDEBAR_X, sy, "TETRIS", COL_TEXT);
+    sy += 16;
+
+    draw_text(SIDEBAR_X, sy, "Score", COL_LABEL);
+    sy += 10;
+    draw_num(SIDEBAR_X, sy, score, COL_TEXT);
+    sy += 14;
+
+    draw_text(SIDEBAR_X, sy, "Lines", COL_LABEL);
+    sy += 10;
+    draw_num(SIDEBAR_X, sy, total_lines, COL_TEXT);
+    sy += 14;
+
+    draw_text(SIDEBAR_X, sy, "Level", COL_LABEL);
+    sy += 10;
+    draw_num(SIDEBAR_X, sy, level + 1, COL_TEXT);
+    sy += 18;
+
+    /* Next piece preview */
+    draw_text(SIDEBAR_X, sy, "Next", COL_LABEL);
+    sy += 12;
+    for (int py = 0; py < 4; py++)
+        for (int px = 0; px < 4; px++)
+            if (pcell(np, 0, px, py)) {
+                int rx = SIDEBAR_X + px * 8;
+                int ry = sy + py * 8;
+                draw_rect(rx, ry, 7, 7, piece_colors[np + 1]);
+            }
+    sy += 40;
+
+    /* Controls */
+    draw_text(SIDEBAR_X, sy, "a/d move", COL_LABEL);
+    sy += 10;
+    draw_text(SIDEBAR_X, sy, "w   spin", COL_LABEL);
+    sy += 10;
+    draw_text(SIDEBAR_X, sy, "s   drop", COL_LABEL);
+    sy += 10;
+    draw_text(SIDEBAR_X, sy, "spc slam", COL_LABEL);
+    sy += 10;
+    draw_text(SIDEBAR_X, sy, "q   quit", COL_LABEL);
+
+    /* Game over overlay */
+    if (game_over) {
+        draw_rect(BOARD_X + 5, BOARD_Y + 90, 90, 20, COL_SIDEBAR);
+        draw_text(BOARD_X + 10, BOARD_Y + 95, "GAME OVER", COL_TEXT);
     }
 
-    // Controls
-    fb_str(11, 30, "Controls:");
-    fb_str(12, 30, "a/d   move");
-    fb_str(13, 30, "w     rotate");
-    fb_str(14, 30, "s     soft drop");
-    fb_str(15, 30, "space hard drop");
-    fb_str(16, 30, "q     quit");
-
-    // Row 23: bottom border + game over
-    fb_str(23, 3, "+----------+");
-    if (game_over)
-        fb_str(23, 18, "GAME OVER -- press q");
-
-    // Flush:
-    //   clear + home (kernel only matches this exact 7-byte string)
-    //   write 1920 bytes (rows 0-23 only, row 24 untouched)
-    //   vga_index ends at 1920, never hits 2000, no scroll
-    sys_write(1, "\033[2J\033[H", 7);
-    sys_write(1, fb, FBSIZE);
+    sys_flush();
 }
 
-// ── Input ────────────────────────────────────────────────────────────────────
+/* ── Input handling ──────────────────────────────────────────────────── */
 
-void handle_input(char c) {
+/* Returns 1 if user pressed quit */
+static int handle_input(char c) {
+    if (c == 'q' || c == 'Q')
+        return 1;
+
     if (game_over)
-        return;
+        return 0;
 
     if (c == 'a' || c == 'A') {
         if (!collides(cp, cr, cx - 1, cy))
@@ -270,13 +285,8 @@ void handle_input(char c) {
         int nr = (cr + 1) % 4;
         if (!collides(cp, nr, cx, cy))
             cr = nr;
-        else if (!collides(cp, nr, cx - 1, cy)) {
-            cx--;
-            cr = nr;
-        } else if (!collides(cp, nr, cx + 1, cy)) {
-            cx++;
-            cr = nr;
-        }
+        else if (!collides(cp, nr, cx - 1, cy)) { cx--; cr = nr; }
+        else if (!collides(cp, nr, cx + 1, cy)) { cx++; cr = nr; }
     } else if (c == 's' || c == 'S') {
         if (!collides(cp, cr, cx, cy + 1))
             cy++;
@@ -284,71 +294,80 @@ void handle_input(char c) {
         while (!collides(cp, cr, cx, cy + 1))
             cy++;
     }
+
+    return 0;
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+/* ── Main ────────────────────────────────────────────────────────────── */
 
-void tetris(void) {
+int main() {
+    /* Create window */
+    create_window_t win;
+    win.x = 200;
+    win.y = 50;
+    win.width = WIN_W;
+    win.height = WIN_H;
+    strcpy(win.title, "TETRIS");
+    win_id = sys_create_window(&win);
 
+    /* Init game state */
     memset(board, 0, BH * BW);
-
     rng = sys_uptime();
     score = 0;
-    lines = 0;
+    total_lines = 0;
     level = 0;
     game_over = 0;
     drop_interval = 20;
-
     np = rand7();
     spawn();
 
-    int frame = 0;
+    int tick = 0;
+    uint32_t last_time = sys_uptime();
+
+    render();
 
     while (1) {
-        while (sys_poll(0)) {
-            char c;
-            sys_read(0, &c, 1);
-            if (c == 'q' || c == 'Q') {
-                sys_write(1, "\033[2J\033[H", 7);
-                return;
+        /* Process all pending events */
+        event_t event;
+        while (sys_get_event(win_id, &event) == 1) {
+            if (event.type == EVENT_KEYPRESS) {
+                if (handle_input(event.c))
+                    goto quit;
             }
-            handle_input(c);
         }
 
-        if (!game_over) {
-            frame++;
-            if (frame >= drop_interval) {
-                frame = 0;
-                if (!collides(cp, cr, cx, cy + 1)) {
-                    cy++;
-                } else {
-                    lock_piece();
-                    int cl = clear_rows();
-                    if (cl > 0)
-                        award_lines(cl);
-                    spawn();
+        /* Check if window was closed */
+        if (sys_get_event(win_id, &event) == -1)
+            sys_exit();
+
+        /* Tick-based gravity */
+        uint32_t now = sys_uptime();
+        if (now != last_time) {
+            last_time = now;
+
+            if (!game_over) {
+                tick++;
+                if (tick >= drop_interval) {
+                    tick = 0;
+                    if (!collides(cp, cr, cx, cy + 1)) {
+                        cy++;
+                    } else {
+                        lock_piece();
+                        int cl = clear_rows();
+                        if (cl > 0)
+                            award_lines(cl);
+                        spawn();
+                    }
                 }
             }
+
+            render();
         }
 
-        render();
-
-        if (game_over) {
-            while (1) {
-                char c;
-                sys_read(0, &c, 1);
-                if (c == 'q' || c == 'Q')
-                    break;
-            }
-            sys_write(1, "\033[2J\033[H", 7);
-            return;
-        }
-
-        sys_sleep(5);
+        sys_sleep(1);
     }
-}
 
-int main() {
-    tetris();
+quit:
+    sys_exit();
     return 0;
 }
