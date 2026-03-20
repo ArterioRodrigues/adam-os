@@ -1,6 +1,6 @@
 #ifndef GTD_H
 #define GDT_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 #define GDT_NULL        0
 #define GDT_KERNEL_CODE 1

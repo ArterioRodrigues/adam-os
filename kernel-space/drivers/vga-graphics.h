@@ -1,15 +1,7 @@
 #ifndef VGA_H
 #define VGA_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
-typedef struct {
-    uint32_t window_id;
-    int x;
-    int y;
-    uint32_t width;
-    uint32_t height;
-    uint8_t color;
-} create_rect_t;
 
 extern volatile uint8_t *vga_graphics_buffer;
 extern uint8_t *back_buffer;

@@ -2,7 +2,7 @@
 #define WINDOW_H
 #include "config.h"
 #include "event.h"
-#include "types.h"
+#include "../../shared/types.h"
 
 typedef struct window {
     uint32_t window_id;
@@ -26,22 +26,6 @@ typedef struct window {
     event_queue_t event_queue;
 
 } window_t;
-
-typedef struct {
-    int x;
-    int y;
-    uint32_t width;
-    uint32_t height;
-    char title[32];
-} create_window_t;
-
-typedef struct {
-    uint32_t window_id;
-    int x;
-    int y;
-    char *str;
-    uint8_t color;
-} create_text_t;
 
 extern window_t *window_head_ptr;
 extern uint32_t window_z_index;

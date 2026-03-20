@@ -1,6 +1,6 @@
 #ifndef MEM_H
 #define MEM_H
-#include "../kernel/types.h"
+#include "types.h"
 
 void memcpy(void *dest, const void *src, uint32_t n);
 void memset(void *ptr, int value, uint32_t n);

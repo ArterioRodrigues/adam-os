@@ -1,6 +1,11 @@
 #ifndef HELPERS_H
 #define HELPERS_H
-#include "types.h"
+#include "../../shared/abi-types.h"
+#include "../../shared/mem.h"
+#include "../../shared/math.h"
+#include "../../shared/string.h"
+#include "../../shared/mem.h"
+#include "../../shared/types.h"
 
 extern void sys_exit();
 extern void sys_exec(char *filname, char *buf);
@@ -35,4 +40,5 @@ static void wait() {
     }
 }
 
+void print(const char *s); 
 #endif

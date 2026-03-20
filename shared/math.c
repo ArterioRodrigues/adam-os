@@ -1,5 +1,4 @@
-#include "../pch.h"
-
+#include "math.h"
 int pow(int n, int power) {
     int result = 1;
 

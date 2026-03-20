@@ -5,11 +5,12 @@ LD=i686-elf-ld
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 USER_BUILD="$SCRIPT_DIR/../user-space/build"
+SHARED_DIR="$SCRIPT_DIR/../shared"
 
 cd "$SCRIPT_DIR"
 
 echo "Creating precompiled header..."
-$CC -ffreestanding -fno-pic -c pch.h -o pch.h.gch
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -c pch.h -o pch.h.gch
 
 echo "Assembling files..."
 nasm -f elf32 cpu/interrupts.asm -o interrupts.o
@@ -21,31 +22,35 @@ nasm -f elf32 kernel/process-control-block.asm -o process-control-block.o
 nasm -f bin boot/kernel-boot-vga-visual.asm -o kernel-boot.bin
 
 echo "Compiling C files..."
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/kernel.c -o kernel.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/kmalloc.c -o kmalloc.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/page-table.c -o page-tablec.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/frame.c -o frame.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/scheduler.c -o scheduler.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/window.c -o window.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
-$CC -ffreestanding -fno-pic -include pch.h -c kernel/event.c -o event.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/ata-disk.c -o ata-disk.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/mouse.c -o mouse.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/vga-graphics.c -o vga-graphics.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/terminal.c -o terminal.o
-$CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
-$CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
-$CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
-$CC -ffreestanding -fno-pic -include pch.h -c cpu/syscall.c -o syscall.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/string.c -o string.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/math.c -o math.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/fat16.c -o fat16.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/mem.c -o mem.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/status-bar.c -o status-bar.o
-$CC -ffreestanding -fno-pic -include pch.h -c lib/font.c -o font.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/kernel.c -o kernel.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/kmalloc.c -o kmalloc.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/page-table.c -o page-tablec.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/frame.c -o frame.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/process-control-block.c -o process-control-blockc.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/scheduler.c -o scheduler.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/window.c -o window.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/stdin.c -o stdin.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/event.c -o event.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/ata-disk.c -o ata-disk.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/keyboard.c -o keyboard.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/mouse.c -o mouse.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/timer.c -o timer.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/vga-graphics.c -o vga-graphics.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c drivers/terminal.c -o terminal.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c cpu/idt.c -o idt.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c cpu/exceptions.c -o exceptionsc.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c cpu/gdt.c -o gdtc.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c cpu/syscall.c -o syscall.o
+
+# shared library files (from shared/)
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c "$SHARED_DIR/string.c" -o string.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c "$SHARED_DIR/math.c" -o math.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c "$SHARED_DIR/mem.c" -o mem.o
+
+# kernel-only lib files (stay in kernel-space/lib/)
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/fat16.c -o fat16.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/status-bar.c -o status-bar.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/font.c -o font.o
 
 # collect all embedded user program objects
 USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')

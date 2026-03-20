@@ -1,7 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 #include "../kernel/config.h"
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 
 extern bool keyboard_pressed;

@@ -1,6 +1,6 @@
 #ifndef FAT16_H
 #define FAT16_H
-#include "../kernel/types.h"
+#include "../../shared/abi-types.h"
 
 typedef struct fat16_bpb {
     uint8_t padding[11];
@@ -21,15 +21,6 @@ typedef struct fat16_geometry {
     uint32_t root_dir_sectors;
     uint32_t data_start_lba;
 } fat16_geometry_t;
-
-typedef struct fat16_entry {
-    uint8_t name[8];
-    uint8_t extension[3];
-    uint8_t attributes;
-    uint8_t reserved[14];
-    uint16_t start_cluster;
-    uint32_t file_size;
-} __attribute__((packed)) fat16_entry_t;
 
 typedef struct {
     uint8_t *data;

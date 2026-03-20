@@ -1,9 +1,4 @@
-#include "page-table.h"
 #include "../pch.h"
-#include "config.h"
-#include "frame.h"
-#include "kernel.h"
-#include "types.h"
 
 static void identity_map_in(page_directory_t *pd, uint32_t phys_addr) {
     uint32_t page_directory_index = phys_addr >> 22;

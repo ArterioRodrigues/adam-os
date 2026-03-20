@@ -1,6 +1,6 @@
 #ifndef MOUSE_H
 #define MOUSE_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 extern int mouse_x;
 extern int mouse_y;

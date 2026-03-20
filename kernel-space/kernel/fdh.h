@@ -1,7 +1,7 @@
 #ifndef FD_H
 #define FD_H
 #include "../lib/fat16.h"
-#include "types.h"
+#include "../../shared/types.h"
 
 #define MAX_FDS 16
 

@@ -1,5 +1,4 @@
 #include "../lib/lib.h"
-#include "../lib/string.h"
 
 char vim_buffer[2000];
 

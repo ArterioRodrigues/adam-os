@@ -1,5 +1,4 @@
 #include "../lib/lib.h"
-#include "../lib/string.h"
 
 #define BW 10
 #define BH 20

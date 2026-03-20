@@ -1,6 +1,6 @@
 #ifndef FONT_H
 #define FONT_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 extern uint8_t font8x16[95][16];
 extern uint8_t font8x8[95][8];

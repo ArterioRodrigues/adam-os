@@ -1,4 +1,5 @@
-#include "../pch.h"
+#include "string.h"
+#include "abi-types.h"
 
 char char_n_10[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 char char_n_16[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
@@ -19,16 +20,13 @@ bool strcmp(const char *str1, const char *str2) {
 }
 
 bool strncmp(const char *str1, const char *str2, int n) {
-    int index = 0;
-    while (n > 0 && str1[index] != '\0' && str2[index] != '\0') {
-        if (str1[index] != str2[index])
+    for (int i = 0; i < n; i++) {
+        if (str1[i] != str2[i])
             return false;
-        index++;
-        n--;
+        if (str1[i] == '\0')
+            return false;
     }
 
-    if (n != 0)
-        return false;
     return true;
 }
 
@@ -143,7 +141,7 @@ int stoi(char *str) {
 }
 
 static char *string_token = NULL;
-char *strtok(char *destination, char *str, char deliminator) {
+char *strtok(char *destination, char *str, char delimiater) {
     if (str != NULL) {
         string_token = str;
     }
@@ -152,12 +150,12 @@ char *strtok(char *destination, char *str, char deliminator) {
         *destination = NULL;
         return NULL;
     }
-    while (*string_token == deliminator) {
+    while (*string_token == delimiater) {
         string_token++;
     }
 
     int index = 0;
-    while (*string_token && *string_token != deliminator) {
+    while (*string_token && *string_token != delimiater) {
         destination[index] = *string_token;
         index++;
         string_token++;
@@ -200,4 +198,13 @@ char *strncat(char *destination, const char *source, int n) {
 
     destination[dest_length + index] = '\0';
     return destination;
+}
+
+
+int strfind(char *c, char deliminator) {
+
+    for (int i = 0; i < strlen(c); i++)
+        if (c[i] == deliminator)
+            return i;
+    return -1;
 }

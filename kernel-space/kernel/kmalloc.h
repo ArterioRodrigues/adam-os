@@ -1,7 +1,7 @@
 #ifndef KMALLOC_H
 #define KMALLOC_H
 
-#include "types.h"
+#include "../../shared/types.h"
 
 typedef struct heap_block_header {
     uint32_t size;

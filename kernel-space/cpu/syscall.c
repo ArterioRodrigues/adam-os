@@ -91,7 +91,7 @@ void handle_syscall_write(registers_t *regs) {
         }
 
         for (uint32_t i = 0; i < len; i++) {
-            if (buf[i] == '\033' && buf[i + 1] == '[') {
+            if (i + 1 < len && buf[i] == '\033' && buf[i + 1] == '[') {
                 int code = stoi(&buf[i + 2]);
 
                 if (code >= 30 && code <= 50)
@@ -106,6 +106,7 @@ void handle_syscall_write(registers_t *regs) {
             terminal_print_char_color(buf[i], color);
         }
         terminal->cursor_floor = (TERMINAL_COLS * terminal->cursor_row) + terminal->cursor_column;
+        regs->eax = (uint32_t)-1;
 
         regs->eax = len;
         break;
@@ -141,8 +142,10 @@ void handle_syscall_write(registers_t *regs) {
 void handle_syscall_open(registers_t *regs) {
     char *file_name = (char *)regs->ebx;
 
-    if (!file_name)
+    if (!file_name) {
+        regs->eax = (uint32_t)-1;
         return;
+    }
 
     fat16_entry_t *entry = fat16_find_file(file_name);
     if (!entry) {
@@ -180,7 +183,7 @@ void handle_syscall_open(registers_t *regs) {
     kfree(fat_fd->data);
     kfree(fat_fd);
     kfree(entry);
-    print("ERROR: TO MANY FILE OPEN");
+    print("ERROR: TOO MANY FILES OPEN");
     return;
 }
 
@@ -198,7 +201,6 @@ void handle_syscall_close(registers_t *regs) {
     kfree(fat_fd->data);
     kfree(fat_fd);
     process_fd->data = NULL;
-    process_fd->is_open = false;
     process_fd->is_open = false;
 
     regs->eax = 0;
@@ -308,7 +310,11 @@ void handle_syscall_create_window(registers_t *regs) {
 void handle_syscall_draw_rect(registers_t *regs) {
     create_rect_t *rect = (create_rect_t *)regs->ebx;
     window_t *window = get_window(rect->window_id);
-    uint32_t index = 0;
+
+    if (!window) {
+        regs->eax = -1;
+        return;
+    }
 
     window_draw_rect(window, rect->x, rect->y, rect->width, rect->height, rect->color);
 }
@@ -337,7 +343,7 @@ void handle_syscall_get_event(registers_t *regs) {
     memcpy(event, popped, sizeof(event_t));
     regs->eax = 1;
 }
-void handle_syscall_destory_window(registers_t *regs) {
+void handle_syscall_destroy_window(registers_t *regs) {
     uint32_t id = regs->ebx;
     remove_window(id);
     wm_composite();
@@ -399,11 +405,11 @@ void syscall_handler_main(registers_t *regs) {
     case SYSCALL_DRAW_TEXT:
         handle_syscall_draw_text(regs);
         break;
-    case SYSCALL_DRAW_EVENT:
+    case SYSCALL_GET_EVENT:
         handle_syscall_get_event(regs);
         break;
     case SYSCALL_DESTROY_WINDOW:
-        handle_syscall_destory_window(regs);
+        handle_syscall_destroy_window(regs);
         break;
     case SYSCALL_FLUSH:
         handle_syscall_flush(regs);

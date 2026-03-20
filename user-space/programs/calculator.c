@@ -1,5 +1,4 @@
 #include "../lib/lib.h"
-#include "../lib/string.h"
 
 void render_calculator(uint32_t id, char *display) {
     create_rect_t rect;

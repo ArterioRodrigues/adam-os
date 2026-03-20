@@ -54,4 +54,14 @@ typedef struct {
 
     char c;
 } event_t;
+
+typedef struct fat16_entry {
+    uint8_t name[8];
+    uint8_t extension[3];
+    uint8_t attributes;
+    uint8_t reserved[14];
+    uint16_t start_cluster;
+    uint32_t file_size;
+} __attribute__((packed)) fat16_entry_t;
+
 #endif

@@ -1,6 +1,5 @@
 #ifndef KERNEL_H
 #define KERNEL_H
-
 #include "page-table.h"
 
 extern uint8_t _binary_idle_bin_start[];

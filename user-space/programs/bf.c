@@ -1,5 +1,4 @@
 #include "../lib/lib.h"
-#include "../lib/string.h"
 
 char program[4096];
 char tape[256];
@@ -75,3 +74,4 @@ void main(char *arg) {
     print("\n");
     return;
 }
+

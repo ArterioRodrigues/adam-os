@@ -1,6 +1,6 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 #define SYSCALL_EXIT 1
 #define SYSCALL_FORK 2
@@ -19,7 +19,7 @@
 #define SYSCALL_CREATE_WINDOW 18
 #define SYSCALL_DRAW_RECT 19
 #define SYSCALL_DRAW_TEXT 20
-#define SYSCALL_DRAW_EVENT 21
+#define SYSCALL_GET_EVENT 21
 #define SYSCALL_DESTROY_WINDOW 22
 #define SYSCALL_FLUSH 23
 

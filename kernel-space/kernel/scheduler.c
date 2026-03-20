@@ -134,10 +134,9 @@ void update_scheduler(registers_t *regs) {
         return;
 
     decrement_wait_process();
-
     quantum_counter++;
     if (current_process && quantum_counter < SCHEDULER_QUANTUM &&
-        (current_process->status == READY || current_process == RUNNING)) {
+        (current_process->status == READY || current_process->status == RUNNING)) {
         return;
     }
 
