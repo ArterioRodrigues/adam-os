@@ -57,8 +57,9 @@ void kernel_main() {
     init_fat16();
     init_frames();
     init_vga();
-
+    init_terminal();
     wm_composite();
+
     for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
     }

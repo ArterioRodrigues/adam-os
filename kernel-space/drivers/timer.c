@@ -8,10 +8,6 @@ void timer_handler_main(registers_t *regs) {
     update_scheduler(regs);
     update_status_bar();
 
-    if (wm_dirty) {
-        wm_composite();
-        wm_dirty = false;
-    }
     outb(PIC1_COMMAND, PIC_EOI);
 }
 

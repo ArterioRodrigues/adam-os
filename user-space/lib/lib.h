@@ -24,7 +24,6 @@ extern int sys_get_event(uint32_t id, event_t *event);
 extern void sys_destory_window(uint32_t id);
 extern void sys_flush();
 
-
 static void wait() {
     int i = 0;
     int j = 0;

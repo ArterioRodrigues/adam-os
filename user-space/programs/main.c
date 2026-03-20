@@ -1,9 +1,11 @@
 #include "../lib/lib.h"
 #include "../lib/string.h"
-#include "calculator.c"
 
-int main() {
-  calculator();
 
-  return 0;
+void main() {
+    sys_exec("shell", "");
+    print("Error: exec failed");
+    while (1)
+        ;
 }
+

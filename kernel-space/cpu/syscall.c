@@ -86,7 +86,7 @@ void handle_syscall_write(registers_t *regs) {
         uint8_t color = WHITE;
 
         if (strcmp(buf, "\033[2J\033[H")) {
-            clear_screen();
+            clear_terminal();
             return;
         }
 
@@ -95,7 +95,7 @@ void handle_syscall_write(registers_t *regs) {
                 int code = stoi(&buf[i + 2]);
 
                 if (code >= 30 && code <= 50)
-                    color = ansi_to_vga[code - 30];
+                    color = ansi_to_terminal[code - 30];
                 else if (code == 0) {
                     color = WHITE;
                 }
@@ -103,9 +103,10 @@ void handle_syscall_write(registers_t *regs) {
                 i += strlen(itos(tmp, code)) + 3;
             }
 
-            print_char_color(buf[i], color);
+            terminal_print_char_color(buf[i], color);
         }
-        vga_cursor_floor = vga_index;
+        terminal->cursor_floor = (TERMINAL_COLS * terminal->cursor_row) + terminal->cursor_column;
+
         regs->eax = len;
         break;
     case FD_FILE:
@@ -207,6 +208,14 @@ void handle_syscall_exec(registers_t *regs) {
     char *file_name = (char *)regs->ecx;
     char *arg = (char *)regs->edx;
 
+    char name_buf[64];
+    char arg_buf[256];
+    strcpy(name_buf, file_name);
+    if (arg)
+        strcpy(arg_buf, arg);
+    else
+        arg_buf[0] = '\0';
+
     fat16_entry_t *entry = fat16_find_file(file_name);
 
     if (!entry) {
@@ -223,20 +232,18 @@ void handle_syscall_exec(registers_t *regs) {
     clear_page_directory(current_page_directory);
     update_page_directory(current_page_directory, data, entry->file_size, regs);
 
-    if (arg) {
+    if (arg_buf[0] != '\0') {
         uint32_t stack_top = regs->useresp;
-        uint32_t arg_len = strlen(arg) + 1;
-
+        uint32_t arg_len = strlen(arg_buf) + 1;
         stack_top -= arg_len;
         uint32_t str_addr = stack_top;
-        memcpy((void *)str_addr, arg, arg_len);
-
+        memcpy((void *)str_addr, arg_buf, arg_len);
         stack_top -= 4;
         *(uint32_t *)stack_top = str_addr;
-
         regs->useresp = stack_top;
         regs->esp = stack_top;
     }
+
     kfree(entry);
     kfree(data);
 }
@@ -318,7 +325,11 @@ void handle_syscall_get_event(registers_t *regs) {
     event_t *event = (event_t *)regs->ecx;
 
     window_t *window = get_window(id);
-    if (!window || event_queue_is_empty(&window->event_queue)) {
+    if (!window) {
+        regs->eax = -1;
+        return;
+    }
+    if (event_queue_is_empty(&window->event_queue)) {
         regs->eax = 0;
         return;
     }
@@ -332,9 +343,7 @@ void handle_syscall_destory_window(registers_t *regs) {
     wm_composite();
 }
 
-void handle_syscall_flush(registers_t *regs) {
-    wm_composite();
-}
+void handle_syscall_flush(registers_t *regs) { wm_composite(); }
 void syscall_handler_main(registers_t *regs) {
     uint32_t syscall_num = regs->eax;
 

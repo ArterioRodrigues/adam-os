@@ -37,7 +37,6 @@ page_table_t *create_page_table() {
 
 void copy_page_directory(page_directory_t *dest, page_directory_t *source) {
     for (int i = 0; i < 1024; i++) {
-
         if (!(source->entries[i] & 1))
             continue;
 
@@ -84,6 +83,9 @@ void clear_page_directory(page_directory_t *page_directory) {
         page_table_t *page_table = (page_table_t *)(page_directory->entries[i] & 0xFFFFF000);
         for (int j = 0; j < 1024; j++) {
             if (page_table->entries[j] & 1) {
+                if (!(page_table->entries[j] & 0x4))
+                    continue;
+
                 uint32_t frame = page_table->entries[j] & 0xFFFFF000;
                 free_frame(frame);
             }
@@ -98,14 +100,17 @@ void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t 
 
     map_page(page_directory, user_func_frame, user_func_frame, PAGE_FLAG_USER);
     map_page(page_directory, USER_FUNC_VADDR, user_func_frame, PAGE_FLAG_USER);
+    memcpy((void *)user_func_frame, fn, min(size, PAGE_SIZE));
 
     for (int i = 1; i < ceil(size, PAGE_SIZE); i++) {
         frame = allocate_frame();
         map_page(page_directory, frame, frame, PAGE_FLAG_USER);
         map_page(page_directory, USER_FUNC_VADDR + PAGE_SIZE * i, frame, PAGE_FLAG_USER);
-    }
 
-    memcpy((void *)user_func_frame, fn, size);
+        uint32_t offset = i * PAGE_SIZE;
+        uint32_t remaining = size - offset;
+        memcpy((void *)frame, fn + offset, min(remaining, PAGE_SIZE));
+    }
 
     uint32_t user_stack_frame = allocate_frame();
     map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);

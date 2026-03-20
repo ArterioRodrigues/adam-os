@@ -1,10 +1,10 @@
 #include "../pch.h"
 
-void rep_memcpy(void *dest, const void *src, uint32_t n) {
+void memcpy(void *dest, const void *src, uint32_t n) {
     uint32_t dwords = n / 4;
     uint32_t remain = n % 4;
 
-    asm volatile("rep movsd"
+    asm volatile("rep movsl"
         : "+D"(dest), "+S"(src), "+c"(dwords)
         :
         : "memory");
@@ -15,7 +15,7 @@ void rep_memcpy(void *dest, const void *src, uint32_t n) {
         *d++ = *s++;
 }
 
-void memcpy(void *dest, const void *src, uint32_t n) {
+void temp_memcpy(void *dest, const void *src, uint32_t n) {
     unsigned char *d = dest;
     unsigned char *s = (char *)src;
 

@@ -214,7 +214,7 @@ static void dispatch(char *line) {
         error_handler(line);
 }
 
-void main() {
+void shell() {
     shell_path[0] = '/';
     shell_path[1] = '\0';
 
@@ -229,4 +229,9 @@ void main() {
         if (size > 0)
             dispatch(input_buf);
     }
+}
+
+int main() {
+    shell();
+    return 0;
 }

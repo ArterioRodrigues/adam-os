@@ -3,8 +3,8 @@
 volatile uint8_t *vga_graphics_buffer;
 uint8_t *back_buffer = NULL;
 
-uint32_t font_row = 4;
-uint32_t font_col = 4;
+uint32_t font_row = 7;
+uint32_t font_col = 5; 
 
 uint32_t screen_width;
 uint32_t screen_height;
@@ -15,10 +15,10 @@ void vga_put_pixel(int x, int y, uint8_t color) {
     if (x >= screen_width || x < 0 || y >= screen_height || y < 0)
         return;
     uint32_t index = (y * screen_pitch) + x;
-    vga_graphics_buffer[index] = color;
+    back_buffer[index] = color;
 }
 
-void vga_clear_screen(uint8_t color) { memset((void *)vga_graphics_buffer, color, screen_size); }
+void vga_clear_screen(uint8_t color) { memset((void *)back_buffer, color, screen_size); }
 
 void vga_draw_rect(int x, int y, int w, int h, uint8_t color) {
     for (int i = x; i < x + w; i++) {
@@ -56,7 +56,7 @@ void vga_draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
 }
 
 void vga_draw_char(int x, int y, char c, uint8_t color) {
-    uint8_t *glyph = font4x4[c - 32];
+    uint8_t *glyph = font5x7[c - 32];
     for (int row = 0; row < font_row; row++) {
         uint8_t bits = glyph[row];
         for (int col = 0; col < font_col; col++) {
@@ -73,16 +73,22 @@ void vga_draw_string(int x, int y, char *c, uint8_t color) {
     }
 }
 
-void vga_flip() { rep_memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)vga_graphics_buffer, screen_size); }
+void vga_flip() { memcpy((uint8_t *)vga_graphics_buffer, (uint8_t *)back_buffer, screen_size); }
 
 void vga_draw_cursor(int x, int y, uint8_t color) {
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++)
-            if (mouse_cursor[row] & (0x80 >> col))
+    for (int row = 0; row < 18; row++) {
+        for (int col = 0; col < 16; col++) {
+            uint8_t outline_byte = cursor_outline[row * 2 + (col / 8)];
+            uint8_t fill_byte = cursor_fill[row * 2 + (col / 8)];
+            uint8_t bit = 0x80 >> (col % 8);
+
+            if (fill_byte & bit)
                 vga_put_pixel(x + col, y + row, color);
+            else if (outline_byte & bit)
+                vga_put_pixel(x + col, y + row, WHITE);
+        }
     }
 }
-
 void init_vga() {
     screen_width = *(uint16_t *)(VBE_MODE_INFO_ADDR + 0x12);
     screen_height = *(uint16_t *)(VBE_MODE_INFO_ADDR + 0x14);

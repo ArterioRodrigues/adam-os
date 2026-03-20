@@ -60,5 +60,6 @@ void window_draw_string(window_t *window, create_text_t *text);
 void window_put_pixel(window_t *window, int x, int y, uint8_t color);
 void window_draw_rect(window_t *window, int x, int y, int w, int h, uint8_t color);
 
+void window_draw_char(window_t *window, int x, int y, char c, uint8_t color);
 void remove_window(uint32_t id);
 #endif

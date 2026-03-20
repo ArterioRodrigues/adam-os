@@ -31,11 +31,11 @@ $CC -ffreestanding -fno-pic -include pch.h -c kernel/window.c -o window.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/stdin.c -o stdin.o
 $CC -ffreestanding -fno-pic -include pch.h -c kernel/event.c -o event.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/ata-disk.c -o ata-disk.o
-$CC -ffreestanding -fno-pic -include pch.h -c drivers/screen.c -o screen.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/keyboard.c -o keyboard.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/mouse.c -o mouse.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/timer.c -o timer.o
 $CC -ffreestanding -fno-pic -include pch.h -c drivers/vga-graphics.c -o vga-graphics.o
+$CC -ffreestanding -fno-pic -include pch.h -c drivers/terminal.c -o terminal.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/idt.c -o idt.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/exceptions.c -o exceptionsc.o
 $CC -ffreestanding -fno-pic -include pch.h -c cpu/gdt.c -o gdtc.o
@@ -54,8 +54,8 @@ echo "Including user binaries: $USER_BINS"
 echo "Linking kernel..."
 $LD -T linker.ld -o kernel.bin \
     kernel-entry.o process-control-blockc.o scheduler.o window.o process-control-block.o \
-    kernel.o kmalloc.o page-tablec.o frame.o screen.o syscall.o \
-    mem.o keyboard.o mouse.o timer.o vga-graphics.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
+    kernel.o kmalloc.o page-tablec.o frame.o syscall.o \
+    mem.o keyboard.o mouse.o timer.o vga-graphics.o terminal.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o event.o\
     page-table.o status-bar.o font.o\
     $USER_BINS \
@@ -72,6 +72,7 @@ mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/vim.bin ::VIM
 mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 mcopy -i fat16.bin $USER_BUILD/tetris.bin ::TETRIS
+mcopy -i fat16.bin $USER_BUILD/calculator.bin ::CALC
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10

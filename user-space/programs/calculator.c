@@ -9,21 +9,21 @@ void render_calculator(uint32_t id, char *display) {
     text.window_id = id;
 
     rect.x = 0;
-    rect.y = 12;
+    rect.y = 0;
     rect.width = 160;
     rect.height = 38;
     rect.color = 0x0;
     sys_create_rect(&rect);
 
     rect.x = 0;
-    rect.y = 50;
+    rect.y = 38;
     rect.width = 162;
     rect.height = 150;
     rect.color = 0xF;
     sys_create_rect(&rect);
 
     text.x = 10;
-    text.y = 30;
+    text.y = 16;
     text.str = display;
     text.color = 0xF;
     sys_create_text(&text);
@@ -35,7 +35,7 @@ void render_calculator(uint32_t id, char *display) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             rect.x = (j * 40) + 2;
-            rect.y = (i * 30) + 52;
+            rect.y = (i * 30) + 40;
             rect.width = 38;
             rect.height = 28;
             rect.color = 0x0;
@@ -43,7 +43,7 @@ void render_calculator(uint32_t id, char *display) {
 
             c[0] = buttons[i][j];
             text.x = (j * 40) + 18;
-            text.y = (i * 30) + 62;
+            text.y = (i * 30) + 50;
             text.str = c;
             text.color = 0xF;
             sys_create_text(&text);
@@ -93,9 +93,9 @@ void calculate(char *display) {
 }
 void calculator() {
     create_window_t window;
-    window.x = 50;
-    window.y = 15;
-    window.height = 172;
+    window.x = 300;
+    window.y = 300;
+    window.height = 160;
     window.width = 162;
     strcpy(window.title, "CALCULATOR");
     uint32_t id = sys_create_window(&window);
@@ -114,10 +114,13 @@ void calculator() {
     while (1) {
         event_t event;
         int is_event = sys_get_event(id, &event);
+        if(is_event == -1)
+          sys_exit();
         if (!is_event) {
             sys_sleep(1);
             continue;
         }
+
         if (event.type != EVENT_MOUSE_CLICK)
             continue;
         if (c == '=') {
@@ -151,4 +154,9 @@ void calculator() {
 
         render_calculator(id, display);
     }
+}
+
+int main() {
+    calculator();
+    return 0;
 }

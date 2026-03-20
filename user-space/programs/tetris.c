@@ -43,15 +43,12 @@ uint32_t rng;
 // Row 23:    bottom border + game over
 // Row 24:    empty (not written — prevents VGA scroll)
 
-
 int rand7(void) {
     rng = rng * 1103515245 + 12345;
     return ((rng >> 16) & 0x7FFF) % 7;
 }
 
-int pcell(int p, int r, int gx, int gy) {
-    return (pieces[p][r] >> (15 - gy * 4 - gx)) & 1;
-}
+int pcell(int p, int r, int gx, int gy) { return (pieces[p][r] >> (15 - gy * 4 - gx)) & 1; }
 
 int collides(int p, int r, int px, int py) {
     int gy;
@@ -89,7 +86,10 @@ int clear_rows(void) {
         int full = 1;
         int x;
         for (x = 0; x < BW; x++)
-            if (!board[y][x]) { full = 0; break; }
+            if (!board[y][x]) {
+                full = 0;
+                break;
+            }
         if (full) {
             cleared++;
             int yy;
@@ -271,8 +271,13 @@ void handle_input(char c) {
         int nr = (cr + 1) % 4;
         if (!collides(cp, nr, cx, cy))
             cr = nr;
-        else if (!collides(cp, nr, cx - 1, cy)) { cx--; cr = nr; }
-        else if (!collides(cp, nr, cx + 1, cy)) { cx++; cr = nr; }
+        else if (!collides(cp, nr, cx - 1, cy)) {
+            cx--;
+            cr = nr;
+        } else if (!collides(cp, nr, cx + 1, cy)) {
+            cx++;
+            cr = nr;
+        }
     } else if (c == 's' || c == 'S') {
         if (!collides(cp, cr, cx, cy + 1))
             cy++;
@@ -284,7 +289,8 @@ void handle_input(char c) {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
-void main(void) {
+void tetris(void) {
+
     memset(board, 0, BH * BW);
 
     rng = sys_uptime();
@@ -343,4 +349,7 @@ void main(void) {
     }
 }
 
-
+int main() {
+    tetris();
+    return 0;
+}

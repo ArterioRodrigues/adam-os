@@ -1,8 +1,10 @@
 #include "window.h"
 #include "../pch.h"
 #include "event.h"
+#include "scheduler.h"
 
-#define PADDING 4
+#define PADDING 5 
+#define HEADER_OFFSET 20
 window_t *window_head_ptr = NULL;
 bool wm_dirty = false;
 uint32_t window_z_index = 1;
@@ -28,9 +30,9 @@ window_t *wm_create_window(int x, int y, uint32_t width, uint32_t height, char *
 
     window->width = width;
     window->height = height;
-    window->pixel_buffer = kmalloc(width * height);
+    window->pixel_buffer = kmalloc(width * (height + HEADER_OFFSET));
 
-    memset(window->pixel_buffer, 0x0, width * height);
+    memset(window->pixel_buffer, 0x0, width * (height + HEADER_OFFSET));
     strcpy(window->title, title);
 
     window->pid = pid;
@@ -56,14 +58,14 @@ window_t *wm_create_window(int x, int y, uint32_t width, uint32_t height, char *
 void draw_window(window_t *window) {
     uint8_t focus_color = window->is_focused ? 0x0 : 0x99;
 
-    vga_draw_rect(window->x - 1, window->y - 1, window->width + 2, window->height + 2, focus_color);
+    vga_draw_rect(window->x - 1, window->y - 1, window->width + 2, window->height + HEADER_OFFSET + 2, focus_color);
 
-    vga_blit(window->x, window->y, window->width, window->height, window->pixel_buffer);
+    vga_blit(window->x, window->y, window->width, window->height + HEADER_OFFSET, window->pixel_buffer);
 
-    vga_draw_rect(window->x, window->y, window->width, 12, 0xF);
-    vga_draw_rect(window->x, window->y, window->width, 11, focus_color);
+    vga_draw_rect(window->x, window->y, window->width, HEADER_OFFSET - 4, 0xF);
+    vga_draw_rect(window->x, window->y, window->width, HEADER_OFFSET - 5, focus_color);
     vga_draw_string(window->x + PADDING, window->y + PADDING, window->title, 0xF);
-    vga_draw_string(window->x + window->width - PADDING - 12, window->y + PADDING, "[X]", 0xF);
+    vga_draw_string(window->x + window->width - PADDING - 15, window->y + PADDING, "[X]", 0xF);
 }
 
 void wm_composite() {
@@ -87,7 +89,7 @@ void wm_composite() {
     if (focus_window) {
         draw_window(focus_window);
     }
-    vga_draw_cursor(mouse_x, mouse_y, 0x56);
+    vga_draw_cursor(mouse_x, mouse_y, BLACK);
     vga_flip();
 }
 
@@ -202,6 +204,7 @@ void window_put_pixel(window_t *window, int x, int y, uint8_t color) {
     if (x >= window->width || x < 0 || y >= window->height || y < 0)
         return;
 
+    y += HEADER_OFFSET;
     uint32_t index = (y * window->width) + x;
     window->pixel_buffer[index] = color;
 }
@@ -244,6 +247,7 @@ void remove_window(uint32_t id) {
     if (window == NULL)
         return;
 
+    int pid = window->pid;
     if (prev == NULL)
         window_head_ptr = window->next;
     else
@@ -259,4 +263,5 @@ void remove_window(uint32_t id) {
     window_z_index--;
     kfree(window->pixel_buffer);
     kfree(window);
+
 }
