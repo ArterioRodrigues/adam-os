@@ -11,10 +11,6 @@ typedef unsigned char uint8_t;
 #define true 1
 #define false 0
 
-#endif
-
-#ifndef STDARG_H
-#define STDARG_H
 
 typedef __builtin_va_list va_list;
 #define va_start(v, l) __builtin_va_start(v, l)

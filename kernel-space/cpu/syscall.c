@@ -154,7 +154,7 @@ static void handle_syscall_ps(registers_t *regs) {
 
 static void handle_syscall_sleep(registers_t *regs) {
     uint32_t ticks = regs->ebx;
-    if (ticks == 0)
+    if (ticks == 0 || current_process->pid == 1)
         return;
     current_process->sleep_ticks = ticks;
     current_process->status = WAITING;

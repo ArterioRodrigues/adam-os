@@ -15,15 +15,6 @@ void memcpy(void *dest, const void *src, uint32_t n) {
         *d++ = *s++;
 }
 
-void temp_memcpy(void *dest, const void *src, uint32_t n) {
-    unsigned char *d = dest;
-    unsigned char *s = (char *)src;
-
-    while (n--) {
-        *d++ = *s++;
-    }
-}
-
 void memset(void *ptr, int value, uint32_t n) {
     char *d = (char *)ptr;
     while (n--) {

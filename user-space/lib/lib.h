@@ -1,7 +1,6 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 #include "../../shared/abi-types.h"
-#include "../../shared/mem.h"
 #include "../../shared/math.h"
 #include "../../shared/string.h"
 #include "../../shared/mem.h"
@@ -26,7 +25,7 @@ extern int sys_create_window(create_window_t *window);
 extern void sys_create_rect(create_rect_t *rect);
 extern void sys_create_text(create_text_t *text);
 extern int sys_get_event(uint32_t id, event_t *event);
-extern void sys_destory_window(uint32_t id);
+extern void sys_destroy_window(uint32_t id);
 extern void sys_flush();
 
 void print(const char *s); 

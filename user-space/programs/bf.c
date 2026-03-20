@@ -33,7 +33,7 @@ void main(char *arg) {
             tape[ptr]--;
         else if (c == '.') {
             char *buf = &tape[ptr];
-            sys_write(0, buf, 1);
+            sys_write(1, buf, 1);
         }
 
         else if (c == ',') {

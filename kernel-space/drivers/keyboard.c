@@ -48,8 +48,11 @@ void keyboard_handler_main(registers_t *regs) {
 
     if (scancode & SCANCODE_RELEASE_MASK) {
         keyboard_pressed = false;
-    } else {
+    } 
+
+    else if (terminal->window->is_focused) {
         keyboard_pressed = true;
+
 
         if (scancode == SCANCODE_ENTER) {
             update_focused_window(EVENT_KEYPRESS, scancode, '\n', NULL, NULL, NULL);

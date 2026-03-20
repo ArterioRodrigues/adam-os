@@ -1,5 +1,4 @@
 #include "../pch.h"
-#include "vga-graphics.h"
 
 uint8_t mouse_cycle = 0;
 uint8_t mouse_bytes[3];
