@@ -10,7 +10,7 @@ typedef struct {
 } event_queue_t;
 
 void event_queue_push(event_queue_t *queue, event_t event);
-event_t *event_queue_pop(event_queue_t *queue);
+void event_queue_pop(event_queue_t *queue, event_t *event);
 bool event_queue_is_empty(event_queue_t *queue);
 
 #endif

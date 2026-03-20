@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef ABI_TYPES_H
+#define ABI_TYPES_H
 
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;

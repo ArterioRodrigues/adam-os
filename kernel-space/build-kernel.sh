@@ -19,7 +19,7 @@ nasm -f elf32 cpu/gdt.asm -o gdt.o
 nasm -f elf32 boot/kernel-entry.asm -o kernel-entry.o
 nasm -f elf32 kernel/page-table.asm -o page-table.o
 nasm -f elf32 kernel/process-control-block.asm -o process-control-block.o
-nasm -f bin boot/kernel-boot-vga-visual.asm -o kernel-boot.bin
+nasm -f bin boot/kernel-boot.asm -o kernel-boot.bin
 
 echo "Compiling C files..."
 $CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c kernel/kernel.c -o kernel.o

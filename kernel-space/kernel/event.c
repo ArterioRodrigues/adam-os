@@ -9,13 +9,14 @@ void event_queue_push(event_queue_t *queue, event_t event) {
     queue->size++;
 }
 
-event_t *event_queue_pop(event_queue_t *queue) {
+void event_queue_pop(event_queue_t *queue, event_t *event) {
     if (queue->size == 0)
-        return NULL;
+        return;
 
-    event_t *event = &queue->events[queue->tail_index];
+    event_t *e = &queue->events[queue->tail_index];
     queue->tail_index = (queue->tail_index + 1) % 64;
     queue->size--;
-    return event;
+
+    memcpy(event, e, sizeof(event_t));
 }
 bool event_queue_is_empty(event_queue_t *queue) { return queue->size == 0; }

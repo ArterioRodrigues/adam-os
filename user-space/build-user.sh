@@ -29,7 +29,18 @@ $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
     -c "$SHARED_DIR/math.c" -o "$SCRIPT_DIR/build/math.o"
 
-# helper: compile + link + objcopy a user program
+build_minimal() {
+    local name="$1"
+    $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+        -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
+        -c "$SCRIPT_DIR/programs/${name}.c" -o "$SCRIPT_DIR/build/${name}.o"
+    $LD -m elf_i386 -Ttext=0x40000000 \
+        "$SCRIPT_DIR/build/syscalls.o" \
+        "$SCRIPT_DIR/build/${name}.o" \
+        -o "$SCRIPT_DIR/build/${name}.elf"
+    $OBJCOPY -O binary "$SCRIPT_DIR/build/${name}.elf" "$SCRIPT_DIR/build/${name}.bin"
+}
+
 build_program() {
     local name="$1"
     local src="$SCRIPT_DIR/programs/${name}.c"
@@ -51,8 +62,9 @@ build_program() {
 }
 
 # build all user programs
-build_program main
-build_program idle
+build_minimal main
+build_minimal idle
+
 build_program shell
 build_program bf
 build_program vim

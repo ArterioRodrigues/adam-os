@@ -157,13 +157,13 @@ void update_scheduler(registers_t *regs) {
     quantum_counter = 0;
 }
 
-void scheduler_remove(uint32_t pid) {
+bool scheduler_remove(uint32_t pid) {
     if (pid == 1)
-        return;
+        return false;
 
     if (pid == current_process->pid) {
         current_process->status = ZOMBIE;
-        return;
+        return true;
     }
 
     reparent_children(pid);
@@ -192,12 +192,14 @@ void scheduler_remove(uint32_t pid) {
 
             kfree((void *)((uint32_t)(current->kernel_stack - PAGE_SIZE)));
             kfree(current);
-            return;
+            return true;
         }
 
         prev = current;
         current = current->next;
     }
+
+    return true;
 }
 
 void reparent_children(uint32_t dying_pid) {

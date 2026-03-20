@@ -1,210 +1,161 @@
 #include "string.h"
 #include "abi-types.h"
+#include "string.h"
 
-char char_n_10[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-char char_n_16[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+static const char digits_10[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+static const char digits_16[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-bool strcmp(const char *str1, const char *str2) {
-    int index = 0;
-    while (str1[index] != '\0' && str2[index] != '\0') {
-        if (str1[index] != str2[index])
-            return false;
-
-        index++;
+bool strcmp(const char *a, const char *b) {
+    while (*a && *a == *b) {
+        a++;
+        b++;
     }
-
-    if (str1[index] != '\0' || str2[index] != '\0')
-        return false;
-
-    return true;
+    return *a == *b;
 }
 
-bool strncmp(const char *str1, const char *str2, int n) {
+bool strncmp(const char *a, const char *b, int n) {
     for (int i = 0; i < n; i++) {
-        if (str1[i] != str2[i])
-            return false;
-        if (str1[i] == '\0')
+        if (a[i] != b[i] || a[i] == '\0')
             return false;
     }
-
     return true;
 }
 
 int strlen(const char *str) {
-    int index = 0;
-    while (str[index] != '\0')
-        index++;
-
-    return index;
+    const char *s = str;
+    while (*s)
+        s++;
+    return s - str;
 }
 
-char *strcpy(char *destination, char *source) {
-    int index = 0;
-
-    while (source[index] != '\0') {
-        destination[index] = source[index];
-        index++;
+int strfind(char *str, char delim) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] == delim)
+            return i;
     }
-
-    destination[index] = '\0';
-    return destination;
+    return -1;
 }
 
-char *strcat(char *destination, char *source) {
-    int index = 0;
-    int dest_length = strlen(destination);
-    char *result;
+char *strcpy(char *dest, char *src) {
+    char *d = dest;
+    while (*src)
+        *d++ = *src++;
+    *d = '\0';
+    return dest;
+}
 
-    while (source[index] != '\0') {
-        destination[dest_length + index] = source[index];
-        index++;
-    }
+char *strncpy(char *dest, const char *src, int n) {
+    char *d = dest;
+    while (n-- > 0 && *src)
+        *d++ = *src++;
+    *d = '\0';
+    return dest;
+}
 
-    destination[dest_length + index] = '\0';
-    return destination;
+char *strcat(char *dest, char *src) {
+    char *d = dest + strlen(dest);
+    while (*src)
+        *d++ = *src++;
+    *d = '\0';
+    return dest;
+}
+
+char *strncat(char *dest, const char *src, int n) {
+    char *d = dest + strlen(dest);
+    while (n-- > 0 && *src)
+        *d++ = *src++;
+    *d = '\0';
+    return dest;
 }
 
 char *strrev(char *str) {
-    int str_length = strlen(str);
-    for (int i = 0; i < str_length / 2; i++) {
-        char temp = str[i];
-        str[i] = str[str_length - i - 1];
-        str[str_length - i - 1] = temp;
+    int len = strlen(str);
+    for (int i = 0; i < len / 2; i++) {
+        char tmp = str[i];
+        str[i] = str[len - 1 - i];
+        str[len - 1 - i] = tmp;
     }
-
     return str;
 }
 
 char *itos(char *result, int n) {
-    int index = 0;
-    bool is_negative = false;
+    int i = 0;
+    bool negative = false;
 
     if (n < 0) {
-        is_negative = true;
+        negative = true;
         n = -n;
     }
-    while (n / 10 > 0) {
-        result[index] = char_n_10[n % 10];
-        index++;
-        n = n / 10;
-    }
-    if (is_negative) {
-        result[index++] = '-';
-    }
-    result[index] = char_n_10[n];
-    result[index + 1] = '\0';
 
+    do {
+        result[i++] = '0' + (n % 10);
+        n /= 10;
+    } while (n > 0);
+
+    if (negative)
+        result[i++] = '-';
+
+    result[i] = '\0';
     strrev(result);
     return result;
 }
 
 char *itohs(char *result, int n) {
-    int index = 0;
     char hex[20];
-    while (n / 16 > 0) {
-        hex[index] = char_n_16[n % 16];
-        index++;
-        n = n / 16;
-    }
-    hex[index] = char_n_16[n];
-    hex[index + 1] = '\0';
+    int i = 0;
 
+    do {
+        hex[i++] = digits_16[n % 16];
+        n /= 16;
+    } while (n > 0);
+
+    hex[i] = '\0';
     strrev(hex);
+
     result[0] = '0';
     result[1] = 'X';
-
-    int i;
-    for (i = 0; hex[i] != '\0'; i++) {
-        result[2 + i] = hex[i];
-    }
-    result[2 + i] = '\0';
+    strcpy(result + 2, hex);
     return result;
 }
 
 int stoi(char *str) {
     int result = 0;
     int i = 0;
-
     int sign = 1;
+
     if (str[0] == '-') {
         sign = -1;
         i = 1;
     }
 
-    for (; str[i] != '\0'; i++) {
-        if (str[i] < '0' || str[i] > '9')
-            break;
+    for (; str[i] >= '0' && str[i] <= '9'; i++)
         result = result * 10 + (str[i] - '0');
-    }
 
     return result * sign;
 }
 
 static char *string_token = NULL;
-char *strtok(char *destination, char *str, char delimiater) {
-    if (str != NULL) {
-        string_token = str;
-    }
 
-    if (string_token == NULL || *string_token == '\0') {
-        *destination = NULL;
+char *strtok(char *dest, char *str, char delim) {
+    if (str)
+        string_token = str;
+
+    if (!string_token || *string_token == '\0') {
+        dest[0] = '\0';
         return NULL;
     }
-    while (*string_token == delimiater) {
+
+    while (*string_token == delim)
         string_token++;
-    }
 
-    int index = 0;
-    while (*string_token && *string_token != delimiater) {
-        destination[index] = *string_token;
-        index++;
+    int i = 0;
+    while (*string_token && *string_token != delim)
+        dest[i++] = *string_token++;
+
+    dest[i] = '\0';
+
+    if (*string_token)
         string_token++;
-    }
 
-    destination[index] = '\0';
-
-    if (*string_token) {
-        *string_token = '\0';
-        string_token++;
-    }
-
-    return (*destination != '\0') ? destination : NULL;
-}
-
-char *strncpy(char *destination, const char *source, int n) {
-    int index = 0;
-
-    while (n && source[index] != '\0') {
-        destination[index] = source[index];
-        index++;
-        n--;
-    }
-
-    destination[index] = '\0';
-    return destination;
-}
-
-char *strncat(char *destination, const char *source, int n) {
-
-    int index = 0;
-    int dest_length = strlen(destination);
-    char *result;
-
-    while (n && source[index] != '\0') {
-        destination[dest_length + index] = source[index];
-        index++;
-        n--;
-    }
-
-    destination[dest_length + index] = '\0';
-    return destination;
-}
-
-
-int strfind(char *c, char deliminator) {
-
-    for (int i = 0; i < strlen(c); i++)
-        if (c[i] == deliminator)
-            return i;
-    return -1;
+    return (i > 0) ? dest : NULL;
 }
