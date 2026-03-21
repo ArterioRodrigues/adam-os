@@ -1,9 +1,4 @@
-#include "page-table.h"
 #include "../pch.h"
-#include "config.h"
-#include "frame.h"
-#include "kernel.h"
-#include "types.h"
 
 static void identity_map_in(page_directory_t *pd, uint32_t phys_addr) {
     uint32_t page_directory_index = phys_addr >> 22;
@@ -80,12 +75,15 @@ void clear_page_directory(page_directory_t *page_directory) {
         uint32_t vaddr = i << 22;
         if (vaddr < USER_FUNC_VADDR)
             continue;
+
+        if (!(page_directory->entries[i] & 0x4))
+            continue;
+
         page_table_t *page_table = (page_table_t *)(page_directory->entries[i] & 0xFFFFF000);
         for (int j = 0; j < 1024; j++) {
             if (page_table->entries[j] & 1) {
                 if (!(page_table->entries[j] & 0x4))
                     continue;
-
                 uint32_t frame = page_table->entries[j] & 0xFFFFF000;
                 free_frame(frame);
             }
@@ -93,7 +91,6 @@ void clear_page_directory(page_directory_t *page_directory) {
         free_frame((uint32_t)page_table);
     }
 }
-
 void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t size, registers_t *regs) {
     uint32_t frame = allocate_frame();
     uint32_t user_func_frame = frame;

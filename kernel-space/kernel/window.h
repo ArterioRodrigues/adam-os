@@ -2,7 +2,7 @@
 #define WINDOW_H
 #include "config.h"
 #include "event.h"
-#include "types.h"
+#include "../../shared/types.h"
 
 typedef struct window {
     uint32_t window_id;
@@ -27,22 +27,6 @@ typedef struct window {
 
 } window_t;
 
-typedef struct {
-    int x;
-    int y;
-    uint32_t width;
-    uint32_t height;
-    char title[32];
-} create_window_t;
-
-typedef struct {
-    uint32_t window_id;
-    int x;
-    int y;
-    char *str;
-    uint8_t color;
-} create_text_t;
-
 extern window_t *window_head_ptr;
 extern uint32_t window_z_index;
 extern uint32_t window_id;
@@ -55,6 +39,7 @@ void update_focused_window(event_type_t type, uint8_t scancode, char c, uint8_t 
 
 window_t *get_window(uint32_t id);
 
+uint32_t window_count();
 void window_draw_string(window_t *window, create_text_t *text);
 
 void window_put_pixel(window_t *window, int x, int y, uint8_t color);

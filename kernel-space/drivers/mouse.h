@@ -1,7 +1,10 @@
 #ifndef MOUSE_H
 #define MOUSE_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
+typedef enum { CURSOR_ARROW, CURSOR_POINTER } cursor_type_t;
+
+extern cursor_type_t current_cursor;
 extern int mouse_x;
 extern int mouse_y;
 extern int prev_mouse_x;

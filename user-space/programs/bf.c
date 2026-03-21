@@ -1,11 +1,9 @@
 #include "../lib/lib.h"
-#include "../lib/string.h"
 
 char program[4096];
 char tape[256];
 
 void main(char *arg) {
-
     int fd = sys_open(arg);
     if (fd == -1) {
         print("no file found\n");
@@ -34,7 +32,7 @@ void main(char *arg) {
             tape[ptr]--;
         else if (c == '.') {
             char *buf = &tape[ptr];
-            sys_write(0, buf, 1);
+            sys_write(1, buf, 1);
         }
 
         else if (c == ',') {
@@ -75,3 +73,4 @@ void main(char *arg) {
     print("\n");
     return;
 }
+

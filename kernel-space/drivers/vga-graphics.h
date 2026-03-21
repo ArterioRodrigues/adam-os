@@ -1,15 +1,9 @@
 #ifndef VGA_H
 #define VGA_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
-typedef struct {
-    uint32_t window_id;
-    int x;
-    int y;
-    uint32_t width;
-    uint32_t height;
-    uint8_t color;
-} create_rect_t;
+#define CURSOR_H 18
+#define CURSOR_W 16
 
 extern volatile uint8_t *vga_graphics_buffer;
 extern uint8_t *back_buffer;
@@ -19,7 +13,10 @@ extern uint32_t screen_width;
 extern uint32_t screen_height;
 extern uint32_t screen_pitch;
 extern uint32_t screen_size;
+extern uint32_t dirty_y_min, dirty_y_max;
 
+
+void mark_dirty(int y_top, int y_bottom);
 void vga_put_pixel(int x, int y, uint8_t color);
 void vga_clear_screen(uint8_t color);
 void vga_draw_rect(int x, int y, int w, int h, uint8_t color);

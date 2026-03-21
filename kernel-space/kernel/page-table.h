@@ -1,7 +1,7 @@
 #ifndef PAGE_TABLE_H
 #define PAGE_TABLE_H
 #include "config.h"
-#include "types.h"
+#include "../../shared/types.h"
 
 typedef uint32_t page_entry_t;
 

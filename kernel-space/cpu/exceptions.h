@@ -1,6 +1,6 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 extern void divide_error_handler();
 extern void debug_handler();

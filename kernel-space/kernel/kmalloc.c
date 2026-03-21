@@ -54,14 +54,9 @@ void *kmalloc(uint32_t size) {
     while (heap_ptr && !(heap_ptr->is_free && heap_ptr->size > size))
         heap_ptr = heap_ptr->next;
 
-    if (!heap_ptr) {
-        //coalesce_blocks();
-        //heap_ptr = heap_head_ptr;
-        //while (heap_ptr && !(heap_ptr->is_free && heap_ptr->size >= size))
-        //    heap_ptr = heap_ptr->next;
-        //if (!heap_ptr)
-            return NULL;
-    }
+    if (!heap_ptr) 
+        return NULL;
+
     split_block(heap_ptr, size);
 
     return (void *)(heap_ptr + 1);
@@ -73,6 +68,7 @@ void kfree(void *ptr) {
     }
     heap_block_header_t *header = (heap_block_header_t *)ptr - 1;
     header->is_free = true;
+    coalesce_blocks();
 }
 
 void dump_heap() {

@@ -10,7 +10,7 @@ extern uint32_t process_queue_size;
 
 void init_scheduler(pcb_t *pcb);
 void scheduler_enqueue(pcb_t *pcb);
-void scheduler_remove(uint32_t pid);
+bool scheduler_remove(uint32_t pid);
 void scheduler_wake(uint32_t pid);
 void next_process();
 

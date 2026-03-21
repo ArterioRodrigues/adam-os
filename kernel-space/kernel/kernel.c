@@ -1,5 +1,4 @@
 #include "../pch.h"
-#include "window.h"
 
 registers_t make_initial_registers(uint32_t entry_vaddr, uint32_t stack_vaddr) {
     registers_t regs;
@@ -58,6 +57,8 @@ void kernel_main() {
     init_frames();
     init_vga();
     init_terminal();
+    init_status_bar();
+
     wm_composite();
 
     for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE) {
@@ -72,8 +73,8 @@ void kernel_main() {
     registers_t main_reg = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
     pcb_t *main = create_process_control_block(main_page_directory, main_reg, 0, NULL);
 
-    init_scheduler(idle);
-    scheduler_enqueue(main);
+    init_scheduler(main);
+    scheduler_enqueue(idle);
     start_scheduler();
     while (1)
         ;

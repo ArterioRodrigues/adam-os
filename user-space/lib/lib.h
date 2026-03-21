@@ -1,6 +1,10 @@
 #ifndef HELPERS_H
 #define HELPERS_H
-#include "types.h"
+#include "../../shared/abi-types.h"
+#include "../../shared/math.h"
+#include "../../shared/string.h"
+#include "../../shared/mem.h"
+#include "../../shared/types.h"
 
 extern void sys_exit();
 extern void sys_exec(char *filname, char *buf);
@@ -21,18 +25,8 @@ extern int sys_create_window(create_window_t *window);
 extern void sys_create_rect(create_rect_t *rect);
 extern void sys_create_text(create_text_t *text);
 extern int sys_get_event(uint32_t id, event_t *event);
-extern void sys_destory_window(uint32_t id);
+extern void sys_destroy_window(uint32_t id);
 extern void sys_flush();
 
-static void wait() {
-    int i = 0;
-    int j = 0;
-    while (i < 10000) {
-        while (j < 10000)
-            j++;
-        i++;
-        j = 0;
-    }
-}
-
+void print(const char *s); 
 #endif

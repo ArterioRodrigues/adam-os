@@ -1,10 +1,7 @@
-#include "../lib/lib.h"
-#include "../lib/string.h"
-
+extern void sys_exec(char *filname, char *buf);
 
 void main() {
     sys_exec("shell", "");
-    print("Error: exec failed");
     while (1)
         ;
 }

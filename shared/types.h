@@ -1,8 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include "config.h"
-
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
@@ -13,10 +11,6 @@ typedef unsigned char uint8_t;
 #define true 1
 #define false 0
 
-#endif
-
-#ifndef STDARG_H
-#define STDARG_H
 
 typedef __builtin_va_list va_list;
 #define va_start(v, l) __builtin_va_start(v, l)

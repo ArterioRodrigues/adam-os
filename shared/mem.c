@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "mem.h"
 
 void memcpy(void *dest, const void *src, uint32_t n) {
     uint32_t dwords = n / 4;
@@ -13,15 +13,6 @@ void memcpy(void *dest, const void *src, uint32_t n) {
     const unsigned char *s = src;
     while (remain--)
         *d++ = *s++;
-}
-
-void temp_memcpy(void *dest, const void *src, uint32_t n) {
-    unsigned char *d = dest;
-    unsigned char *s = (char *)src;
-
-    while (n--) {
-        *d++ = *s++;
-    }
 }
 
 void memset(void *ptr, int value, uint32_t n) {

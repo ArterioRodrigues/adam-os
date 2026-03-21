@@ -1,6 +1,11 @@
 #ifndef PCH_H
 #define PCH_H
 
+#include "../shared/abi-types.h"
+#include "../shared/string.h"
+#include "../shared/math.h"
+#include "../shared/mem.h"
+#include "../shared/types.h"
 #include "cpu/idt.h"
 #include "cpu/exceptions.h"
 #include "cpu/syscall.h"
@@ -15,17 +20,13 @@
 #include "kernel/config.h"
 #include "kernel/frame.h"
 #include "kernel/kmalloc.h"
-#include "kernel/types.h"
 #include "kernel/page-table.h"
 #include "kernel/process-control-block.h"
 #include "kernel/scheduler.h"
 #include "kernel/stdin.h"
 #include "kernel/event.h"
 #include "kernel/window.h"
-#include "lib/math.h"
 #include "lib/fat16.h"
-#include "lib/mem.h"
-#include "lib/string.h"
 #include "lib/status-bar.h"
 #include "lib/font.h"
 

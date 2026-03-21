@@ -117,27 +117,31 @@ void start_scheduler() {
     switch_to_process(scheduler_head_ptr);
 }
 
-void decrement_wait_process() {
+bool decrement_wait_process() {
+    bool woke = false;
     pcb_t *process = scheduler_head_ptr;
     while (process) {
         if (process->sleep_ticks > 0) {
             process->sleep_ticks--;
-            if (process->sleep_ticks == 0 && process->status == WAITING)
+            if (process->sleep_ticks == 0 && process->status == WAITING) {
                 process->status = READY;
+                woke = true;
+            }
         }
         process = process->next;
     }
+
+    return woke;
 }
 
 void update_scheduler(registers_t *regs) {
     if (!enable_scheduler)
         return;
 
-    decrement_wait_process();
-
+    bool woke = decrement_wait_process();
     quantum_counter++;
-    if (current_process && quantum_counter < SCHEDULER_QUANTUM &&
-        (current_process->status == READY || current_process == RUNNING)) {
+    if (current_process && !woke && quantum_counter < SCHEDULER_QUANTUM &&
+        (current_process->status == READY || current_process->status == RUNNING)) {
         return;
     }
 
@@ -158,13 +162,13 @@ void update_scheduler(registers_t *regs) {
     quantum_counter = 0;
 }
 
-void scheduler_remove(uint32_t pid) {
-    if (pid == 1)
-        return;
+bool scheduler_remove(uint32_t pid) {
+    if (pid == 1 || pid == 2)
+        return false;
 
     if (pid == current_process->pid) {
         current_process->status = ZOMBIE;
-        return;
+        return true;
     }
 
     reparent_children(pid);
@@ -193,12 +197,14 @@ void scheduler_remove(uint32_t pid) {
 
             kfree((void *)((uint32_t)(current->kernel_stack - PAGE_SIZE)));
             kfree(current);
-            return;
+            return true;
         }
 
         prev = current;
         current = current->next;
     }
+
+    return true;
 }
 
 void reparent_children(uint32_t dying_pid) {

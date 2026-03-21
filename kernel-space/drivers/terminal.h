@@ -1,11 +1,12 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
+
 #include "../kernel/window.h"
 
-#define TERMINAL_FONT_W 6
-#define TERMINAL_FONT_H 9
-#define TERMINAL_WIN_W 320
-#define TERMINAL_WIN_H 600
+#define TERMINAL_FONT_W 7 
+#define TERMINAL_FONT_H 9 
+#define TERMINAL_WIN_W 360
+#define TERMINAL_WIN_H 300
 #define TERMINAL_COLS (TERMINAL_WIN_W / TERMINAL_FONT_W)
 #define TERMINAL_ROWS ((TERMINAL_WIN_H) / TERMINAL_FONT_H)
 #define TERMINAL_SIZE (TERMINAL_COLS * TERMINAL_ROWS)
@@ -31,8 +32,8 @@ void terminal_print_color(const char *str, unsigned char color);
 void terminal_print_at(const char *str, int x, int y, unsigned char color);
 void terminal_print_many(const char *first, ...);
 
-#define print(str, ...) terminal_print_color(str, WHITE)
-#define print_char(c, ...) terminal_print_char_color(c, WHITE)
+#define print(str, ...) terminal_print_color(str, BRIGHT_RED)
+#define print_char(c, ...) terminal_print_char_color(c, BRIGHT_RED)
 #define printf(...) terminal_print_many(__VA_ARGS__, NULL)
 
 #endif

@@ -1,5 +1,5 @@
+#include "mouse.h"
 #include "../pch.h"
-#include "vga-graphics.h"
 
 uint8_t mouse_cycle = 0;
 uint8_t mouse_bytes[3];
@@ -15,6 +15,7 @@ int dx = 0;
 int dy = 0;
 bool is_x_negative = false;
 bool is_y_negative = false;
+cursor_type_t current_cursor = CURSOR_ARROW;
 
 void mouse_wait(uint8_t type) {
     uint32_t timeout = 100000;
@@ -116,9 +117,6 @@ void mouse_handler_main(registers_t *regs) {
 
         prev_mouse_buttons = mouse_buttons;
         mouse_buttons = mouse_bytes[0] & 0x07;
-
-        update_window();
-        wm_composite();
     }
 
     outb(PIC2_COMMAND, PIC_EOI);

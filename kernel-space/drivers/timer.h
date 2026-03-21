@@ -1,6 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 extern void timer_handler();
 extern volatile unsigned int timer_ticks;
