@@ -130,8 +130,8 @@ void wm_composite() {
 
     for (uint32_t i = 0; i < count; i++) {
         window_t *w = sorted[i];
-        if (!w || !w->is_visible || w->is_visible) {
-            focused = w->is_visible ? w : NULL;
+        if (!w || !w->is_visible || w->is_focused) {
+            focused = w->is_focused ? w : NULL;
             continue;
         }
         draw_window(w);
@@ -171,10 +171,10 @@ void window_draw_rect(window_t *window, int x, int y, int w, int h, uint8_t colo
 void window_draw_char(window_t *window, int x, int y, char c, uint8_t color) {
     if (c < 32)
         return;
-    uint8_t *glyph = font5x7[c - 32];
-    for (int row = 0; row < 7; row++) {
+    uint8_t *glyph = font8x8[c - 32];
+    for (int row = 0; row < font_row; row++) {
         uint8_t bits = glyph[row];
-        for (int col = 0; col < 5; col++) {
+        for (int col = 0; col < font_col; col++) {
             if (bits & (0x80 >> col))
                 window_put_pixel(window, x + col, y + row, color);
         }
@@ -183,7 +183,7 @@ void window_draw_char(window_t *window, int x, int y, char c, uint8_t color) {
 
 void window_draw_string(window_t *window, create_text_t *text) {
     for (int i = 0; text->str[i]; i++)
-        window_draw_char(window, text->x + (i * 6), text->y, text->str[i], text->color);
+        window_draw_char(window, text->x + (i * font_spacing), text->y, text->str[i], text->color);
 }
 
 void update_focused_window(event_type_t type, uint8_t scancode, char c, uint8_t mouse_button, int mx, int my) {
@@ -272,7 +272,6 @@ void update_window_click() {
     update_focused_window(EVENT_MOUSE_CLICK, 0, 0, mouse_buttons, mouse_x - clicked->x, mouse_y - clicked->y);
 }
 void update_window() {
-
     update_window_drag();
 
     if (mouse_x != prev_mouse_x || mouse_y != prev_mouse_y)

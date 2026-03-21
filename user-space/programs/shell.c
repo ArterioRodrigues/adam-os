@@ -22,7 +22,6 @@ static void handle_help() {
     print("  kill <pid>     Kill a process\n");
     print("  ps             Show running processes\n");
     print("  touch <f> <d>  Create file with content\n");
-    print("  vim <file>     Open text editor\n");
     print("  bf <file>      Run Brainfuck program\n");
     print("  clear          Clear terminal screen\n");
     print("  help           Show this message\n");
@@ -46,11 +45,10 @@ static void handle_exec(char *file_name, char *arg) {
 
 static void handle_fork(char *file_name, char *arg) {
     int child = sys_fork();
-    if (child == 0) {
+    if (child == 0)
         handle_exec(file_name, arg);
-    } else {
+    else
         sys_waitpid(child);
-    }
 }
 
 static void handle_ls() {
@@ -66,7 +64,6 @@ static void handle_ls() {
     for (int i = 0; i < size; i += sizeof(fat16_entry_t)) {
         fat16_entry_t *entry = (fat16_entry_t *)(buf + i);
 
-        /* Skip empty/deleted entries */
         if (entry->name[0] == 0x00 || entry->name[0] == 0xE5)
             continue;
 
@@ -201,59 +198,33 @@ static void handle_create(char *arg) {
 }
 
 static void dispatch(char *line) {
-    if (strcmp(line, "clear")) {
+    if (strcmp(line, "clear"))
         handle_clear();
-        return;
-    }
-    if (strcmp(line, "help")) {
+    else if (strcmp(line, "help"))
         handle_help();
-        return;
-    }
-    if (strcmp(line, "ls")) {
+    else if (strcmp(line, "ls"))
         handle_ls();
-        return;
-    }
-    if (strcmp(line, "ps")) {
+    else if (strcmp(line, "ps"))
         handle_ps();
-        return;
-    }
-
-    if (strncmp(line, "exec ", 5)) {
+    else if (strncmp(line, "exec ", 5))
         handle_exec(line + 5, "");
-        return;
-    }
-    if (strncmp(line, "cd ", 3)) {
+    else if (strncmp(line, "cd ", 3))
         handle_cd(line + 3);
-        return;
-    }
-    if (strncmp(line, "fork ", 5)) {
+    else if (strncmp(line, "fork ", 5))
         handle_fork(line + 5, "");
-        return;
-    }
-    if (strncmp(line, "kill ", 5)) {
+    else if (strncmp(line, "kill ", 5))
         handle_kill(line + 5);
-        return;
-    }
-    if (strncmp(line, "touch ", 6)) {
+    else if (strncmp(line, "touch ", 6))
         handle_create(line + 6);
-        return;
-    }
-    if (strncmp(line, "cat ", 4)) {
+    else if (strncmp(line, "cat ", 4))
         handle_cat(line + 4);
-        return;
-    }
-    if (strncmp(line, "bf ", 3)) {
+    else if (strncmp(line, "bf ", 3))
         handle_fork("bf", line + 3);
-        return;
+    else {
+        print("command not found: ");
+        print(line);
+        print("\ntype 'help' for command list\n");
     }
-    if (strncmp(line, "vim ", 4)) {
-        handle_fork("vim", line + 4);
-        return;
-    }
-
-    print("command not found: ");
-    print(line);
-    print("\ntype 'help' for command list\n");
 }
 
 int main() {

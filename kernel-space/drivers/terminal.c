@@ -18,6 +18,7 @@ uint8_t ansi_to_terminal[20] = {
     BRIGHT_CYAN,    // #44
     WHITE           // #45
 };
+
 terminal_t *terminal = NULL;
 int cursor_index = 0;
 
@@ -30,15 +31,13 @@ void render_terminal() {
             char ch = terminal->buffer[index] & 0xFF;
             uint8_t color = (terminal->buffer[index] >> 8) & 0xFF;
             if (ch > 0)
-                window_draw_char(window, j * TERMINAL_FONT_W, (i * TERMINAL_FONT_H), ch, color);
+                window_draw_char(window, j * TERMINAL_FONT_W , (i * TERMINAL_FONT_H), ch, color);
         }
     }
-    wm_composite();
 }
 
 void terminal_print_char_color(char c, unsigned char color) {
     uint32_t cursor_index = (TERMINAL_COLS * terminal->cursor_row) + terminal->cursor_column;
-
     if (cursor_index >= TERMINAL_SIZE) {
         for (int i = 0; i < TERMINAL_SIZE; i++) {
             if (i > TERMINAL_SIZE - TERMINAL_COLS)

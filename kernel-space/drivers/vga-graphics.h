@@ -9,6 +9,7 @@ extern volatile uint8_t *vga_graphics_buffer;
 extern uint8_t *back_buffer;
 extern uint32_t font_row;
 extern uint32_t font_col;
+extern uint32_t font_spacing;
 extern uint32_t screen_width;
 extern uint32_t screen_height;
 extern uint32_t screen_pitch;

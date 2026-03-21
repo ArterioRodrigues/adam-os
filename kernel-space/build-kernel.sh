@@ -4,7 +4,7 @@ CC=i686-elf-gcc
 LD=i686-elf-ld
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-USER_BUILD="$SCRIPT_DIR/../user-space/build"
+USER_BUILD="$SCRIPT_DIR/../build"
 SHARED_DIR="$SCRIPT_DIR/../shared"
 
 cd "$SCRIPT_DIR"
@@ -74,10 +74,10 @@ mkfs.fat -F 16 fat16.bin
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
 mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
-mcopy -i fat16.bin $USER_BUILD/vim.bin ::VIM
 mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 mcopy -i fat16.bin $USER_BUILD/tetris.bin ::TETRIS
 mcopy -i fat16.bin $USER_BUILD/calculator.bin ::CALC
+mcopy -i fat16.bin $USER_BUILD/snake.bin ::SNAKE
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10
@@ -86,9 +86,9 @@ dd if=kernel.bin of=os-image.bin seek=1 conv=notrunc
 dd if=fat16.bin of=os-image.bin seek=2048 conv=notrunc
 
 echo "Moving artifacts to build..."
-mkdir -p build
-mv *.o build/ 2>/dev/null || true
-mv *.bin build/ 2>/dev/null || true
-mv *.gch build/ 2>/dev/null || true
+mkdir -p ../build
+mv *.o ../build/ 2>/dev/null || true
+mv *.bin ../build/ 2>/dev/null || true
+mv *.gch ../build/ 2>/dev/null || true
 
 echo "Kernel build complete!"
