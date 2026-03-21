@@ -3,7 +3,6 @@
 char vim_buffer[2000];
 
 void main(char *arg) {
-
     char file[8];
     memcpy(file, arg, 8);
 

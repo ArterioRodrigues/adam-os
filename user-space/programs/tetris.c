@@ -372,7 +372,7 @@ int main() {
             dirty = 0;
         }
 
-        sys_sleep(10);
+        sys_sleep(5);
     }
 
 quit:

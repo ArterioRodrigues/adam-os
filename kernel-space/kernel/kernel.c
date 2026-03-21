@@ -57,6 +57,8 @@ void kernel_main() {
     init_frames();
     init_vga();
     init_terminal();
+    init_status_bar();
+
     wm_composite();
 
     for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE) {

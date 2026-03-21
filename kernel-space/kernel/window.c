@@ -1,7 +1,7 @@
 #include "../pch.h"
 
 #define PADDING 5
-#define HEADER_OFFSET 20
+#define HEADER_OFFSET 25
 #define MAX_WINDOWS 32
 #define CLOSE_BTN_W 30
 #define TITLE_BAR_H 12
@@ -15,7 +15,7 @@ static inline bool point_in_rect(int px, int py, int x, int y, int w, int h) {
     return px >= x && px < x + w && py >= y && py < y + h;
 }
 
-static uint32_t window_count() {
+uint32_t window_count() {
     uint32_t n = 0;
     for (window_t *w = window_head_ptr; w; w = w->next)
         n++;
@@ -43,7 +43,7 @@ window_t *wm_create_window(int x, int y, uint32_t width, uint32_t height, char *
     memset(window, 0, sizeof(window_t));
 
     window->x = x;
-    window->y = y;
+    window->y = y + STATUS_BAR_HEIGHT;
     window->width = width;
     window->height = height;
 
@@ -100,16 +100,16 @@ void remove_window(uint32_t id) {
 }
 
 static void draw_window(window_t *window) {
-    uint8_t border_color = window->is_focused ? 0x0 : 0x99;
+    uint8_t border_color = window->is_focused ? 0x11 : 0x99;
     int total_h = window->height + HEADER_OFFSET;
-
-    vga_draw_rect(window->x - 1, window->y - 1, window->width + 2, total_h + 2, border_color);
 
     vga_blit(window->x, window->y, window->width, total_h, window->pixel_buffer);
 
-    vga_draw_rect(window->x, window->y, window->width, HEADER_OFFSET - 5, border_color);
-    vga_draw_string(window->x + PADDING, window->y + PADDING, window->title, 0xF);
-    vga_draw_string(window->x + window->width - PADDING - 15, window->y + PADDING, "[X]", 0xF);
+    vga_draw_rect(window->x, window->y, window->width, HEADER_OFFSET, border_color);
+    vga_draw_string(window->x + PADDING, window->y + PADDING + 5, window->title, WHITE);
+
+    vga_draw_rect(window->x + window->width - PADDING - 15, window->y + PADDING, 15, 15, BRIGHT_RED);
+    vga_draw_string(window->x + window->width - PADDING - 12, window->y + PADDING + 4, "X", 0xF);
 }
 
 void wm_composite() {
@@ -117,8 +117,9 @@ void wm_composite() {
 
     uint32_t count = window_count();
     if (count == 0)
-        goto cursor;
+        goto draw_cursor;
 
+    window_t *focused = NULL;
     window_t *sorted[MAX_WINDOWS];
     memset(sorted, 0, sizeof(sorted));
 
@@ -127,13 +128,10 @@ void wm_composite() {
             sorted[w->z_index - 1] = w;
     }
 
-    window_t *focused = NULL;
     for (uint32_t i = 0; i < count; i++) {
         window_t *w = sorted[i];
-        if (!w || !w->is_visible)
-            continue;
-        if (w->is_focused) {
-            focused = w;
+        if (!w || !w->is_visible || w->is_visible) {
+            focused = w->is_visible ? w : NULL;
             continue;
         }
         draw_window(w);
@@ -142,7 +140,8 @@ void wm_composite() {
     if (focused)
         draw_window(focused);
 
-cursor:
+draw_cursor:
+    draw_status_bar();
     vga_draw_cursor(mouse_x, mouse_y, BLACK);
     vga_flip();
 }
@@ -213,30 +212,33 @@ void update_focused_window(event_type_t type, uint8_t scancode, char c, uint8_t 
     event_queue_push(&window->event_queue, event);
 }
 
-void update_window() {
+void update_window_drag() {
     for (window_t *w = window_head_ptr; w; w = w->next) {
-        if (w->is_dragging) {
-            if (!(mouse_buttons & 1)) {
-                w->is_dragging = false;
-            } else {
-                w->x = mouse_x - drag_offset_x;
-                w->y = mouse_y - drag_offset_y;
-            }
+        if (point_in_rect(prev_mouse_x, prev_mouse_y, w->x + w->width - CLOSE_BTN_W, w->y, CLOSE_BTN_W, HEADER_OFFSET))
+            current_cursor = CURSOR_POINTER;
+        else
+            current_cursor = CURSOR_ARROW;
+
+        if (!w->is_dragging)
+            continue;
+
+        if (!(mouse_buttons & 1))
+            w->is_dragging = false;
+        else {
+            w->x = mouse_x - drag_offset_x;
+            w->y = mouse_y - drag_offset_y;
         }
     }
+}
 
-    if (mouse_x != prev_mouse_x || mouse_y != prev_mouse_y)
-        update_focused_window(EVENT_MOUSE_MOVE, 0, 0, mouse_buttons, mouse_x, mouse_y);
-
-    if (!((mouse_buttons & 1) && !(prev_mouse_buttons & 1)))
-        return;
-
+void update_window_click() {
     window_t *clicked = NULL;
     uint32_t top_z = 0;
 
     for (window_t *w = window_head_ptr; w; w = w->next) {
         if (!point_in_rect(prev_mouse_x, prev_mouse_y, w->x, w->y, w->width, w->height + HEADER_OFFSET))
             continue;
+
         if (w->z_index >= top_z) {
             top_z = w->z_index;
             clicked = w;
@@ -251,19 +253,33 @@ void update_window() {
             w->z_index--;
         w->is_focused = false;
     }
+
     clicked->is_focused = true;
     clicked->z_index = window_z_index - 1;
 
-    if (prev_mouse_y < clicked->y + TITLE_BAR_H && prev_mouse_x > clicked->x + (int)clicked->width - CLOSE_BTN_W) {
+    if (point_in_rect(prev_mouse_x, prev_mouse_y, clicked->x + clicked->width - CLOSE_BTN_W, clicked->y, CLOSE_BTN_W,
+                      HEADER_OFFSET)) {
         remove_window(clicked->window_id);
         return;
     }
 
-    if (prev_mouse_y < clicked->y + TITLE_BAR_H) {
+    if (prev_mouse_y < clicked->y + HEADER_OFFSET) {
         drag_offset_x = prev_mouse_x - clicked->x;
         drag_offset_y = prev_mouse_y - clicked->y;
         clicked->is_dragging = true;
     }
 
     update_focused_window(EVENT_MOUSE_CLICK, 0, 0, mouse_buttons, mouse_x - clicked->x, mouse_y - clicked->y);
+}
+void update_window() {
+
+    update_window_drag();
+
+    if (mouse_x != prev_mouse_x || mouse_y != prev_mouse_y)
+        update_focused_window(EVENT_MOUSE_MOVE, 0, 0, mouse_buttons, mouse_x, mouse_y);
+
+    if (!((mouse_buttons & 1) && !(prev_mouse_buttons & 1)))
+        return;
+
+    update_window_click();
 }

@@ -349,13 +349,10 @@ static void handle_syscall_get_event(registers_t *regs) {
 
 static void handle_syscall_destroy_window(registers_t *regs) {
     remove_window(regs->ebx);
-    wm_composite();
+    wm_dirty = true;
 }
 
-static void handle_syscall_flush(registers_t *regs) {
-    (void)regs;
-    wm_composite();
-}
+static void handle_syscall_flush(registers_t *regs) { wm_dirty = true; }
 
 void syscall_handler_main(registers_t *regs) {
     switch (regs->eax) {

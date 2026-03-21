@@ -3,7 +3,7 @@
 unsigned int frames_bitmap[NUM_FRAMES / 32];
 static inline void clear_frame(uint32_t frame) { frames_bitmap[frame / 32] &= ~(1 << (frame % 32)); }
 static inline void set_frame(uint32_t frame) { frames_bitmap[frame / 32] |= (1 << (frame % 32)); }
-static inline int test_frame(uint32_t frame) {
+int test_frame(uint32_t frame) {
     if (frames_bitmap[frame / 32] & (1 << (frame % 32)))
         return 1;
     return 0;

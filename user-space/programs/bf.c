@@ -4,7 +4,6 @@ char program[4096];
 char tape[256];
 
 void main(char *arg) {
-
     int fd = sys_open(arg);
     if (fd == -1) {
         print("no file found\n");

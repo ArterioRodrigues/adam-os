@@ -13,12 +13,6 @@ char scancode_to_ascii_shift[] = {0,   0,   '!', '@', '#', '$', '%', '^', '&', '
                                   'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~', 0,   '|', 'Z',
                                   'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 0,   0,   0,   ' '};
 
-#define SCANCODE_LSHIFT 0x2A
-#define SCANCODE_RSHIFT 0x36
-#define SCANCODE_LSHIFT_REL 0xAA
-#define SCANCODE_RSHIFT_REL 0xB6
-#define SCANCODE_END 0x4F
-
 void keyboard_handler_main(registers_t *regs) {
     unsigned char scancode = inb(KEYBOARD_DATA_PORT);
 
@@ -35,12 +29,15 @@ void keyboard_handler_main(registers_t *regs) {
     }
 
     if (shift_held && scancode == SCANCODE_ENTER) {
-        stdin_write(' ');
-        update_focused_window(EVENT_KEYPRESS, scancode, ' ', NULL, NULL, NULL);
-        print("\n");
+        if (terminal->window->is_visible) {
+            stdin_write(' ');
+            print("\n");
+        } else
+            update_focused_window(EVENT_KEYPRESS, scancode, ' ', NULL, NULL, NULL);
         outb(PIC1_COMMAND, PIC_EOI);
         return;
     }
+
     if (STANDARD_IN_BUFFER_SIZE <= stdin.count) {
         outb(PIC1_COMMAND, PIC_EOI);
         return;
@@ -48,30 +45,35 @@ void keyboard_handler_main(registers_t *regs) {
 
     if (scancode & SCANCODE_RELEASE_MASK) {
         keyboard_pressed = false;
-    } 
-
-    else if (terminal->window->is_focused) {
+    } else if (terminal->window->is_focused) {
         keyboard_pressed = true;
 
-
-        if (scancode == SCANCODE_ENTER) {
-            update_focused_window(EVENT_KEYPRESS, scancode, '\n', NULL, NULL, NULL);
+        if (scancode == SCANCODE_ENTER)
             stdin_write('\n');
-        }
-
-        else if (scancode == SCANCODE_BACKSPACE) {
-            update_focused_window(EVENT_KEYPRESS, scancode, '\b', NULL, NULL, NULL);
+        else if (scancode == SCANCODE_BACKSPACE)
             stdin_write('\b');
+        else if (scancode < sizeof(scancode_to_ascii)) {
+            char c = shift_held ? scancode_to_ascii_shift[scancode] : scancode_to_ascii[scancode];
+            if (c != 0) {
+                stdin_write(c);
+            }
         }
+    } else {
+        keyboard_pressed = true;
+
+        if (scancode == SCANCODE_ENTER)
+            update_focused_window(EVENT_KEYPRESS, scancode, '\n', NULL, NULL, NULL);
+        else if (scancode == SCANCODE_BACKSPACE)
+            update_focused_window(EVENT_KEYPRESS, scancode, '\b', NULL, NULL, NULL);
 
         else if (scancode < sizeof(scancode_to_ascii)) {
             char c = shift_held ? scancode_to_ascii_shift[scancode] : scancode_to_ascii[scancode];
             if (c != 0) {
                 update_focused_window(EVENT_KEYPRESS, scancode, c, NULL, NULL, NULL);
-                stdin_write(c);
             }
         }
     }
+
     if (stdin.wait_queue.process != NULL &&
         (stdin.wait_queue.requested_len <= stdin.count || scancode == SCANCODE_ENTER)) {
         stdin_wake_process(regs);

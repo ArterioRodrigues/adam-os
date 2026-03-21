@@ -39,6 +39,7 @@ void update_focused_window(event_type_t type, uint8_t scancode, char c, uint8_t 
 
 window_t *get_window(uint32_t id);
 
+uint32_t window_count();
 void window_draw_string(window_t *window, create_text_t *text);
 
 void window_put_pixel(window_t *window, int x, int y, uint8_t color);
