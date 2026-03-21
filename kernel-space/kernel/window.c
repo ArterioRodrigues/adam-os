@@ -114,7 +114,7 @@ static void draw_window(window_t *window) {
 
 void wm_composite() {
     vga_clear_screen(0x64);
-
+    draw_desktop_icons();
     uint32_t count = window_count();
     if (count == 0)
         goto draw_cursor;
@@ -280,5 +280,6 @@ void update_window() {
     if (!((mouse_buttons & 1) && !(prev_mouse_buttons & 1)))
         return;
 
+    handle_icon_click();
     update_window_click();
 }

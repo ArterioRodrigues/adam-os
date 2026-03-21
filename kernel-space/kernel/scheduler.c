@@ -138,6 +138,7 @@ void update_scheduler(registers_t *regs) {
     if (!enable_scheduler)
         return;
 
+    process_desktop_launch();
     bool woke = decrement_wait_process();
     quantum_counter++;
     if (current_process && !woke && quantum_counter < SCHEDULER_QUANTUM &&
@@ -242,7 +243,7 @@ void scheduler_wake(uint32_t pid) {
     pcb_t *current = scheduler_head_ptr;
 
     while (current) {
-        if (current->waiting_pid == pid) {
+         if (current->waiting_pid == pid) {
             current->status = READY;
             return;
         }

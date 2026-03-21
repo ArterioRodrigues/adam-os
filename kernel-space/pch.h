@@ -29,5 +29,6 @@
 #include "lib/fat16.h"
 #include "lib/status-bar.h"
 #include "lib/font.h"
+#include "lib/desktop.h"
 
 #endif

@@ -4,7 +4,7 @@
 #include "../kernel/window.h"
 
 #define TERMINAL_FONT_W 8 
-#define TERMINAL_FONT_H 10 
+#define TERMINAL_FONT_H 12
 #define TERMINAL_WIN_W 360
 #define TERMINAL_WIN_H 300
 #define TERMINAL_COLS (TERMINAL_WIN_W / TERMINAL_FONT_W)

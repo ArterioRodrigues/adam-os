@@ -56,10 +56,9 @@ void kernel_main() {
     init_fat16();
     init_frames();
     init_vga();
+    init_desktop_icons();
     init_terminal();
     init_status_bar();
-
-    wm_composite();
 
     for (uint32_t i = KERNEL_START; i < HEAP_END; i += PAGE_SIZE) {
         uint32_t frame = allocate_frame();
@@ -76,6 +75,7 @@ void kernel_main() {
     init_scheduler(main);
     scheduler_enqueue(idle);
     start_scheduler();
+
     while (1)
         ;
 }

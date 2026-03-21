@@ -51,6 +51,7 @@ $CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c "$SHARED_DIR/mem.c
 $CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/fat16.c -o fat16.o
 $CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/status-bar.c -o status-bar.o
 $CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/font.c -o font.o
+$CC -ffreestanding -fno-pic -I"$SHARED_DIR" -include pch.h -c lib/desktop.c -o desktop.o
 
 # collect all embedded user program objects
 USER_BINS=$(ls "$USER_BUILD"/*_bin.o 2>/dev/null | tr '\n' ' ')
@@ -62,7 +63,7 @@ $LD -T linker.ld -o kernel.bin \
     kernel.o kmalloc.o page-tablec.o frame.o syscall.o \
     mem.o keyboard.o mouse.o timer.o vga-graphics.o terminal.o ata-disk.o idt.o interrupts.o gdt.o gdtc.o \
     exceptions.o exceptionsc.o fat16.o math.o string.o stdin.o event.o\
-    page-table.o status-bar.o font.o\
+    page-table.o status-bar.o font.o desktop.o\
     $USER_BINS \
     --oformat binary
 
@@ -77,7 +78,6 @@ mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 mcopy -i fat16.bin $USER_BUILD/tetris.bin ::TETRIS
 mcopy -i fat16.bin $USER_BUILD/calculator.bin ::CALC
-mcopy -i fat16.bin $USER_BUILD/snake.bin ::SNAKE
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10

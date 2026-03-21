@@ -69,7 +69,6 @@ build_program shell
 build_program bf
 build_program tetris
 build_program calculator
-build_program snake
 
 # embed all as kernel objects
 cd "$SCRIPT_DIR/../build"
@@ -79,7 +78,6 @@ $OBJCOPY -I binary -O elf32-i386 -B i386 shell.bin shell_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 bf.bin bf.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 tetris.bin tetris.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 calculator.bin calculator.o
-$OBJCOPY -I binary -O elf32-i386 -B i386 snake.bin snake.o
 cd "$SCRIPT_DIR"
 
 echo "User space build complete!"
