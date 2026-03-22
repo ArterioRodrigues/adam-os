@@ -73,6 +73,7 @@ void scheduler_enqueue(pcb_t *pcb) {
         scheduler_head_ptr = pcb;
         return;
     }
+
     pcb_t *current = scheduler_head_ptr;
     while (current->next) {
         current = current->next;

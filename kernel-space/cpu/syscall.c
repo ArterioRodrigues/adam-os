@@ -111,6 +111,7 @@ static void handle_syscall_exec(registers_t *regs) {
     update_page_directory(current_process->page_directory, data, entry->file_size, regs);
 
     if (arg_buf[0] != '\0') {
+
         uint32_t stack_top = regs->useresp;
         uint32_t arg_len = strlen(arg_buf) + 1;
         stack_top -= arg_len;

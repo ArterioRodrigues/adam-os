@@ -280,6 +280,7 @@ void update_window() {
     if (!((mouse_buttons & 1) && !(prev_mouse_buttons & 1)))
         return;
 
+    prev_mouse_buttons = mouse_buttons;
     handle_icon_click();
     update_window_click();
 }

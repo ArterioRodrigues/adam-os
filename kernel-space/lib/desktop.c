@@ -4,10 +4,6 @@ static char desktop_pending_launch[12] = {0};
 desktop_icon_t desktop_icons[MAX_DESKTOP_ICONS];
 int desktop_icon_count = 0;
 
-static const uint16_t bmp_terminal[16] = {
-    0x0000, 0x7FFE, 0x7FFE, 0x6006, 0x6806, 0x6406, 0x6806, 0x6006,
-    0x61C6, 0x6006, 0x7FFE, 0x7FFE, 0x03C0, 0x03C0, 0x07E0, 0x0000,
-};
 static const uint16_t bmp_tetris[16] = {
     0x0000, 0x0000, 0x0FF0, 0x0FF0, 0x0FF0, 0x03C0, 0x03C0, 0x03C0,
     0x03C0, 0x03C0, 0x03C0, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -35,7 +31,6 @@ static void add_icon(char *label, char *program, uint8_t color, const uint16_t *
 
 void init_desktop_icons(void) {
     desktop_icon_count = 0;
-    add_icon("Terminal", "SHELL", BLACK, bmp_terminal);
     add_icon("Tetris", "TETRIS", BLACK, bmp_tetris);
     add_icon("Calc", "CALC", BLACK, bmp_calc);
 }
@@ -132,11 +127,10 @@ static void desktop_spawn_program(char *filename) {
 
     disable_paging();
     page_directory_t *pd = create_kernel_page_directory((void *)stub);
+    enable_paging();
     registers_t regs = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
     pcb_t *pcb = create_process_control_block(pd, regs, 0, NULL);
     scheduler_enqueue(pcb);
-
-    enable_paging();
     kfree(stub);
 }
 
