@@ -4,7 +4,7 @@
 
 extern pcb_t *current_process;
 extern pcb_t *scheduler_head_ptr;
-
+extern uint32_t foreground_pid;
 extern uint32_t quantum_counter;
 extern uint32_t process_queue_size;
 
@@ -21,4 +21,5 @@ void set_process_ready(unsigned int pid);
 void dump_processes();
 void debug_scheduler();
 void reparent_children(uint32_t dying_pid);
+void sigint_foreground();
 #endif

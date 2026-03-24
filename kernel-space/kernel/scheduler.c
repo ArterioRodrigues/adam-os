@@ -2,8 +2,11 @@
 
 pcb_t *current_process = NULL;
 pcb_t *scheduler_head_ptr = NULL;
+
+uint32_t foreground_pid = 0;
 uint32_t quantum_counter = 0;
 uint32_t process_queue_size = 0;
+
 bool enable_scheduler = false;
 
 void dump_current_process() {
@@ -139,7 +142,6 @@ void update_scheduler(registers_t *regs) {
     if (!enable_scheduler)
         return;
 
-    process_desktop_launch();
     bool woke = decrement_wait_process();
     quantum_counter++;
     if (current_process && !woke && quantum_counter < SCHEDULER_QUANTUM &&
@@ -147,6 +149,8 @@ void update_scheduler(registers_t *regs) {
         return;
     }
 
+    if (current_process->pid == 3)
+        dump_current_process();
     if (current_process && current_process->status == ZOMBIE) {
         int pid = current_process->pid;
         scheduler_wake(current_process->pid);
@@ -244,11 +248,37 @@ void scheduler_wake(uint32_t pid) {
     pcb_t *current = scheduler_head_ptr;
 
     while (current) {
-         if (current->waiting_pid == pid) {
+        if (current->waiting_pid == pid) {
             current->status = READY;
             return;
         }
 
         current = current->next;
     }
+}
+
+void sigint_foreground() {
+    print("^C\n");
+    stdin.count = 0;
+    stdin.read_index = stdin.write_index;
+
+    if (foreground_pid == 0)
+        return;
+
+    if (stdin.wait_queue.process && stdin.wait_queue.process->pid == foreground_pid) {
+        stdin.wait_queue.process = NULL;
+        stdin.wait_queue.requested_len = -1;
+    }
+
+    pcb_t *p = scheduler_head_ptr;
+
+    while (p) {
+        if (p->pid == foreground_pid) {
+            p->status = ZOMBIE;
+            break;
+        }
+        p = p->next;
+    }
+
+    foreground_pid = 0;
 }

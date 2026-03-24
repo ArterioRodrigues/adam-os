@@ -133,8 +133,10 @@ static void handle_syscall_kill(registers_t *regs) {
 }
 
 static void handle_syscall_wait(registers_t *regs) {
-    current_process->waiting_pid = regs->ebx;
-    current_process->status = WAITING;
+    uint32_t pid = regs->ebx;
+    foreground_pid = pid;
+    current_process->waiting_pid = pid;
+    current_process->status = current_process->status == ZOMBIE ? ZOMBIE : WAITING;
     update_scheduler(regs);
 }
 
@@ -158,7 +160,7 @@ static void handle_syscall_sleep(registers_t *regs) {
     if (ticks == 0 || current_process->pid == 1)
         return;
     current_process->sleep_ticks = ticks;
-    current_process->status = WAITING;
+    current_process->status = current_process->status == ZOMBIE ? ZOMBIE : WAITING;
     update_scheduler(regs);
 }
 

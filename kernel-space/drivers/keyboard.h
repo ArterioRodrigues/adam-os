@@ -8,6 +8,9 @@
 #define SCANCODE_LSHIFT_REL 0xAA
 #define SCANCODE_RSHIFT_REL 0xB6
 #define SCANCODE_END 0x4F
+#define SCANCODE_LCTRL 0x1D
+#define SCANCODE_LCTRL_REL 0x9D
+#define SCANCODE_C 0x2E
 
 extern bool keyboard_pressed;
 extern void keyboard_handler();
