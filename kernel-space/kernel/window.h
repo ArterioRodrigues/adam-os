@@ -47,4 +47,5 @@ void window_draw_rect(window_t *window, int x, int y, int w, int h, uint8_t colo
 
 void window_draw_char(window_t *window, int x, int y, char c, uint8_t color);
 void remove_window(uint32_t id);
+void remove_window_process(uint32_t pid);
 #endif

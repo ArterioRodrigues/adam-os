@@ -1,4 +1,5 @@
 #include "../pch.h"
+#include "window.h"
 
 pcb_t *current_process = NULL;
 pcb_t *scheduler_head_ptr = NULL;
@@ -149,8 +150,6 @@ void update_scheduler(registers_t *regs) {
         return;
     }
 
-    if (current_process->pid == 3)
-        dump_current_process();
     if (current_process && current_process->status == ZOMBIE) {
         int pid = current_process->pid;
         scheduler_wake(current_process->pid);
@@ -271,10 +270,10 @@ void sigint_foreground() {
     }
 
     pcb_t *p = scheduler_head_ptr;
-
     while (p) {
         if (p->pid == foreground_pid) {
             p->status = ZOMBIE;
+            remove_window_process(foreground_pid);
             break;
         }
         p = p->next;

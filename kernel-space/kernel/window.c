@@ -1,3 +1,4 @@
+#include "window.h"
 #include "../pch.h"
 
 #define PADDING 5
@@ -68,6 +69,17 @@ window_t *wm_create_window(int x, int y, uint32_t width, uint32_t height, char *
     }
 
     return window;
+}
+
+void remove_window_process(uint32_t pid) {
+    window_t *window = window_head_ptr;
+
+    while (window) {
+        if (window->pid == pid)
+            remove_window(window->window_id);
+
+        window = window->next;
+    }
 }
 
 void remove_window(uint32_t id) {
