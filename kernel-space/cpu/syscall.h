@@ -22,6 +22,9 @@
 #define SYSCALL_GET_EVENT 21
 #define SYSCALL_DESTROY_WINDOW 22
 #define SYSCALL_FLUSH 23
+#define SYSCALL_GETPID 24
+#define SYSCALL_GETPPID 25
+#define SYSCALL_SBRK 26 
 
 void init_syscall();
 void syscall_handler_main(registers_t *regs);

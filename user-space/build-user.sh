@@ -14,7 +14,7 @@ $NASM -f elf32 "$SCRIPT_DIR/lib/syscalls.asm" -o "$SCRIPT_DIR/../build/syscalls.
 # compile lib once - linked into each program
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
-    -c "$SCRIPT_DIR/programs/lib.c" -o "$SCRIPT_DIR/../build/lib.o"
+    -c "$SCRIPT_DIR/lib/lib.c" -o "$SCRIPT_DIR/../build/lib.o"
 
 # compile shared library files once - linked into each program
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
@@ -29,6 +29,10 @@ $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
     -c "$SHARED_DIR/math.c" -o "$SCRIPT_DIR/../build/math.o"
 
+$CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+    -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
+    -c "$SCRIPT_DIR/lib/malloc.c" -o "$SCRIPT_DIR/../build/malloc.o"
+
 build_minimal() {
     local name="$1"
     $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
@@ -36,6 +40,7 @@ build_minimal() {
         -c "$SCRIPT_DIR/programs/${name}.c" -o "$SCRIPT_DIR/../build/${name}.o"
     $LD -m elf_i386 -Ttext=0x40000000 \
         "$SCRIPT_DIR/../build/syscalls.o" \
+        "$SCRIPT_DIR/../build/malloc.o" \
         "$SCRIPT_DIR/../build/${name}.o" \
         -o "$SCRIPT_DIR/../build/${name}.elf"
     $OBJCOPY -O binary "$SCRIPT_DIR/../build/${name}.elf" "$SCRIPT_DIR/../build/${name}.bin"
@@ -44,27 +49,24 @@ build_minimal() {
 build_program() {
     local name="$1"
     local src="$SCRIPT_DIR/programs/${name}.c"
-
     $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
         -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
         -c "$src" -o "$SCRIPT_DIR/../build/${name}.o"
-
     $LD -m elf_i386 -Ttext=0x40000000 \
         "$SCRIPT_DIR/../build/syscalls.o" \
         "$SCRIPT_DIR/../build/lib.o" \
         "$SCRIPT_DIR/../build/string.o" \
+        "$SCRIPT_DIR/../build/malloc.o" \
         "$SCRIPT_DIR/../build/mem.o" \
         "$SCRIPT_DIR/../build/math.o" \
         "$SCRIPT_DIR/../build/${name}.o" \
         -o "$SCRIPT_DIR/../build/${name}.elf"
-
     $OBJCOPY -O binary "$SCRIPT_DIR/../build/${name}.elf" "$SCRIPT_DIR/../build/${name}.bin"
 }
 
 # build all user programs
 build_minimal main
 build_minimal idle
-
 build_program shell
 build_program bf
 build_program tetris

@@ -23,6 +23,9 @@ global sys_create_text
 global sys_get_event
 global sys_destroy_window
 global sys_flush
+global sys_getpid
+global sys_getppid
+global sys_sbrk 
 
 extern main
 _start:
@@ -152,5 +155,21 @@ sys_destroy_window:
 
 sys_flush:
     mov eax, 23 
+    int 0x80
+    ret
+
+sys_getpid:
+    mov eax, 24
+    int 0x80
+    ret
+
+sys_getppid:
+    mov eax, 25
+    int 0x80
+    ret
+
+sys_sbrk: 
+    mov eax, 26
+    mov ebx, [esp + 4]
     int 0x80
     ret

@@ -1,6 +1,6 @@
 #ifndef IDT_H
 #define IDT_H
-#include "../kernel/config.h"
+#include "../../shared/config.h"
 #include "../../shared/types.h"
 
 extern void idt_load(unsigned int);

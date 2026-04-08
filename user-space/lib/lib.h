@@ -2,9 +2,10 @@
 #define HELPERS_H
 #include "../../shared/abi-types.h"
 #include "../../shared/math.h"
-#include "../../shared/string.h"
 #include "../../shared/mem.h"
+#include "../../shared/string.h"
 #include "../../shared/types.h"
+#include "../../shared/config.h"
 
 extern void sys_exit();
 extern void sys_exec(char *filname, char *buf);
@@ -27,6 +28,9 @@ extern void sys_create_text(create_text_t *text);
 extern int sys_get_event(uint32_t id, event_t *event);
 extern void sys_destroy_window(uint32_t id);
 extern void sys_flush();
+extern uint32_t sys_getpid();
+extern uint32_t sys_getppid();
+extern void *sys_sbrk(uint32_t offset);
 
-void print(const char *s); 
+void print(const char *s);
 #endif

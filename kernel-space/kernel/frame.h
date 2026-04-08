@@ -1,7 +1,7 @@
 #ifndef FRAME_H
 #define FRAME_H
 #include "../../shared/types.h"
-#include "config.h"
+#include "../../shared/config.h"
 
 extern unsigned int frames_bitmap[NUM_FRAMES / 32];
 

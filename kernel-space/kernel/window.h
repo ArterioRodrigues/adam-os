@@ -1,7 +1,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
-#include "config.h"
+
 #include "event.h"
+#include "../../shared/config.h"
 #include "../../shared/types.h"
 
 typedef struct window {

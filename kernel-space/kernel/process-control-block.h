@@ -15,6 +15,7 @@ typedef struct pcb {
     struct pcb *next;
 
     uint32_t kernel_stack;
+    uint32_t heap_break;
     uint32_t pid;
     uint32_t parent_pid;
 

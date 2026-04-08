@@ -1,4 +1,5 @@
 #include "../lib/lib.h"
+#include "../lib/malloc.h"
 
 #define MAX_INPUT 256
 #define MAX_PS 16
@@ -197,6 +198,24 @@ static void handle_create(char *arg) {
     sys_close(fd);
 }
 
+static void handle_dump() {
+    heap_block_header_t *current = heap_head_ptr;
+    char buf[10];
+    while (current) {
+
+        if (current->is_free)
+            print("F ");
+        else
+            print("N ");
+
+        print("S: ");
+        print(itos(buf, current->size));
+        print("N: ");
+        print(itos(buf, (uint32_t)current->next));
+
+        current = current->next;
+    }
+}
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
@@ -220,6 +239,8 @@ static void dispatch(char *line) {
         handle_cat(line + 4);
     else if (strncmp(line, "bf ", 3))
         handle_fork("bf", line + 3);
+    else if (strcmp(line, "dump"))
+        handle_dump();
     else {
         print("command not found: ");
         print(line);

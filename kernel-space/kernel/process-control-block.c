@@ -10,6 +10,7 @@ pcb_t *create_process_control_block(page_directory_t *page_directory, registers_
     uint8_t *stack_mem = (uint8_t *)kmalloc(PAGE_SIZE);
     pcb->kernel_stack = (uint32_t)(stack_mem + PAGE_SIZE);
 
+    pcb->heap_break = NULL; 
     pcb->pid = pid_static++;
     pcb->parent_pid = parent_pid;
     pcb->status = READY;

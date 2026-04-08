@@ -12,11 +12,12 @@
 //  0x40000000          User function page (virtual)
 //  0x50000000          User stack page (virtual)
 //
-#define KERNEL_START 0x00000           // Physical start of kernel
-#define KERNEL_END   0x100000 // Physical end of kernel (1MB)
-#define KERNEL_STACK_ADDRESS 0x90000   // Top of kernel stack (grows downward)
+#define KERNEL_START 0x00000         // Physical start of kernel
+#define KERNEL_END 0x100000          // Physical end of kernel (1MB)
+#define KERNEL_STACK_ADDRESS 0x90000 // Top of kernel stack (grows downward)
 
 #define USER_FUNC_VADDR 0x40000000           // Virtual address user function is mapped to
+#define USER_HEAP_VADDR 0x48000000           // Virtual address user stack is mapped to
 #define USER_STACK_VADDR 0x50000000          // Virtual address user stack is mapped to
 #define USER_LIB_VADDR 0x60000000            // Virtual address user is mapped to
 #define USER_PAGE_DIRECTORY_VADDR 0x70000000 // Virtual address user is mapped to

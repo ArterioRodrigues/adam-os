@@ -1,6 +1,6 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
-#include "../kernel/config.h"
+#include "../../shared/config.h"
 #include "../../shared/types.h"
 
 #define SCANCODE_LSHIFT 0x2A
