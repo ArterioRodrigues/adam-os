@@ -56,7 +56,6 @@ void kernel_main() {
     init_fat16();
     init_frames();
     init_vga();
-    init_desktop_icons();
     init_terminal();
     init_status_bar();
 

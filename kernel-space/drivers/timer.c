@@ -7,10 +7,8 @@ void timer_handler_main(registers_t *regs) {
 
     update_scheduler(regs);
 
-    if (timer_ticks % 2) {
-        update_window();
-        wm_composite();
-    }
+    update_window();
+    wm_composite();
 
     outb(PIC1_COMMAND, PIC_EOI);
 }
