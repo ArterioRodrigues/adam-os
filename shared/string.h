@@ -20,4 +20,5 @@ char *strncpy(char* destination, const char* source, int n);
 char *strncat(char* dest, const char* src, int n);
 int strfind(char *c, char deliminator);
 char *ftos(char *result, float n, int precision);
+float stof(const char *str);
 #endif

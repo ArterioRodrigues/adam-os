@@ -33,6 +33,10 @@ $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
     -c "$SCRIPT_DIR/lib/malloc.c" -o "$SCRIPT_DIR/../build/malloc.o"
 
+$CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+    -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
+    -c "$SCRIPT_DIR/lib/obj.c" -o "$SCRIPT_DIR/../build/obj.o"
+
 build_minimal() {
     local name="$1"
     $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
@@ -57,6 +61,7 @@ build_program() {
         "$SCRIPT_DIR/../build/lib.o" \
         "$SCRIPT_DIR/../build/string.o" \
         "$SCRIPT_DIR/../build/malloc.o" \
+        "$SCRIPT_DIR/../build/obj.o" \
         "$SCRIPT_DIR/../build/mem.o" \
         "$SCRIPT_DIR/../build/math.o" \
         "$SCRIPT_DIR/../build/${name}.o" \

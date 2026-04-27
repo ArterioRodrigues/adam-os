@@ -200,3 +200,30 @@ char *ftos(char *result, float n, int precision) {
 
     return result;
 }
+
+float stof(const char *str) {
+    int sign = 1;
+    int i = 0;
+
+    if (str[0] == '-') {
+        sign = -1;
+        i = 1;
+    } else if (str[0] == '+') {
+        i = 1;
+    }
+
+    float result = 0.0f;
+    for (; str[i] >= '0' && str[i] <= '9'; i++)
+        result = result * 10.0f + (float)(str[i] - '0');
+
+    if (str[i] == '.') {
+        i++;
+        float scale = 0.1f;
+        for (; str[i] >= '0' && str[i] <= '9'; i++) {
+            result += (float)(str[i] - '0') * scale;
+            scale *= 0.1f;
+        }
+    }
+
+    return result * (float)sign;
+}
