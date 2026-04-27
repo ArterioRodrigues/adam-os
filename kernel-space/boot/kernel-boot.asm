@@ -7,7 +7,7 @@
 
 ; The sets a consant KERNEL_OFFSET = 0x1000
 KERNEL_OFFSET equ 0x1000
-KERNEL_SECTORS equ 82
+KERNEL_SECTORS equ 128
 
 start:
   ; When BIOS jumps to 0x7C00 it sets the dl register to be the booted drive

@@ -159,3 +159,44 @@ char *strtok(char *dest, char *str, char delim) {
 
     return (i > 0) ? dest : NULL;
 }
+
+char *ftos(char *result, float n, int precision) {
+    int i = 0;
+    bool negative = false;
+
+    if (n < 0) {
+        negative = true;
+        n = -n;
+    }
+
+    int scale = 1;
+    for (int p = 0; p < precision; p++)
+        scale *= 10;
+
+    int total = (int)(n * (float)scale + 0.5f);
+    int int_part = total / scale;
+    int frac_part = total % scale;
+
+    do {
+        result[i++] = '0' + (int_part % 10);
+        int_part /= 10;
+    } while (int_part > 0);
+
+    if (negative)
+        result[i++] = '-';
+
+    result[i] = '\0';
+    strrev(result);
+
+    if (precision > 0) {
+        result[i++] = '.';
+        int divisor = scale / 10;
+        for (int p = 0; p < precision; p++) {
+            result[i++] = '0' + ((frac_part / divisor) % 10);
+            divisor /= 10;
+        }
+        result[i] = '\0';
+    }
+
+    return result;
+}

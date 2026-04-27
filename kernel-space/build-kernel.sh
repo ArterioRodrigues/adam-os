@@ -71,13 +71,13 @@ $LD -T linker.ld -o kernel.bin \
 truncate -s 9M fat16.bin
 mkfs.fat -F 16 fat16.bin
 
-# add shell to the fat storage
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
 mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 mcopy -i fat16.bin $USER_BUILD/tetris.bin ::TETRIS
 mcopy -i fat16.bin $USER_BUILD/calculator.bin ::CALC
+mcopy -i fat16.bin $USER_BUILD/cube.obj ::CUBE
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10

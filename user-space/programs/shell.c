@@ -199,23 +199,9 @@ static void handle_create(char *arg) {
 }
 
 static void handle_dump() {
-    heap_block_header_t *current = heap_head_ptr;
-    char buf[10];
-    while (current) {
 
-        if (current->is_free)
-            print("F ");
-        else
-            print("N ");
-
-        print("S: ");
-        print(itos(buf, current->size));
-        print("N: ");
-        print(itos(buf, (uint32_t)current->next));
-
-        current = current->next;
-    }
 }
+
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
