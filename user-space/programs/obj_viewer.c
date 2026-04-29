@@ -57,9 +57,9 @@ static void draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
     }
 }
 
-static void load_obj() {
+static void load_obj(char *file_name) {
     char buf[1000];
-    int fd = sys_open("CUBE");
+    int fd = sys_open(file_name);
     int size = sys_read(fd, buf, 1000);
 
     parse_obj(buf, VERTICES, &VERTEX_COUNT, FACES, &FACE_COUNT);
@@ -126,12 +126,12 @@ static void render_wireframe() {
     sys_flush();
 }
 
-int main() {
+int main(char *arg) {
+    char *file_name = arg;
     bool toggle = true;
     init();
 
-    load_obj();
-
+    load_obj(file_name);
     while (true) {
         event_t event;
         int ev;

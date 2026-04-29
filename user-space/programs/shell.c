@@ -220,6 +220,8 @@ static void dispatch(char *line) {
         handle_cat(line + 4);
     else if (strncmp(line, "bf ", 3))
         handle_fork("bf", line + 3);
+    else if (strncmp(line, "obj_viewer ", 11))
+        handle_fork("obj_viewer", line + 11);
     else {
         print("command not found: ");
         print(line);

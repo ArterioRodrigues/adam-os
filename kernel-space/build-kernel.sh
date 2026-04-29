@@ -71,18 +71,18 @@ $LD -T linker.ld -o kernel.bin \
 truncate -s 9M fat16.bin
 mkfs.fat -F 16 fat16.bin
 
+mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/shell.bin ::SHELL
 mcopy -i fat16.bin $USER_BUILD/idle.bin ::IDLE
-mcopy -i fat16.bin $USER_BUILD/bf.bin ::BF
 mcopy -i fat16.bin $USER_BUILD/main.bf ::MAIN.BF
 mcopy -i fat16.bin $USER_BUILD/tetris.bin ::TETRIS
 mcopy -i fat16.bin $USER_BUILD/calculator.bin ::CALC
 mcopy -i fat16.bin $USER_BUILD/obj_viewer.bin ::OBJ_VIEW
-mcopy -i fat16.bin $USER_BUILD/cube.obj ::CUBE
-mcopy -i fat16.bin $USER_BUILD/diamond.obj ::DIAMOND
-mcopy -i fat16.bin $USER_BUILD/pyramid.obj ::PYRAMID
-mcopy -i fat16.bin $USER_BUILD/octahedron.obj ::OCTAHEDRON
-mcopy -i fat16.bin $USER_BUILD/tetrahedron.obj ::TETRAHEDR
+mcopy -i fat16.bin $USER_BUILD/cube.obj ::CUBE.OBJ
+mcopy -i fat16.bin $USER_BUILD/diamond.obj ::DIAMOND.OBJ
+mcopy -i fat16.bin $USER_BUILD/pyramid.obj ::PYRAMID.OBJ
+mcopy -i fat16.bin $USER_BUILD/octahedron.obj ::OCTAHED.OBJ
+mcopy -i fat16.bin $USER_BUILD/tetrahedron.obj ::TETRAHE.OBJ
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10
