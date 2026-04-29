@@ -197,9 +197,7 @@ static void handle_create(char *arg) {
     sys_close(fd);
 }
 
-static void handle_dump(char *arg) {
-  print("test");
-}
+static void handle_dump(char *arg) { print(""); }
 
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
