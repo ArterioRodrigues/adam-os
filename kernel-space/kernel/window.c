@@ -180,6 +180,30 @@ void window_draw_rect(window_t *window, int x, int y, int w, int h, uint8_t colo
     }
 }
 
+void window_draw_line(window_t *window, int x0, int y0, int x1, int y1, uint8_t color) {
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+    int sx = x0 < x1 ? 1 : -1;
+    int sy = y0 < y1 ? 1 : -1;
+    int error = dx - dy;
+
+    while (1) {
+        window_put_pixel(window, x0, y0, color);
+        if (x0 == x1 && y0 == y1)
+            break;
+
+        int error2 = 2 * error;
+        if (error2 > -dy) {
+            error -= dy;
+            x0 += sx;
+        }
+        if (error2 < dx) {
+            error += dx;
+            y0 += sy;
+        }
+    }
+}
+
 void window_draw_char(window_t *window, int x, int y, char c, uint8_t color) {
     if (c < 32)
         return;

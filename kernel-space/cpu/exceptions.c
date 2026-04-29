@@ -66,24 +66,24 @@ void exception_handler_c(registers_t *regs) {
         asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
 
         vga_draw_string(PADDING, PADDING + 40, "Faulting address: ", WHITE);
-        vga_draw_string(PADDING + 100, PADDING + 40, itohs(buf, faulting_address), WHITE);
+        vga_draw_string(PADDING + 200, PADDING + 40, itohs(buf, faulting_address), WHITE);
 
         vga_draw_string(PADDING, PADDING + 50, "Caused by: ", WHITE);
         if (!(regs->err_code & 0x1))
             vga_draw_string(PADDING, PADDING + 60, "Page not present", WHITE);
         if (regs->err_code & 0x2)
-            vga_draw_string(PADDING, PADDING + 60, "Write operation", WHITE);
+            vga_draw_string(PADDING + 200, PADDING + 60, "Write operation", WHITE);
         else
-            vga_draw_string(PADDING, PADDING + 60, "Read operation", WHITE);
+            vga_draw_string(PADDING + 200, PADDING + 60, "Read operation", WHITE);
         if (regs->err_code & 0x4)
-            vga_draw_string(PADDING, PADDING + 60, "User mode", WHITE);
+            vga_draw_string(PADDING + 400, PADDING + 60, "User mode", WHITE);
         else
-            vga_draw_string(PADDING, PADDING + 60, "Kernel mode", WHITE);
+            vga_draw_string(PADDING + 400 , PADDING + 60, "Kernel mode", WHITE);
     }
 
     if (regs->int_no == 13) {
         vga_draw_string(PADDING, PADDING + 70, "Segment selector: ", WHITE);
-        vga_draw_string(PADDING + 100, PADDING + 70, itohs(buf, regs->err_code >> 3), WHITE);
+        vga_draw_string(PADDING + 200, PADDING + 70, itohs(buf, regs->err_code >> 3), WHITE);
     }
 
     vga_draw_string(PADDING, PADDING + 80, "Registers: ", WHITE);
@@ -121,106 +121,6 @@ void exception_handler_c(registers_t *regs) {
         ;
 }
 
-
-void exception_handler_c_legacy(registers_t *regs) {
-    print("\n*** EXCEPTION ***\n");
-
-    if (regs->int_no < 20) {
-        print(exception_messages[regs->int_no]);
-    } else {
-        print("Reserved Exception");
-    }
-    print("\n");
-
-    char buf[20];
-    print("Exception: ");
-    itos(buf, regs->int_no);
-    print(buf);
-    print("\n");
-    print("Error Code: ");
-    itohs(buf, regs->err_code);
-    print(buf);
-    print("\n");
-
-    if (regs->int_no == 14) {
-        uint32_t faulting_address;
-        asm volatile("mov %%cr2, %0" : "=r"(faulting_address));
-
-        print("Faulting address: ");
-        itohs(buf, faulting_address);
-        print(buf);
-        print("\n");
-
-        print("Caused by: ");
-        if (!(regs->err_code & 0x1))
-            print("Page not present ");
-        if (regs->err_code & 0x2)
-            print("Write operation ");
-        else
-            print("Read operation ");
-        if (regs->err_code & 0x4)
-            print("User mode");
-        else
-            print("Kernel mode");
-        print("\n");
-    }
-
-    if (regs->int_no == 13) {
-        print("Segment selector: ");
-        itohs(buf, regs->err_code >> 3);
-        print(buf);
-        print("\n");
-    }
-
-    print("\nRegisters:\n");
-    print("EAX=");
-    itohs(buf, regs->eax);
-    print(buf);
-    print(" ");
-    print("EBX=");
-    itohs(buf, regs->ebx);
-    print(buf);
-    print("\n");
-    print("ECX=");
-    itohs(buf, regs->ecx);
-    print(buf);
-    print(" ");
-    print("EDX=");
-    itohs(buf, regs->edx);
-    print(buf);
-    print("\n");
-    print("ESI=");
-    itohs(buf, regs->esi);
-    print(buf);
-    print(" ");
-    print("EDI=");
-    itohs(buf, regs->edi);
-    print(buf);
-    print("\n");
-    print("EBP=");
-    itohs(buf, regs->ebp);
-    print(buf);
-    print(" ");
-    print("ESP=");
-    itohs(buf, regs->esp);
-    print(buf);
-    print("\n");
-    print("EIP=");
-    itohs(buf, regs->eip);
-    print(buf);
-    print(" ");
-    print("EFLAGS=");
-    itohs(buf, regs->eflags);
-    print(buf);
-    print("\n");
-
-    print("\nSystem halted.\n");
-
-    vga_flip();
-    wm_composite();
-    while (1)
-        ;
-}
 void dump_registers(registers_t *regs) {
     char buf[20];
     print("\n=== REGISTERS ===\n");

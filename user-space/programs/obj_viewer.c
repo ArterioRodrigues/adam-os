@@ -8,6 +8,7 @@
 #define POINT_COLOR 0x00
 
 static create_rect_t RECT;
+static create_line_t LINE;
 static create_window_t WINDOW;
 
 static obj_face_t FACES[MAX_FACES];
@@ -31,30 +32,12 @@ static void draw_rect(int x, int y, int w, int h, uint8_t color) {
 }
 
 static void draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
-    int dx = x1 - x0;
-    if (dx < 0)
-        dx = -dx;
-    int dy = y1 - y0;
-    if (dy < 0)
-        dy = -dy;
-    int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
-    int err = dx - dy;
-
-    while (1) {
-        draw_rect(x0, y0, 1, 1, color);
-        if (x0 == x1 && y0 == y1)
-            break;
-        int e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-        }
-    }
+    LINE.x0 = x0;
+    LINE.y0 = y0;
+    LINE.x1 = x1;
+    LINE.y1 = y1;
+    LINE.color = color;
+    sys_create_line(&LINE);
 }
 
 static void load_obj(char *file_name) {
@@ -64,21 +47,22 @@ static void load_obj(char *file_name) {
         print("FILE NOT FOUND!");
         sys_exit();
     }
-    int size = sys_read(fd, buf, 1000);
+    int size = sys_read(fd, buf, 1024);
     while (size > 0) {
         parse_obj(buf, VERTICES, &VERTEX_COUNT, FACES, &FACE_COUNT);
-        size = sys_read(fd, buf, 1000);
+        size = sys_read(fd, buf, 1024);
     }
 }
 static void init() {
     WINDOW.height = WINDOW_H;
     WINDOW.width = WINDOW_W;
-    WINDOW.x = 100;
-    WINDOW.y = 100;
+    WINDOW.x = 0;
+    WINDOW.y = 0;
     strcpy(WINDOW.title, "OBJ_VIEWER");
 
     WINDOW_ID = sys_create_window(&WINDOW);
     RECT.window_id = WINDOW_ID;
+    LINE.window_id = WINDOW_ID;
 }
 static void render_inital() {
     draw_rect(0, 0, WINDOW_W, WINDOW_H, BACKGROUND_COLOR);
@@ -96,7 +80,6 @@ static void render_inital() {
 
         draw_rect(point.x - 2, point.y - 2, 4, 4, POINT_COLOR);
     }
-    sys_flush();
 }
 static void render_wireframe() {
     draw_rect(0, 0, WINDOW_W, WINDOW_H, BACKGROUND_COLOR);
@@ -128,8 +111,6 @@ static void render_wireframe() {
         draw_line(sp[1].x, sp[1].y, sp[2].x, sp[2].y, POINT_COLOR);
         draw_line(sp[2].x, sp[2].y, sp[0].x, sp[0].y, POINT_COLOR);
     }
-
-    sys_flush();
 }
 
 int main(char *arg) {
@@ -138,6 +119,7 @@ int main(char *arg) {
     init();
 
     load_obj(file_name);
+    render_wireframe();
     while (true) {
         event_t event;
         int ev;
@@ -154,13 +136,17 @@ int main(char *arg) {
                 YAW += 0.05f;
             else if (event.c == 'l')
                 YAW -= 0.05f;
+            else if (event.c == 'z')
+                CAMERA_DISTANCE++;
+            else if (event.c == 'Z')
+                CAMERA_DISTANCE--;
         }
 
         if (ev == -1)
             sys_exit();
 
         toggle ? render_wireframe() : render_inital();
-        sys_sleep(5);
+        sys_sleep(1);
     }
     return 0;
 }

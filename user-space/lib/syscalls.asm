@@ -19,6 +19,7 @@ global sys_sleep
 global sys_uptime
 global sys_create_window
 global sys_create_rect
+global sys_create_line
 global sys_create_text
 global sys_get_event
 global sys_destroy_window
@@ -133,43 +134,47 @@ sys_create_rect:
     mov ebx, [esp + 4]
     int 0x80
     ret
-
+sys_create_line:
+    mov eax, 20 
+    mov ebx, [esp + 4]
+    int 0x80
+    ret
 sys_create_text:
-    mov eax, 20
+    mov eax, 21
     mov ebx, [esp + 4]
     int 0x80
     ret
 
 sys_get_event:
-    mov eax, 21 
+    mov eax, 22
     mov ebx, [esp + 4]
     mov ecx, [esp + 8]
     int 0x80
     ret
 
 sys_destroy_window:
-    mov eax, 22 
+    mov eax, 23
     mov ebx, [esp + 4]
     int 0x80
     ret
 
 sys_flush:
-    mov eax, 23 
-    int 0x80
-    ret
-
-sys_getpid:
     mov eax, 24
     int 0x80
     ret
 
-sys_getppid:
+sys_getpid:
     mov eax, 25
     int 0x80
     ret
 
-sys_sbrk: 
+sys_getppid:
     mov eax, 26
+    int 0x80
+    ret
+
+sys_sbrk: 
+    mov eax, 27
     mov ebx, [esp + 4]
     int 0x80
     ret

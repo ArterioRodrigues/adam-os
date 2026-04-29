@@ -323,6 +323,15 @@ static void handle_syscall_draw_rect(registers_t *regs) {
     window_draw_rect(win, rect->x, rect->y, rect->width, rect->height, rect->color);
 }
 
+static void handle_syscall_draw_line(registers_t *regs) {
+    create_line_t *line = (create_line_t *)regs->ebx;
+    window_t *win = get_window(line->window_id);
+    if (!win) {
+        regs->eax = (uint32_t)-1;
+        return;
+    }
+    window_draw_line(win, line->x0, line->y0, line->x1, line->y1, line->color);
+}
 static void handle_syscall_draw_text(registers_t *regs) {
     create_text_t *text = (create_text_t *)regs->ebx;
     window_t *win = get_window(text->window_id);
@@ -379,7 +388,7 @@ static void handle_syscall_sbrk(registers_t *regs) {
         map_page(current_process->page_directory, page, frame, PAGE_FLAG_USER);
         memset((void *)page, 0, PAGE_SIZE);
         page += PAGE_SIZE;
-   }
+    }
 
     current_process->heap_break = new_break;
     regs->eax = old_break;
@@ -433,6 +442,9 @@ void syscall_handler_main(registers_t *regs) {
         break;
     case SYSCALL_DRAW_RECT:
         handle_syscall_draw_rect(regs);
+        break;
+    case SYSCALL_DRAW_LINE:
+        handle_syscall_draw_line(regs);
         break;
     case SYSCALL_DRAW_TEXT:
         handle_syscall_draw_text(regs);

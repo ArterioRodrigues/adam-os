@@ -43,4 +43,4 @@ void dump_frame() {
     print("\n");
 }
 
-void free_frame(uint32_t frame) { clear_frame(frame); }
+void free_frame(uint32_t frame) { clear_frame(frame / PAGE_SIZE); }

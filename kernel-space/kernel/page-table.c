@@ -73,6 +73,8 @@ void copy_page_directory(page_directory_t *dest, page_directory_t *source) {
 
         page_table_t *dest_page_table = (page_table_t *)allocate_frame();
         identity_map_in(source, (uint32_t)dest_page_table);
+        for (int j = 0; j < 1024; j++)
+            dest_page_table->entries[j] = 0;
 
         for (int j = 0; j < 1024; j++) {
             if (source_pt->entries[j] & 1) {
@@ -116,11 +118,12 @@ void clear_page_directory(page_directory_t *page_directory) {
             }
         }
         free_frame((uint32_t)page_table);
+        page_directory->entries[i] = 0;
     }
 }
 void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t size, registers_t *regs) {
     uint32_t code_pages = ceil(size, PAGE_SIZE);
-    uint32_t bss_pages = 16;
+    uint32_t bss_pages = 32;
     uint32_t total_pages = code_pages + bss_pages;
 
     for (uint32_t i = 0; i < code_pages; i++) {
@@ -152,6 +155,14 @@ void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t 
     regs->cs = (3 * 8) | 3;
     regs->ss = (4 * 8) | 3;
     regs->eflags = eflags | 0x200;
+
+    regs->eax = 0;
+    regs->ebx = 0;
+    regs->ecx = 0;
+    regs->edx = 0;
+    regs->esi = 0;
+    regs->edi = 0;
+    regs->ebp = 0;
 
     load_page_directory(page_directory);
 }

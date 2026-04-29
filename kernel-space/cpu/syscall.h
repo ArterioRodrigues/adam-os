@@ -18,13 +18,14 @@
 #define SYSCALL_UPTIME 17
 #define SYSCALL_CREATE_WINDOW 18
 #define SYSCALL_DRAW_RECT 19
-#define SYSCALL_DRAW_TEXT 20
-#define SYSCALL_GET_EVENT 21
-#define SYSCALL_DESTROY_WINDOW 22
-#define SYSCALL_FLUSH 23
-#define SYSCALL_GETPID 24
-#define SYSCALL_GETPPID 25
-#define SYSCALL_SBRK 26 
+#define SYSCALL_DRAW_LINE 20 
+#define SYSCALL_DRAW_TEXT 21
+#define SYSCALL_GET_EVENT 22
+#define SYSCALL_DESTROY_WINDOW 23
+#define SYSCALL_FLUSH 24 
+#define SYSCALL_GETPID 25 
+#define SYSCALL_GETPPID 26
+#define SYSCALL_SBRK 27
 
 void init_syscall();
 void syscall_handler_main(registers_t *regs);

@@ -26,6 +26,7 @@ extern void sys_sleep(int ticks);
 extern int sys_uptime();
 extern int sys_create_window(create_window_t *window);
 extern void sys_create_rect(create_rect_t *rect);
+extern void sys_create_line(create_line_t *line);
 extern void sys_create_text(create_text_t *text);
 extern int sys_get_event(uint32_t id, event_t *event);
 extern void sys_destroy_window(uint32_t id);

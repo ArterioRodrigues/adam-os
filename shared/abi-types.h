@@ -37,6 +37,15 @@ typedef struct {
 
 typedef struct {
     uint32_t window_id;
+    int x0;
+    int y0;
+    int x1;
+    int y1;
+    uint8_t color;
+} create_line_t;
+
+typedef struct {
+    uint32_t window_id;
     int x;
     int y;
     char *str;

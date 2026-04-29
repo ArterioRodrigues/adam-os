@@ -1,8 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#define MAX_VERTICES 2018
-#define MAX_FACES 3500 
+#define MAX_VERTICES 4000
+#define MAX_FACES 4000 
 
 typedef struct {
     float x, y, z;

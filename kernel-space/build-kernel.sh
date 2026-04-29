@@ -84,6 +84,7 @@ mcopy -i fat16.bin $USER_BUILD/pyramid.obj ::PYRAMID.OBJ
 mcopy -i fat16.bin $USER_BUILD/octahedron.obj ::OCTAHED.OBJ
 mcopy -i fat16.bin $USER_BUILD/tetrahedron.obj ::TETRAHE.OBJ
 mcopy -i fat16.bin $USER_BUILD/sphere.obj ::SPHERE.OBJ
+mcopy -i fat16.bin $USER_BUILD/tie.obj ::TIE.OBJ
 
 echo "Creating OS image..."
 dd if=/dev/zero of=os-image.bin bs=1M count=10
