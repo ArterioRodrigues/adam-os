@@ -27,7 +27,7 @@ page_directory_t *create_page_directory() {
  * and access it directly but this is kinda ify should be a better way
  * if we do this and a program get's access to kernel it can see other
  * programs while paging is off
-*/
+ */
 static inline int paging_enabled(void) {
     uint32_t cr0;
     asm volatile("mov %%cr0, %0" : "=r"(cr0));
@@ -119,34 +119,36 @@ void clear_page_directory(page_directory_t *page_directory) {
     }
 }
 void update_page_directory(page_directory_t *page_directory, void *fn, uint32_t size, registers_t *regs) {
-    uint32_t frame = allocate_frame();
-    uint32_t user_func_frame = frame;
+    uint32_t code_pages = ceil(size, PAGE_SIZE);
+    uint32_t bss_pages = 16;
+    uint32_t total_pages = code_pages + bss_pages;
 
-    map_page(page_directory, user_func_frame, user_func_frame, PAGE_FLAG_USER);
-    map_page(page_directory, USER_FUNC_VADDR, user_func_frame, PAGE_FLAG_USER);
-    memcpy((void *)user_func_frame, fn, min(size, PAGE_SIZE));
-
-    for (int i = 1; i < ceil(size, PAGE_SIZE); i++) {
-        frame = allocate_frame();
-        map_page(page_directory, frame, frame, PAGE_FLAG_USER);
-        map_page(page_directory, USER_FUNC_VADDR + PAGE_SIZE * i, frame, PAGE_FLAG_USER);
+    for (uint32_t i = 0; i < code_pages; i++) {
+        uint32_t frame = allocate_frame();
+        uint32_t vaddr = USER_FUNC_VADDR + i * PAGE_SIZE;
+        map_page(page_directory, vaddr, frame, PAGE_FLAG_USER);
 
         uint32_t offset = i * PAGE_SIZE;
         uint32_t remaining = size - offset;
-        memcpy((void *)frame, fn + offset, min(remaining, PAGE_SIZE));
+        memcpy((void *)vaddr, (uint8_t *)fn + offset, min(remaining, PAGE_SIZE));
+    }
+
+    for (uint32_t i = code_pages; i < total_pages; i++) {
+        uint32_t frame = allocate_frame();
+        uint32_t vaddr = USER_FUNC_VADDR + i * PAGE_SIZE;
+        map_page(page_directory, vaddr, frame, PAGE_FLAG_USER);
+        memset((void *)vaddr, 0, PAGE_SIZE);
     }
 
     uint32_t user_stack_frame = allocate_frame();
-    map_page(page_directory, user_stack_frame, user_stack_frame, PAGE_FLAG_USER);
     map_page(page_directory, USER_STACK_VADDR, user_stack_frame, PAGE_FLAG_USER);
 
     regs->eip = USER_FUNC_VADDR;
-    regs->useresp = USER_STACK_VADDR + 0x1000 - 4;
-    regs->esp = USER_STACK_VADDR + 0x1000 - 4;
+    regs->useresp = USER_STACK_VADDR + PAGE_SIZE - 4;
+    regs->esp = regs->useresp;
 
     uint32_t eflags;
     asm volatile("pushf; pop %0" : "=r"(eflags));
-
     regs->cs = (3 * 8) | 3;
     regs->ss = (4 * 8) | 3;
     regs->eflags = eflags | 0x200;

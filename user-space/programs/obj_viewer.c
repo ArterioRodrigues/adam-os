@@ -58,11 +58,17 @@ static void draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
 }
 
 static void load_obj(char *file_name) {
-    char buf[1000];
+    char buf[1024];
     int fd = sys_open(file_name);
+    if (fd == -1) {
+        print("FILE NOT FOUND!");
+        sys_exit();
+    }
     int size = sys_read(fd, buf, 1000);
-
-    parse_obj(buf, VERTICES, &VERTEX_COUNT, FACES, &FACE_COUNT);
+    while (size > 0) {
+        parse_obj(buf, VERTICES, &VERTEX_COUNT, FACES, &FACE_COUNT);
+        size = sys_read(fd, buf, 1000);
+    }
 }
 static void init() {
     WINDOW.height = WINDOW_H;

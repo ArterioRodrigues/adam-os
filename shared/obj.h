@@ -1,8 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#define MAX_VERTICES 100
-#define MAX_FACES 100
+#define MAX_VERTICES 2018
+#define MAX_FACES 3500 
 
 typedef struct {
     float x, y, z;
@@ -11,6 +11,8 @@ typedef struct {
 typedef struct {
     int a, b, c;
 } obj_face_t;
+
+extern void sys_write(int fd, char *buf, int len);
 
 void parse_obj(const char *buf, obj_vertex_t *vertices, int *vertex_count, obj_face_t *faces, int *face_count);
 #endif
