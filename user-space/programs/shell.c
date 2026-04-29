@@ -1,4 +1,5 @@
 #include "../lib/lib.h"
+#include "../lib/malloc.h"
 
 #define MAX_INPUT 256
 #define MAX_PS 16
@@ -197,7 +198,17 @@ static void handle_create(char *arg) {
     sys_close(fd);
 }
 
-static void handle_dump(char *arg) { print(""); }
+static void handle_dump(char *arg) {
+    char buf[32];
+    int *arr = malloc(sizeof(int) * 20);
+    for (int i = 0; i < 20; i++) {
+        arr[i] = i;
+    }
+
+    for (int i = 0; i < 20; i++) {
+        print(itos(buf, arr[i]));
+    }
+}
 
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
