@@ -1,6 +1,6 @@
 #ifndef SCREEN_H
 #define SCREEN_H
-#include "../kernel/types.h"
+#include "../../shared/types.h"
 
 extern volatile unsigned short *vga_buffer;
 extern int vga_index;

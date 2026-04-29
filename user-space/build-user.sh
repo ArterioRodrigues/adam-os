@@ -31,11 +31,15 @@ $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
 
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
-    -c "$SCRIPT_DIR/lib/malloc.c" -o "$SCRIPT_DIR/../build/malloc.o"
+    -c "$SHARED_DIR/obj.c" -o "$SCRIPT_DIR/../build/obj.o"
 
 $CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
     -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
-    -c "$SCRIPT_DIR/lib/obj.c" -o "$SCRIPT_DIR/../build/obj.o"
+    -c "$SHARED_DIR/render.c" -o "$SCRIPT_DIR/../build/render.o"
+
+$CC -m32 -ffreestanding -fno-pic -nostdlib -nostdinc \
+    -I"$SHARED_DIR" -I"$SCRIPT_DIR/lib" \
+    -c "$SCRIPT_DIR/lib/malloc.c" -o "$SCRIPT_DIR/../build/malloc.o"
 
 build_minimal() {
     local name="$1"
@@ -64,6 +68,7 @@ build_program() {
         "$SCRIPT_DIR/../build/obj.o" \
         "$SCRIPT_DIR/../build/mem.o" \
         "$SCRIPT_DIR/../build/math.o" \
+        "$SCRIPT_DIR/../build/render.o" \
         "$SCRIPT_DIR/../build/${name}.o" \
         -o "$SCRIPT_DIR/../build/${name}.elf"
     $OBJCOPY -O binary "$SCRIPT_DIR/../build/${name}.elf" "$SCRIPT_DIR/../build/${name}.bin"
@@ -76,6 +81,7 @@ build_program shell
 build_program bf
 build_program tetris
 build_program calculator
+build_program obj_viewer 
 
 # embed all as kernel objects
 cd "$SCRIPT_DIR/../build"
@@ -85,6 +91,7 @@ $OBJCOPY -I binary -O elf32-i386 -B i386 shell.bin shell_bin.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 bf.bin bf.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 tetris.bin tetris.o
 $OBJCOPY -I binary -O elf32-i386 -B i386 calculator.bin calculator.o
+$OBJCOPY -I binary -O elf32-i386 -B i386 obj_viewer.bin obj_viewer.o
 cd "$SCRIPT_DIR"
 
 echo "User space build complete!"

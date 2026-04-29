@@ -61,10 +61,13 @@ void vga_draw_line(int x0, int y0, int x1, int y1, uint8_t color) {
     int sy = y0 < y1 ? 1 : -1;
     int error = dx - dy;
 
-    while (!(x0 == x1 && y0 == y1)) {
+    while (1) {
         vga_put_pixel(x0, y0, color);
-        int error2 = 2 * error;
 
+        if (x0 == x1 && y0 == y1)
+            break;
+
+        int error2 = 2 * error;
         if (error2 > -dy) {
             error -= dy;
             x0 += sx;
@@ -93,7 +96,7 @@ void vga_draw_char(int x, int y, char c, uint8_t color) {
 void vga_draw_string(int x, int y, char *c, uint8_t color) {
     int size = strlen(c);
     for (int i = 0; i < size; i++) {
-        vga_draw_char(x + (i * font_spacing ) , y, c[i], color);
+        vga_draw_char(x + (i * font_spacing), y, c[i], color);
     }
 }
 

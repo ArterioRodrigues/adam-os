@@ -1,5 +1,4 @@
 #include "../lib/lib.h"
-#include "../lib/obj.h"
 
 #define MAX_INPUT 256
 #define MAX_PS 16
@@ -198,34 +197,6 @@ static void handle_create(char *arg) {
     sys_close(fd);
 }
 
-static obj_vertex_t vertices[MAX_VERTICES];
-static obj_face_t faces[MAX_FACES];
-
-static void handle_dump() {
-    char buf[1000];
-    int fd = sys_open("CUBE");
-    int size = sys_read(fd, buf, 1000);
-
-    int vertex_count = 0;
-    int face_count = 0;
-
-    parse_obj(buf, vertices, &vertex_count, faces, &face_count);
-    print("vertices: ");
-    print(itos(buf, vertex_count));
-    print("\n");
-    print("faces:    ");
-    print(itos(buf, face_count));
-    print("\n");
-    print("v[0] = ");
-    print(itos(buf, (int)(vertices[0].x * 10)));
-    print(", ");
-    print(itos(buf, (int)(vertices[0].y * 10)));
-    print(", ");
-    print(itos(buf, (int)(vertices[0].z * 10)));
-    print("\n");
-    sys_close(fd);
-}
-
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
@@ -249,8 +220,6 @@ static void dispatch(char *line) {
         handle_cat(line + 4);
     else if (strncmp(line, "bf ", 3))
         handle_fork("bf", line + 3);
-    else if (strcmp(line, "dump"))
-        handle_dump();
     else {
         print("command not found: ");
         print(line);

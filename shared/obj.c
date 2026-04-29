@@ -1,5 +1,5 @@
 #include "obj.h"
-#include "lib.h"
+#include "string.h"
 
 int next_line(const char *buf, char *line) {
     const char *p = buf;
@@ -45,13 +45,13 @@ void parse_obj(const char *buf, obj_vertex_t *vertices, int *vertex_count, obj_f
             strtok(temp, line, ' ');
 
             strtok(temp, NULL, ' ');
-           faces[*face_count].a = stoi(temp);
+            faces[*face_count].a = stoi(temp) - 1;
 
             strtok(temp, NULL, ' ');
-            faces[*face_count].b = stoi(temp);
+            faces[*face_count].b = stoi(temp) - 1;
 
             strtok(temp, NULL, ' ');
-            faces[*face_count].c = stoi(temp);
+            faces[*face_count].c = stoi(temp) - 1;
 
             (*face_count)++;
         }

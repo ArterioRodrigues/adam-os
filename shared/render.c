@@ -1,3 +1,4 @@
+#include "types.h"
 #include "render.h"
 #include "math.h"
 
@@ -101,4 +102,28 @@ mat4_t mat4_rotate_z(float angle) {
     mat.m[1][0] =  s;
     mat.m[1][1] =  c;
     return mat;
+}
+
+screen_point_t project(vec3_t v, float focal_length, int screen_w, int screen_h) {
+
+    screen_point_t point;
+    if (v.z <= 0) {
+        point.x = 0;
+        point.y = 0;
+        point.valid = false;
+        return point;
+    }
+
+    float fx = (v.x / v.z) * focal_length;
+    float fy = (-v.y / v.z) * focal_length;
+
+    point.x = (int)(fx + (fx >= 0.0f ? 0.5f : -0.5f));
+    point.y = (int)(fy + (fy >= 0.0f ? 0.5f : -0.5f));
+
+    point.x += screen_w / 2;
+    point.y += screen_h / 2;
+
+    point.valid = true;
+
+    return point;
 }

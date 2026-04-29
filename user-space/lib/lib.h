@@ -7,6 +7,7 @@
 #include "../../shared/types.h"
 #include "../../shared/config.h"
 #include "../../shared/render.h"
+#include "../../shared/obj.h"
 
 extern void sys_exit();
 extern void sys_exec(char *filname, char *buf);
