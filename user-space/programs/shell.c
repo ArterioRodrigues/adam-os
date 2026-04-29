@@ -197,6 +197,13 @@ static void handle_create(char *arg) {
     sys_close(fd);
 }
 
+static void handle_dump() {
+    char buf[32];
+    uint32_t b1 = sys_sbrk(0); itohs(buf, b1); print(buf); print("\n");
+    uint32_t b2 = sys_sbrk(4096); itohs(buf, b2); print(buf); print("\n");
+    uint32_t b3 = sys_sbrk(0); itohs(buf, b3); print(buf); print("\n");
+}
+
 static void dispatch(char *line) {
     if (strcmp(line, "clear"))
         handle_clear();
@@ -222,6 +229,8 @@ static void dispatch(char *line) {
         handle_fork("bf", line + 3);
     else if (strncmp(line, "obj_viewer ", 11))
         handle_fork("obj_viewer", line + 11);
+    else if (strncmp(line, "dump", 4))
+      handle_dump();
     else {
         print("command not found: ");
         print(line);

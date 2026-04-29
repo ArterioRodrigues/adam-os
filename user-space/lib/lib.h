@@ -1,13 +1,13 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 #include "../../shared/abi-types.h"
+#include "../../shared/config.h"
 #include "../../shared/math.h"
 #include "../../shared/mem.h"
+#include "../../shared/obj.h"
+#include "../../shared/render.h"
 #include "../../shared/string.h"
 #include "../../shared/types.h"
-#include "../../shared/config.h"
-#include "../../shared/render.h"
-#include "../../shared/obj.h"
 
 extern void sys_exit();
 extern void sys_exec(char *filname, char *buf);
@@ -32,7 +32,7 @@ extern void sys_destroy_window(uint32_t id);
 extern void sys_flush();
 extern uint32_t sys_getpid();
 extern uint32_t sys_getppid();
-extern void *sys_sbrk(uint32_t offset);
+extern uint32_t sys_sbrk(uint32_t offset);
 
 void print(const char *s);
 #endif

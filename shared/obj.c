@@ -18,9 +18,9 @@ int next_line(const char *buf, char *line) {
 }
 
 void parse_obj(const char *buf, obj_vertex_t *vertices, int *vertex_count, obj_face_t *faces, int *face_count) {
-    const char *p = buf;
-    char line[100];
     char temp[32];
+    char line[128];
+    const char *p = buf;
 
     while (*p != '\0') {
         int consumed = next_line(p, line);

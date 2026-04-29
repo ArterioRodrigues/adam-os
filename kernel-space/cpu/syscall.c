@@ -359,13 +359,12 @@ static void handle_syscall_flush(registers_t *regs) { wm_dirty = true; }
 static void handle_syscall_getpid(registers_t *regs) { regs->eax = current_process->pid; }
 static void handle_syscall_getppid(registers_t *regs) { regs->eax = current_process->parent_pid; }
 static void handle_syscall_sbrk(registers_t *regs) {
-    uint32_t offset = regs->ebx;
-    uint32_t old_break = current_process->heap_break;
-    if (!old_break) {
-        uint32_t heap_break = allocate_frame();
+    uint32_t offset = (uint32_t)regs->ebx;
+
+    if (current_process->heap_break == 0)
         current_process->heap_break = USER_HEAP_VADDR;
-        map_page(current_process->page_directory, USER_HEAP_VADDR, heap_break, PAGE_FLAG_USER);
-    }
+
+    uint32_t old_break = current_process->heap_break;
 
     if (offset == 0) {
         regs->eax = old_break;
@@ -373,18 +372,18 @@ static void handle_syscall_sbrk(registers_t *regs) {
     }
 
     uint32_t new_break = old_break + offset;
-
     uint32_t page = (old_break + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+
     while (page < new_break) {
-        current_process->heap_break = allocate_frame();
-        map_page(current_process->page_directory, page, current_process->heap_break, PAGE_FLAG_USER);
+        uint32_t frame = allocate_frame();
+        map_page(current_process->page_directory, page, frame, PAGE_FLAG_USER);
+        memset((void *)page, 0, PAGE_SIZE);
         page += PAGE_SIZE;
-    }
+   }
 
     current_process->heap_break = new_break;
     regs->eax = old_break;
 }
-
 void syscall_handler_main(registers_t *regs) {
     switch (regs->eax) {
     case SYSCALL_EXIT:

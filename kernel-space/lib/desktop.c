@@ -125,9 +125,7 @@ static void desktop_spawn_program(char *filename) {
     stub[i++] = 0xCD;
     stub[i++] = 0x80;
 
-    disable_paging();
     page_directory_t *pd = create_kernel_page_directory((void *)stub);
-    enable_paging();
     registers_t regs = make_initial_registers(USER_FUNC_VADDR, USER_STACK_VADDR);
     pcb_t *pcb = create_process_control_block(pd, regs, 0, NULL);
     scheduler_enqueue(pcb);

@@ -19,13 +19,40 @@ page_directory_t *create_page_directory() {
     return page_directory;
 }
 
+/*
+ * TODO: FIRGURE OUT HOW TO REMOVE THE PAGE_ENABLED FUNC
+ * Problem: map_page table needs to create a page_table to map
+ * but we can access that page table because it's not mapped in memory
+ * so we get a page fault, a way around this is to turn off paging
+ * and access it directly but this is kinda ify should be a better way
+ * if we do this and a program get's access to kernel it can see other
+ * programs while paging is off
+*/
+static inline int paging_enabled(void) {
+    uint32_t cr0;
+    asm volatile("mov %%cr0, %0" : "=r"(cr0));
+    return (cr0 & 0x80000000) != 0;
+}
+
 page_table_t *create_page_table() {
     uint32_t memory = allocate_frame();
     page_table_t *page_table = (page_table_t *)memory;
 
-    for (int i = 0; i < 1024; i++) {
-        page_table->entries[i] = 0;
+    if (paging_enabled()) {
+        asm volatile("cli");
+        disable_paging();
+
+        for (int i = 0; i < 1024; i++)
+            page_table->entries[i] = 0;
+
+        enable_paging();
+        asm volatile("sti");
+
+        return page_table;
     }
+
+    for (int i = 0; i < 1024; i++)
+        page_table->entries[i] = 0;
 
     return page_table;
 }
