@@ -20,7 +20,7 @@ static int WINDOW_ID = 0;
 
 static float YAW = 0.0f;
 static float PITCH = 0.0f;
-static float CAMERA_DISTANCE = 3;
+static float CAMERA_DISTANCE = 5;
 
 static void draw_rect(int x, int y, int w, int h, uint8_t color) {
     RECT.x = x;
@@ -52,6 +52,7 @@ static void load_obj(char *file_name) {
         parse_obj(buf, VERTICES, &VERTEX_COUNT, FACES, &FACE_COUNT);
         size = sys_read(fd, buf, 1024);
     }
+
 }
 static void init() {
     WINDOW.height = WINDOW_H;
@@ -80,6 +81,8 @@ static void render_inital() {
 
         draw_rect(point.x - 2, point.y - 2, 4, 4, POINT_COLOR);
     }
+
+    sys_flush();
 }
 static void render_wireframe() {
     draw_rect(0, 0, WINDOW_W, WINDOW_H, BACKGROUND_COLOR);
@@ -111,15 +114,15 @@ static void render_wireframe() {
         draw_line(sp[1].x, sp[1].y, sp[2].x, sp[2].y, POINT_COLOR);
         draw_line(sp[2].x, sp[2].y, sp[0].x, sp[0].y, POINT_COLOR);
     }
+    sys_flush();
 }
 
 int main(char *arg) {
     char *file_name = arg;
     bool toggle = true;
-    init();
 
+    init();
     load_obj(file_name);
-    render_wireframe();
     while (true) {
         event_t event;
         int ev;
@@ -146,7 +149,7 @@ int main(char *arg) {
             sys_exit();
 
         toggle ? render_wireframe() : render_inital();
-        sys_sleep(1);
+        sys_sleep(5);
     }
     return 0;
 }

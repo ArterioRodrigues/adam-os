@@ -53,6 +53,11 @@ void parse_obj(const char *buf, obj_vertex_t *vertices, int *vertex_count, obj_f
             strtok(temp, NULL, ' ');
             faces[*face_count].c = stoi(temp) - 1;
 
+            if (faces[*face_count].a < 0 || faces[*face_count].a >= *vertex_count || faces[*face_count].b < 0 ||
+                faces[*face_count].b >= *vertex_count || faces[*face_count].c < 0 ||
+                faces[*face_count].c >= *vertex_count) {
+            }
+
             (*face_count)++;
         }
 
