@@ -12,10 +12,11 @@ int test_frame(uint32_t frame) {
 void init_frames() {
     for (uint32_t i = 0; i < NUM_FRAMES; i++)
         clear_frame(i);
+    set_frame(0);
 }
 
 uint32_t allocate_frame() {
-    for (int i = 0; i < NUM_FRAMES; i++) {
+    for (int i = 1; i < NUM_FRAMES; i++) {
         if (!test_frame(i)) {
             set_frame(i);
             return i * PAGE_SIZE;
@@ -43,4 +44,8 @@ void dump_frame() {
     print("\n");
 }
 
-void free_frame(uint32_t frame) { clear_frame(frame / PAGE_SIZE); }
+void free_frame(uint32_t frame) {
+    if (frame == 0)
+        return;
+    clear_frame(frame / PAGE_SIZE);
+}
