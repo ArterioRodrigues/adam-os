@@ -40,7 +40,6 @@ page_directory_t *create_kernel_page_directory(void *fn) {
 
 void kernel_main() {
     init_gdt();
-    set_kernel_stack(KERNEL_STACK_ADDRESS);
     init_idtp();
     remap_pic();
 
